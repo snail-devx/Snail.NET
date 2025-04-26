@@ -1,0 +1,46 @@
+<!-- 项目的全局属性，各个 .csproj 项目文件中的共同属性配置
+		1、项目默认生成规则
+		2、生成前后的的额外处理
+-->
+<Project>
+	<!-- 项目默认属性 -->
+	<PropertyGroup>
+		<!-- 定义可全局使用变量 -->
+		<Version>1.0.11</Version>
+		<TargetFramework>net9.0</TargetFramework>
+		<!-- 固化信息-->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<!-- 生成nuget包（.nupkg)；包含调试信息pdf包（.snupkg）-->
+		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    	<IncludeSymbols>true</IncludeSymbols>
+    	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<!-- 特定警告忽略：
+				1587为在代码内使用/***/注释时的警告
+				RS1041，分析器项目，仅在net平台下使用，不考虑Framework平台，忽略此井盖不应在具有目标框架“.NET 8.0”的程序集中实现此编译器扩展
+				NU1903，nuget包的警告，忽略此警告，不影响项目构建
+		-->
+		<NoWarn>1587;RS1041</NoWarn>
+		<!-- 许可授权等信息 -->
+    	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Authors>snail_dev@163.com</Authors>
+	</PropertyGroup>
+
+	<!-- 项目构建时，针对Nuget包做处理：复制到统一目录下 -->
+	<!--	项目构建前，先将之前的nuget包删除掉-->
+	<Target Name="CleanupBeforeBuild" BeforeTargets="BeforeBuild">
+		<ItemGroup>
+			<FilesToDelete Include="$(ProjectDir)/*/*/*.*nupkg" />
+		</ItemGroup>
+		<Delete Files="@(FilesToDelete)" />
+	</Target>
+	<!--	Nuget包生成后，将包复制到 根 【packages】 目录下，方便统一管理 -->
+	<Target Name="CopyNuGetPackage" AfterTargets="Pack">
+		<ItemGroup>
+			<NupkgFiles Include="$(OutputPath)../*.*nupkg" />
+		</ItemGroup>
+		<Copy SourceFiles="@(NupkgFiles)" DestinationFolder="$(ProjectDir)../../packages" />
+	</Target>
+</Project>

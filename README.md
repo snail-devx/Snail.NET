@@ -1,2 +1,2 @@
-# Snail.NET
-.NET框架
+# .net
+.net开源项目，一些基础类库项目

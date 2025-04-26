@@ -1,0 +1,34 @@
+﻿核心库：
+1、命名规范：
+	1、按照功能模块创建目录；目录下子目录规范
+		Attributes		特性标签类
+		Components		功能组件：包含功能逻辑，而单纯属性字段的实体类。默认提供的操作接口实现类；如注册器、监听器
+		DataModels		数据实体类
+		Enumerations	枚举类型
+		Exceptions		功能模块对外提供的异常对象
+		Extensions		扩展信息；如针对class的扩展方法，针对其他系统功能的三方适配等
+		Interfaces		接口规范
+		Utils			助手类
+	2、对外提供Manager，完成功能交互；若功能为static，则使用Helper.
+		Manager统一对外提供get方法构建实例，用于传入Manager工作必须参数；私有构造方法
+		Manager.cs直接放到功能模块根目录
+2、功能模块说明：
+	Common				基础通用的一些组件实体
+	Distribution		分布式相关，分布式锁、分布式缓存
+	Database			数据库相关；如数据库访问、、、、
+	ErrorCode			错误编码相关处理；实现编码管理，国际化等功能
+	Identity			身份管理：主键id、身份令牌、、
+	Dependency			依赖注入相关逻辑，实现反射构建实例
+	Logging				日志相关的
+	Message				消息相关，先实现消息队列和发布订阅，后期考虑SMS、Email等
+	Schedule				定时调度相关
+	Setting				应用配置相关：取配置的环境信息、站点配置组等
+	Web					网络相关；如http请求，api控制器、、、、
+
+3、依赖关系层级
+	Common	
+	Setting
+	DI					Identity
+	Web/Http
+	ILogging			Message			Cache		
+	Concurrent			ErrorCode		Database

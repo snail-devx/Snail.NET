@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			//	默认配置
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-dotnettools.vscode-dotnet-runtime",
+			"ms-dotnettools.csharp",
+			"ms-dotnettools.csdevkit",
+			"ms-dotnettools.vscodeintellicode-csharp",
+			"tintoy.msbuild-project-tools",
+			"jtlowe.vscode-icon-theme",
+			"ms-vscode.vs-keybindings",
+			"MS-CEINTL.vscode-language-pack-zh-hans",
+		],
+	}
+}
