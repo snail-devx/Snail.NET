@@ -1,0 +1,23 @@
+﻿<!-- 部分公共配置信息，走解决方案根目录下的【Directory.Build.props】文件 -->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Snail中Logging日志记录器实现</Description>
+	</PropertyGroup>
+
+	<!-- 默认配置项-->
+	<ItemGroup>
+		<!-- 1、程序集的特性标签，最终输出到【AssemblyInfo.cs】中，如[assembly: AppScan(Order = -5000)]-->
+		<AssemblyAttribute Include="Snail.Abstractions.Common.Attributes.AppScanAttribute">
+			<Order>-4000</Order>
+			<Order_TypeName>System.Int32</Order_TypeName>
+		</AssemblyAttribute>
+		<!-- 2、同项目包依赖:使用项目依赖；直接nuget包依赖也行，但生成项目时，同解决方案下先后关系混乱冗余报错-->
+		<!-- <PackageReference Include="Snail.Abstractions" Version="$(Version)" /> -->
+		<ProjectReference Include="..\Snail.Abstractions\Snail.Abstractions.csproj" />
+	</ItemGroup>
+
+	<!-- 依赖三方的Nuget包 -->
+	<ItemGroup>
+		<PackageReference Include="log4net" Version="3.0.3" />
+	</ItemGroup>
+</Project>
