@@ -1,0 +1,18 @@
+Snail.Utilities		系统扩展类库，作为基础工具库，被其他所有类库共享使用
+
+1、对系统类型做一下扩展方法
+2、封装通用助手类
+3、扩充一些提供基础的数据结构
+
+核心：无任何业务色彩逻辑
+
+
+Collections			集合相关，如可枚举、列表、字典等扩展
+Common				通用基础扩展，如string、int、array等数据类型扩展
+IO					文件读写相关
+Reflection			程序集、属性、字段、方法等反射相关扩展
+Threading			线程相关扩展，如线程锁、task等
+
+
+Threading			线程相关
+Web					网络相关
