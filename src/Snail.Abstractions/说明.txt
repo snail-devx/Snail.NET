@@ -1,0 +1,21 @@
+Snail.Abstract		作为核心库抽象层，提供通用助手类、核心接口、基础数据接口等逻辑，不涉及具体功能实现，如如何实现依赖注入，但包含通用的助手类方法
+
+1、命名规范：
+	Attributes						特性标签
+	Components						基础公共组件
+	DataModels						数据结构
+	Enumerations					枚举对象
+	Extensions						扩展方法目录	
+	Interfaces						接口依赖信息
+	Utils							助手类
+	文件:IXXXManager				作为核心助手类接口约束，放到最外层使用						
+2、功能模块说明	
+	Common							公共接口、组件
+	Dependency						依赖注入相关
+	Distribution					分布式相关，分布式锁、分布式缓存
+	Identity						身份管理：主键id、身份令牌、、
+	Logging							日志相关的
+	Message							消息发送和接收，非即时消息，为应用程序消息，通常为队列消息
+	Setting							应用配置相关：取配置的环境信息、站点配置组等
+	Web								网络相关；如http请求，api控制器、、、、
+
