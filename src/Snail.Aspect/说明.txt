@@ -1,0 +1,14 @@
+Snail.Aspect	作为面向切面编程实现类库，用于对【Snail.Abstractions】进行功能扩充
+
+1、使用方式
+	
+2、功能模块说明	
+	Common					基础通用，为语法树的通用功能
+	Web						网络相关切面编程，如自动为打了[Http]标签的[Interface]生成实现类
+	Distribution			分布式相关切面编程，如自动为打了[Cache]标签的方法做代码注入，自动实现对象缓存维护
+
+3、功能限制
+	1、分析生成代码时，内部类型只会分析命名空间，不会使用static将上级父类型using进来，需要注意一下
+		举例：XC<Disposable>.XCC.Code
+		结果：using XC所在命名空间，不会进行 using static XC;
+		使用时需要注意一下，若需要这么做，自己在interface顶层using时加入，实现类中会自动copy下来

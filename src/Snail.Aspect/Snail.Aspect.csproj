@@ -1,0 +1,38 @@
+﻿<!-- 部分公共配置信息，走解决方案根目录下的【Directory.Build.props】文件 -->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!-- 目标框架采用：netstandard2.0；为了同时在[Visual Studio]和[dotnet]命令行里加载分析器
+				Visual Studio 采用的是 .NET Framework 运行时，而dotnet 命令行工具采用的是 .NET Core 运行时 
+			 后续vs支持默认dotnet构建项目时，再升级为具体的net版本
+				<TargetFramework>netstandard2.1</TargetFramework>
+				<TargetFramework>netstandard2.0</TargetFramework>
+				<TargetFramework>net8.0</TargetFramework>
+				<TargetFramework>net9.0</TargetFramework>
+		-->
+		<Description>Snail中 面向切面编程实现类库，用于静态代码织入，代码分析，源码自动生成等</Description>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<!-- 覆盖公共配置中的配置项： -->
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+	
+	<!-- 默认配置项 -->
+	<ItemGroup>
+		<!-- 1、将dll文件打包到【分析器】目录下，否则通过nuget包方式引入本项目时，不会生成源码 -->
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="true" />
+		<!-- 2、同项目包依赖:使用项目依赖；直接nuget包依赖也行，但生成项目时，同解决方案下先后关系混乱冗余报错
+			但在分析器项目中引入三方项目包，若其他项目使用了【分析器】项目，则生成时会报错，导致分析器无法生成代码；先注释，由外部自己引入这两个项目包-->
+		<!-- <ProjectReference Include="..\Snail.Abstractions\Snail.Abstractions.csproj" />
+		<ProjectReference Include="..\Snail.Utilities\Snail.Utilities.csproj" />-->
+	</ItemGroup>
+	
+	<!-- 依赖三方的Nuget包 -->
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	    <PrivateAssets>all</PrivateAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+	</ItemGroup>
+</Project>
