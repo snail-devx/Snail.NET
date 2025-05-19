@@ -1,0 +1,31 @@
+﻿<!-- 部分公共配置信息，走解决方案根目录下的【Directory.Build.props】文件 -->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Snail中Database相关功能的MongoDB实现</Description>
+		<NoWarn>1587;RS1041;NU1903</NoWarn>
+	</PropertyGroup>
+
+	<!-- 默认配置项-->
+	<ItemGroup>
+		<!--1、程序集的特性标签，最终输出到【AssemblyInfo.cs】中，如[assembly: AppScan(Order = -5000)]-->
+		<AssemblyAttribute Include="Snail.Abstractions.Common.Attributes.AppScanAttribute">
+			<Order>-3000</Order>
+			<Order_TypeName>System.Int32</Order_TypeName>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+	<!-- 同项目包依赖:使用项目依赖；直接nuget包依赖也行，但生成项目时，同解决方案下先后关系混乱冗余报错-->
+	<ItemGroup>
+		<!-- <PackageReference Include="Snail.Abstractions" Version="$(Version)" />
+		<PackageReference Include="Snail" Version="$(Version)" /> -->
+		<ProjectReference Include="..\Snail.Abstractions\Snail.Abstractions.csproj" />
+		<ProjectReference Include="..\Snail\Snail.csproj" />
+	</ItemGroup>
+	
+	<!-- 依赖三方的Nuget包 -->
+	<ItemGroup>
+		<!-- mongo驱动，给一个最小依赖版本-->
+		<PackageReference Include="SharpCompress" Version="0.39.0"/>
+		<PackageReference Include="MongoDB.Driver" Version="2.13.3" />
+	</ItemGroup>
+</Project>
