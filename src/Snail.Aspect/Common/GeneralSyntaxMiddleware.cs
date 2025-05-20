@@ -97,6 +97,11 @@ namespace Snail.Aspect.Common
         /// <returns>代码字符串</returns>
         string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
         {
+            //  如果是class，则除非指定Abstract或者Virtual，否则不与重写拦截
+            if (context.TypeIsClass && options.IsVirtual == false && options.IsAbstract == false)
+            {
+                return null;
+            }
             //  只要有下一步的具体实现，都需要进行具体实现
             string nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod, simpleBaseCall: false);
             if (string.IsNullOrEmpty(nextRunCode) == true)
@@ -116,7 +121,7 @@ namespace Snail.Aspect.Common
                 builder.Append(context.LinePrefix)
                        .Append($"{nameof(MethodRunContext)} mrhContext = new(")
                        .Append($"\"{method.Identifier}\", ")
-                       .Append(tmpCode == null ? "null" : $"new Dictionary<string, object?>() {{ {tmpCode} }}")
+                       .Append(context.GetMethodParameterMapName(method))
                        .AppendLine(");");
             }
             //      生成执行代码：需要区分是否有返回值；配合 IMethodRunHandle 扩展方法，简化代码逻辑；替换下面的旧代码

@@ -54,6 +54,12 @@ namespace Snail.Aspect.Common.Components
         /// </summary>
         public bool Generated { set; get; } = false;
         /// <summary>
+        /// 是否需要生成【方法参数映射字典】；<br />
+        ///     1、全局生成一次，避免多个插件中生成重复代码<br />
+        ///     2、生成IDictionary 字典，包含方法的所有参数，key为参数名，value为object参数值
+        /// </summary>
+        public bool NeedMethodParameterMap { get; private set; } = false;
+        /// <summary>
         /// 实际生成过代码的中间件编码；在生成代码返回前添加
         /// </summary>
         public IList<string> Middlewares = new List<string>();
@@ -88,6 +94,8 @@ namespace Snail.Aspect.Common.Components
             LocalMethods.Clear();
             Middlewares.Clear();
             _varNames.Clear();
+
+            NeedMethodParameterMap = false;
 
             return this;
         }
@@ -145,6 +153,22 @@ namespace Snail.Aspect.Common.Components
                 index += 1;
             }
             return varName;
+        }
+        /// <summary>
+        /// 获取【方法参数映射】变量名称
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>生成的字典名称；方法无参数时，返回“null”字符串</returns>
+        public string GetMethodParameterMapName(MethodDeclarationSyntax method)
+        {
+            //  后期对此变量名称做优化，避免外部重复使用，甚至参数名称就是这个
+            if (method.ParameterList.Parameters.Count > 0)
+            {
+                NeedMethodParameterMap = true;
+                return "aspectMethodParameters";
+            }
+            //  无参数个数时返回“null”
+            return "null";
         }
 
         /// <summary>

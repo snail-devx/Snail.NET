@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Snail.Aspect.Common.Interfaces;
 
 namespace Snail.Aspect.Common.Components
@@ -34,10 +35,10 @@ namespace Snail.Aspect.Common.Components
         /// </summary>
         /// <param name="method"></param>
         /// <param name="parameters"></param>
-        public MethodRunContext(string method, Dictionary<string, object> parameters)
+        public MethodRunContext(string method, IDictionary<string, object> parameters)
         {
             Method = method;
-            Parameters = parameters;
+            Parameters = new ReadOnlyDictionary<string, object>(parameters);
         }
         #endregion
 

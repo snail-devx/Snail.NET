@@ -224,6 +224,27 @@ namespace Snail.Aspect.Common.Extensions
             return args;
         }
         /// <summary>
+        /// 属性中是否存在指定参数
+        /// </summary>
+        /// <param name="attr"></param>
+        /// <param name="agName"></param>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        public static bool HasArgument(this AttributeSyntax attr, string agName, out AttributeArgumentSyntax argument)
+        {
+            argument = attr?.GetArguments()?.FirstOrDefault(ag => ag.NameEquals?.Name?.Identifier.ValueText == agName);
+            return argument != null;
+        }
+        /// <summary>
+        /// 属性中是否存在【Analyzer】参数
+        /// </summary>
+        /// <param name="attr"></param>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        public static bool HasAnalyzer(this AttributeSyntax attr, out AttributeArgumentSyntax argument)
+            => HasArgument(attr, "Analyzer", out argument);
+
+        /// <summary>
         /// 获取【属性节点】所使用到的命名空间 <br />
         ///     1、属性自身类型的命名空间，如<see cref="Web.Attributes.HttpAspectAttribute"/> <br />
         ///     2、使用属性时传入的参数值类型命名空间，如[Http("Test", Workspace = "Test", Code = Xx.Xxx.Code, Analyzer = Cons.Analyzer)]中Cons.Analyzer的Cons类命名空间<br />

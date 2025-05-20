@@ -76,7 +76,7 @@ namespace Snail.Aspect.Common.Utils
         /// <param name="context"></param>
         /// <param name="otherArgs"></param>
         /// <returns></returns>
-        public static string BuildServerInjectCodeByAttribute(AttributeSyntax aspectAttr, SourceGenerateContext context, Action<string, AttributeArgumentSyntax> otherArgs)
+        public static string BuildServerInjectCodeByAttribute(AttributeSyntax aspectAttr, SourceGenerateContext context, Action<string, AttributeArgumentSyntax> otherArgs = null)
         {
             AttributeArgumentSyntax code = null;
             //  遍历属性参数信息，得到Server注入参数：非Server的注入参数，执行otherArgs通知外面；并将Code独立出来，方便后面做必填验证
@@ -207,6 +207,31 @@ namespace Snail.Aspect.Common.Utils
             }
 
             return nextCode;
+        }
+
+
+        /// <summary>
+        /// 生成【分析器】的辅助代码
+        /// </summary>
+        /// <param name="builder">代码构建器</param>
+        /// <param name="context"></param>
+        /// <param name="analyzerArg">分析器属性参数</param>
+        /// <param name="typeName">分析器类型名：如 ICacheAnalyzer</param>
+        /// <param name="analyzerName">分析器变量名：如 _cacheAnalyzer</param>
+        /// <remarks>
+        /// 生成的示例代码：<br />
+        ///     [Inject(Key = "xxx")]<br />
+        ///     private ICacheAnalyzer? _cacheAnalyzer { init; get; }<br />
+        /// </remarks>
+        public static void GenerateAnalyzerAssistantCode(StringBuilder builder, SourceGenerateContext context, AttributeArgumentSyntax analyzerArg, string typeName, string analyzerName)
+        {
+            if (analyzerArg != null)
+            {
+                string tmpCode = $"{analyzerArg.Expression}";
+                tmpCode = tmpCode == "null" ? "[Inject]" : $"[Inject(Key = {tmpCode})]";
+                builder.Append(context.LinePrefix).AppendLine(tmpCode)
+                       .Append(context.LinePrefix).AppendLine($"private {typeName}? {analyzerName} {{ init; get; }}");
+            }
         }
         #endregion
     }

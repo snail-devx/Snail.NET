@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Snail.Aspect.Common.Attributes;
 using Snail.Aspect.Common.Components;
 using Snail.Aspect.Common.DataModels;
 using Snail.Aspect.Common.Delegates;
@@ -27,6 +28,10 @@ namespace Snail.Aspect.Common
         /// 中间件配置
         /// </summary>
         private static readonly IList<Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware>> _middlewareConfigs;
+        /// <summary>
+        /// 类型名：<see cref="AspectIgnoreAttribute"/>
+        /// </summary>
+        protected static readonly string TYPENAME_AspectIgnoreAttribute = typeof(AspectIgnoreAttribute).FullName;
         /// <summary>
         /// 固定需要引入的命名空间几何
         /// </summary>
@@ -118,6 +123,13 @@ namespace Snail.Aspect.Common
                 transform: (ctx, _) =>
                 {
                     TypeDeclarationSyntax tds = ctx.Node as TypeDeclarationSyntax;
+                    //  如果标记为AspectAttribute，则忽略掉
+                    AttributeSyntax attr = tds.AttributeLists.GetAttribute(ctx.SemanticModel, TYPENAME_AspectIgnoreAttribute);
+                    if (attr != null)
+                    {
+                        return null;
+                    }
+                    //  基于中间件，构建代码分析代理器
                     List<ITypeDeclarationMiddleware> middlewares = new List<ITypeDeclarationMiddleware>();
                     foreach (var item in _middlewareConfigs)
                     {
@@ -189,12 +201,12 @@ namespace Snail.Aspect.Common
             //      using处理：插入到最前面；using命名空间，只有再最后的时候才知道要引入哪些
             builder.Insert(0, "\r\n").Insert(0, "\r\n")
                    .Insert(0, string.Join("\r\n", context.Namespaces.Distinct().OrderBy(item => item).Select(item => $"using {item};")))
-                   .Insert(0, "#pragma warning disable CS8600, CS8602, CS8603, CS8604\r\n")
+                   .Insert(0, "#pragma warning disable CS1591, CS8600, CS8602, CS8603, CS8604\r\n")
                    .Insert(0, "#nullable enable\r\n");
             //      类和命名空间收尾，追加到最后面：
             builder.Append("\t").AppendLine("}")
                    .AppendLine("}")
-                   .AppendLine("#pragma warning restore CS8600, CS8602, CS8603, CS8604")
+                   .AppendLine("#pragma warning restore CS1591, CS8600, CS8602, CS8603, CS8604")
                    .AppendLine("#nullable disable");
 
             return builder.ToString();
@@ -289,7 +301,7 @@ namespace Snail.Aspect.Common
                     var pNames = GenerateCodeByParameter(builder, cNode.ParameterList, context);
                     //      base访问基类 + 空方法实现
                     builder.Append(context.LinePrefix).Append('\t').AppendLine($": base({string.Join(", ", pNames)})");
-                    builder.Append(context.LinePrefix).AppendLine("{}");
+                    builder.Append(context.LinePrefix).AppendLine("{ }");
                 }
                 builder.Append(context.LinePrefix).AppendLine("#endregion")
                        .AppendLine();
@@ -329,11 +341,27 @@ namespace Snail.Aspect.Common
                    .Append($"{mNode.Identifier}");
             //      4、方法参数：保留参数属性标记；分析参数和参数属性用到的命名空间 示例：(string x,LockList<string>? x2,[HttpBody, Inject]string xx1}
             _ = GenerateCodeByParameter(builder, mNode.ParameterList, context);
-            //      5、合并方法实现代码
-            builder.Append("\t\t").AppendLine("{")
-                   .Append(context.LocalMethods)
-                   .AppendLine(code.TrimEnd())
-                   .Append("\t\t").AppendLine("}");
+            //      5、合并方法实现代码：根据需要生成【切面方法参数映射字段】信息
+            builder.Append("\t\t").AppendLine("{");
+            if (context.NeedMethodParameterMap == true)
+            {
+                builder.Append(context.LinePrefix).Append($"var {context.GetMethodParameterMapName(mNode)} = ");
+                if (mNode.ParameterList.Parameters.Count > 0)
+                {
+                    string tmpCode = string.Join(
+                        ",",
+                        mNode.ParameterList.Parameters.Select(p => $"{{ \"{p.Identifier.Text}\", {p.Identifier.Text} }}")
+                    );
+                    builder.AppendLine($"new Dictionary<string, object?>() {{ {tmpCode} }};");
+                }
+                else
+                {
+                    builder.AppendLine("null;");
+                }
+            }
+            builder.Append(context.LocalMethods)
+                   .AppendLine(code.TrimEnd());
+            builder.Append("\t\t").AppendLine("}");
 
             return true;
         }
@@ -397,7 +425,7 @@ namespace Snail.Aspect.Common
             {
                 context.ReportError
                 (
-                    message: "类方法无法重写实现，除非标记为virtual/abstract",
+                    message: "类方法无法重写实现，除非标记为virtual/abstract：" + code,
                     syntax: mNode
                 );
                 return null;

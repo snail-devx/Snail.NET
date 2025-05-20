@@ -50,7 +50,7 @@ namespace Snail.Abstractions.Distribution.Extensions
         public static Task<bool> AddObject<T>(this ICacher cacher, IList<T> datas, long? expireSeconds = null) where T : IIdentity
         {
             IDictionary<string, T> map = BuildCacheData(datas);
-            return cacher.AddObject(map);
+            return cacher.AddObject(map, expireSeconds);
         }
 
         /// <summary>

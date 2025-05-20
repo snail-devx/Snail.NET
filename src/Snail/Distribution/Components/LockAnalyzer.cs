@@ -8,6 +8,7 @@ namespace Snail.Distribution.Components
     ///     1、处理并发锁操作时的Key上的动态参数信息<br />
     ///     2、配合<see cref="LockAspectAttribute"/>在进行并发锁操作干预<br />
     /// </summary>
+    [Component<ILockAnalyzer>(Lifetime = LifetimeType.Singleton)]
     public class LockAnalyzer : ILockAnalyzer
     {
         #region ILockAnalyzer

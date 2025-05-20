@@ -190,7 +190,7 @@ namespace Snail.Aspect.Distribution.DataModels
             if (type is INamedTypeSymbol nts && nts.TypeArguments.Length > 0)
             {
                 code.Append("<");
-                code.Append(string.Join(",", nts.TypeArguments.Select(arg => GetSymbolName(arg))));
+                code.Append(string.Join(", ", nts.TypeArguments.Select(GetSymbolName)));
                 code.Append(">");
             }
             //  如果是数组的话，需要追加上

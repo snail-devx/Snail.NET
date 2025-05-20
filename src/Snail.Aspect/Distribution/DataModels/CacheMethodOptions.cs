@@ -37,11 +37,13 @@ namespace Snail.Aspect.Distribution.DataModels
         public CacheActionType Action { get; }
 
         /// <summary>
-        /// 缓存主Key：根据<see cref="Type"/>取值，此值意义不一样<br />
-        ///     1、在<see cref="CacheType.ObjectCache"/>缓存时，目前忽略<br />
-        ///     2、在<see cref="CacheType.HashCache"/>缓存时，为Hash缓存key<br />
+        /// 缓存主Key：；参照<see cref="Attributes.CacheMethodAttribute.MasterKey"/>
         /// </summary>
         public AttributeArgumentSyntax MasterKey { get; }
+        /// <summary>
+        /// 缓存数据Key前缀；参照<see cref="Attributes.CacheMethodAttribute.DataKeyPrefix"/>
+        /// </summary>
+        public AttributeArgumentSyntax DataKeyPrefix { get; }
 
         /// <summary>
         /// 缓存数据类型名称；<br />
@@ -70,6 +72,7 @@ namespace Snail.Aspect.Distribution.DataModels
                 Type = CacheType.ObjectCache;
                 Action = CacheActionType.Load;
                 MasterKey = null;
+                DataKeyPrefix = null;
                 DataType = null;
                 DataTypeSymbol = null;
             }
@@ -86,7 +89,11 @@ namespace Snail.Aspect.Distribution.DataModels
                         break;
                     //  缓存主Key；若传入了则强制非Null
                     case "MasterKey":
-                        MasterKey = ag;
+                        MasterKey = Type == CacheType.ObjectCache ? null : ag;
+                        break;
+                    //  数据Key前缀，为空则强制null
+                    case "DataKeyPrefix":
+                        DataKeyPrefix = SyntaxExtensions.IsNullOrEmpty(ag) ? null : ag;
                         break;
                     //  分析缓存数据类型：并将类型加入命名空间
                     case "DataType":
@@ -131,15 +138,27 @@ namespace Snail.Aspect.Distribution.DataModels
 
         #region 公共方法
         /// <summary>
-        /// 解构成字符串，方便做代码生成
+        /// 结构选项；将如下属性解构成字符串，方便做代码生成 <br/>
+        ///     1、<see cref="Attributes.CacheMethodAttribute.MasterKey"/> <br/>
+        ///     2、<see cref="Attributes.CacheMethodAttribute.DataKeyPrefix"/> <br/>
+        /// </summary>
+        /// <param name="masterKey"></param>
+        /// <param name="dataKeyPrefix"></param>
+        public void DeconstructKey(out string masterKey, out string dataKeyPrefix)
+        {
+            masterKey = MasterKey == null ? "null" : $"{MasterKey.Expression}";
+            dataKeyPrefix = DataKeyPrefix == null ? "null" : $"{DataKeyPrefix.Expression}";
+        }
+        /// <summary>
+        /// 结构选项；将如下属性结构成字符串，方便做代码生成 <br/>
+        ///     1、<see cref="Attributes.CacheMethodAttribute.Type"/> <br/>
+        ///     2、<see cref="Attributes.CacheMethodAttribute.DataType"/> <br/>
         /// </summary>
         /// <param name="cacheType">缓存类型字符串：如CacheType.Object</param>
         /// <param name="dataType">缓存数据类型：如string、TestCache</param>
-        /// <param name="masterKey">缓存主Key</param>
-        public void Deconstruct(out string cacheType, out string dataType, out string masterKey)
+        public void DeconstructType(out string cacheType, out string dataType)
         {
             dataType = $"{DataTypeSymbol.Name}";
-            masterKey = MasterKey == null ? "null" : $"{MasterKey.Expression}";
             cacheType = $"{nameof(CacheType)}.{Type}";
         }
         #endregion

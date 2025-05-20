@@ -11,6 +11,7 @@ using Snail.Aspect.Common.Interfaces;
 using Snail.Aspect.Web.Attributes;
 using Snail.Aspect.Web.Enumerations;
 using Snail.Aspect.Web.Interfaces;
+using Snail.Aspect.Web.Utils;
 using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 
 
@@ -43,7 +44,8 @@ namespace Snail.Aspect.Web
         protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
         {
             //  全局依赖的
-           "Snail.Utilities.Common.Utils",                      //  typeof(ObjectHelper).Namespace,//                   ,
+            "Snail.Utilities.Common.Utils",                      //  typeof(ObjectHelper).Namespace,//                   ,
+            "static Snail.Utilities.Common.Utils.ObjectHelper",
             //  依赖注入相关：将生成的class注册为Interface实现组件
             "Snail.Abstractions.Dependency.Attributes",         //  typeof(InjectAttribute).Namespace,//                
             "Snail.Abstractions.Dependency.Enumerations",       //  typeof(LifetimeType).Namespace,//                   
@@ -56,13 +58,17 @@ namespace Snail.Aspect.Web
             typeof(HttpAspectAttribute).Namespace,
             typeof(HttpMethodType).Namespace,
             typeof(IHttpAnalyzer).Namespace,
+            $"static {typeof(HttpAspectHelper).FullName}",
         };
 
         /// <summary>
         /// [Http]特性标签
         /// </summary>
         protected readonly AttributeSyntax ANode;
-
+        /// <summary>
+        /// HTTP分析器参数：<see cref="IHttpAnalyzer"/>分析缓存相关Key
+        /// </summary>
+        protected readonly AttributeArgumentSyntax AnalyzerArg;
         /// <summary>
         /// 是否需要【辅助】代码
         /// </summary>
@@ -76,6 +82,7 @@ namespace Snail.Aspect.Web
         private HttpSyntaxMiddleware(AttributeSyntax aNode)
         {
             ANode = aNode;
+            aNode.HasAnalyzer(out AnalyzerArg);
         }
         #endregion
 
@@ -177,7 +184,7 @@ namespace Snail.Aspect.Web
                 parameters.Add(name);
             });
             //      2、生成http请求结果；发送请求前，针对url参数做处理
-            GenerateHttpRequestCode(builder, methodAttr, context, parameters, bodyParameter, options.ReturnType == null);
+            GenerateHttpRequestCode(builder, method, methodAttr, context, parameters, bodyParameter, options.ReturnType == null);
             //      3、构建返回结果：根据返回数据类型做区别处理
             GenerateMethodReturnCode(builder, options.ReturnType, context);
 
@@ -200,34 +207,17 @@ namespace Snail.Aspect.Web
             }
             //  添加需要的命名空间
             context.AddNamespaces(FixedNamespaces);
-            //  解析属性标签节点：生成Server和Analyzer的依赖依赖注入代码
-            string serverInjectCode, analyzerInjectCode;
-            {
-                AttributeArgumentSyntax analyzer = null;
-                serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context, (agName, ag) =>
-                {
-                    analyzer = agName == "Analyzer" ? ag : analyzer;
-                });
-                //      生成分析器Analyzer注入代码，无分析器则不生成 Inject(Key="{Key}");
-                analyzerInjectCode = analyzer != null ? $"Inject(Key = {analyzer.Expression})" : $"Inject";
-            }
-            //  合并代码返回
-            return $@"{context.LinePrefix}//  生成[HttpAspect]辅助代码
-{context.LinePrefix}//      [http]相关依赖注入属性
-{context.LinePrefix}[HttpRequestor, {serverInjectCode}]
-{context.LinePrefix}private IHttpRequestor? _requestor {{ init; get; }} 
-{context.LinePrefix}[{analyzerInjectCode}]
-{context.LinePrefix}private IHttpAnalyzer? _httpAnalyzer {{ init; get; }} 
-{context.LinePrefix}//      [http]实现相关助手方法
-{context.LinePrefix}private async Task<string> _AnalysisHttpUrl(string url, IDictionary<string, object?>? parameters)
-{context.LinePrefix}{{
-{context.LinePrefix}    if (_httpAnalyzer != null)
-{context.LinePrefix}    {{
-{context.LinePrefix}        url = await _httpAnalyzer.AnalysisUrl(url, parameters);
-{context.LinePrefix}        ObjectHelper.ThrowIfNull(url, ""AnalysisUrl后，url地址为null"");
-{context.LinePrefix}    }}
-{context.LinePrefix}    return url;
-{context.LinePrefix}}}";
+            //  生成辅助代码
+            StringBuilder builder = new StringBuilder();
+            builder.Append(context.LinePrefix).AppendLine("//  生成[HttpAspect]辅助代码;");
+            //      解析属性标签节点：生成Server的依赖依赖注入代码
+            string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
+            builder.Append(context.LinePrefix).AppendLine($"[HttpRequestor, {serverInjectCode}]")
+                   .Append(context.LinePrefix).AppendLine("private IHttpRequestor? _requestor { init; get; }");
+            //      生成分析器代码
+            GenerateAnalyzerAssistantCode(builder, context, AnalyzerArg, nameof(IHttpAnalyzer), "_httpAnalyzer");
+
+            return builder.ToString();
         }
         #endregion
 
@@ -236,14 +226,15 @@ namespace Snail.Aspect.Web
         /// 生成【Http】请求发送代码：内部自动处理url参数，执行【IHttpAnalyzer】逻辑
         /// </summary>
         /// <param name="builder">代码构建器，将生成代码添加进去</param>
+        /// <param name="mNode">方法节点</param>
         /// <param name="methodAttr">方法属性语法节点，分析请求的url和method</param>
         /// <param name="context">代码生成上下文，用于报告错误信息</param>
         /// <param name="parameters">方法的参数名列表</param>
         /// <param name="bodyParameter">post时提交的数据参数名</param>
         /// <param name="isVoidMethod">是否是void类型方法，如void或者Task</param>
-        private void GenerateHttpRequestCode(StringBuilder builder, AttributeSyntax methodAttr, SourceGenerateContext context, List<string> parameters, string bodyParameter, bool isVoidMethod)
+        private void GenerateHttpRequestCode(StringBuilder builder, MethodDeclarationSyntax mNode, AttributeSyntax methodAttr, SourceGenerateContext context, List<string> parameters, string bodyParameter, bool isVoidMethod)
         {
-            builder.Append(context.LinePrefix).AppendLine("ObjectHelper.ThrowIfNull(_requestor, \"_requestor为null，无法进行Http请求\");");
+            builder.Append(context.LinePrefix).AppendLine("ThrowIfNull(_requestor, \"_requestor为null，无法进行Http请求\");");
             //  分析url和method类型
             HttpMethodType method = HttpMethodType.Get; string url;
             {
@@ -266,15 +257,14 @@ namespace Snail.Aspect.Web
                 url = $"{urlArg.Expression}";
             }
             //  url相关参数处理（执行AnalysisUrl方法）
-            string tmpCode = null;
-            string urlVarName = context.GetVarName("url");
-            if (parameters?.Count > 0)
+            string urlVarName = null;
+            if (AnalyzerArg != null)
             {
-                tmpCode = string.Join(", ", parameters.Select(item => $"{{ \"{item}\", {item} }}"));
-                tmpCode = $"new Dictionary<string, object?>() {{ {tmpCode} }}";
+                urlVarName = context.GetVarName("url");
+                string ampName = context.GetMethodParameterMapName(mNode);
+                builder.Append(context.LinePrefix)
+                       .AppendLine($"string {urlVarName} = await AnalysisHttpUrl(_httpAnalyzer, {url}, {ampName});");
             }
-            tmpCode = tmpCode ?? "null";
-            builder.Append(context.LinePrefix).AppendLine($"string {urlVarName} = await _AnalysisHttpUrl({url}, {tmpCode});");
             //  构建http请求代码
             bodyParameter = string.IsNullOrEmpty(bodyParameter) ? "(object?)null" : bodyParameter;
             builder.Append(context.LinePrefix).Append(isVoidMethod ? "await " : "HttpResult hr = await ");
@@ -282,11 +272,11 @@ namespace Snail.Aspect.Web
             {
                 //  Get请求
                 case HttpMethodType.Get:
-                    builder.AppendLine($"_requestor.Get({urlVarName});");
+                    builder.AppendLine($"_requestor.Get({urlVarName ?? url});");
                     break;
                 //  Post请求
                 case HttpMethodType.Post:
-                    builder.AppendLine($"_requestor.Post({urlVarName}, {bodyParameter});");
+                    builder.AppendLine($"_requestor.Post({urlVarName ?? url}, {bodyParameter});");
                     break;
                 //  默认，暂时不支持
                 default:

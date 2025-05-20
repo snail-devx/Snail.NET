@@ -1,4 +1,5 @@
 ﻿using System;
+using Snail.Aspect.Distribution.Interfaces;
 
 namespace Snail.Aspect.Distribution.Attributes
 {
@@ -31,5 +32,12 @@ namespace Snail.Aspect.Distribution.Attributes
         /// 缓存服务器编码
         /// </summary>
         public string Code { set; get; }
+
+        /// <summary>
+        /// 缓存分析器<see cref="ICacheAnalyzer"/>的依赖注入Key值 <br />
+        ///     1、若想使用默认的分析器，则传入null：Analyzer=null <br />
+        ///     2、此属性不显式赋值，则表示不使用分析器 <br />
+        /// </summary>
+        public string Analyzer { set; get; }
     }
 }

@@ -70,7 +70,10 @@ namespace Snail.Aspect.Distribution
         /// [LockAspect]特性标签
         /// </summary>
         protected readonly AttributeSyntax ANode;
-
+        /// <summary>
+        /// Lock分析器参数：<see cref="ILockAnalyzer"/>分析缓存相关Key
+        /// </summary>
+        protected readonly AttributeArgumentSyntax AnalyzerArg;
         /// <summary>
         /// 是否需要【辅助】代码
         /// </summary>
@@ -81,10 +84,11 @@ namespace Snail.Aspect.Distribution
         /// <summary>
         /// 私有构造方法
         /// </summary>
-        /// <param name="cacheAttr"></param>
-        private LockSyntaxMiddleware(AttributeSyntax cacheAttr)
+        /// <param name="aNode"></param>
+        private LockSyntaxMiddleware(AttributeSyntax aNode)
         {
-            ANode = cacheAttr;
+            ANode = aNode;
+            aNode.HasAnalyzer(out AnalyzerArg);
         }
         #endregion
 
@@ -138,7 +142,6 @@ namespace Snail.Aspect.Distribution
             //  2、实现前的基础验证；
             context.Generated = true;
             string key, value, tryCount, expireSeconds;
-            List<string> parameters = new List<string>();
             {
                 //  方法必须是异步的：强制规则，推进异步编程
                 if (options.IsAsync == false)
@@ -151,7 +154,7 @@ namespace Snail.Aspect.Distribution
                     return null;
                 }
                 //  检测参数
-                ForEachMethodParametes(method, context, (name, _) => parameters.Add(name));
+                ForEachMethodParametes(method, context);
             }
             //  3、生成实现代码；先构建nextRunCode：无实际业务代码，直接空实现
             StringBuilder builder = new StringBuilder();
@@ -165,25 +168,24 @@ namespace Snail.Aspect.Distribution
             }
             else
             {
-                string tmpCode = null, keyVar = "lockKey", valueVar = "lockValue";
-                //  准备工作：构建解析器，解析key、value中的动态参数
+                //  根据进行lockKey、lockValue参数解析
+                string tmpCode = null, lockKey = null, lockValue = null;
+                if (AnalyzerArg != null)
                 {
-                    //  构建lockKey、lockValue的变量值，避免冲突
-                    keyVar = context.GetVarName(keyVar);
-                    valueVar = context.GetVarName(valueVar);
-                    //  定义lockKey、lockValue变量，整理执行Run参数信息
-                    builder.Append(context.LinePrefix).AppendLine("ThrowIfNull(_locker, \"_locker为null，无法进行Lock操作\");");
-                    builder.Append(context.LinePrefix).AppendLine($"string {keyVar} = {key}, {valueVar} = {value};");
-                    if (parameters.Count > 0)
-                    {
-                        tmpCode = string.Join(", ", parameters.Select(item => $"{{ \"{item}\", {item} }}"));
-                        tmpCode = $"new Dictionary<string, object?>() {{ {tmpCode} }}";
-                    }
-                    tmpCode = tmpCode ?? "null";
-                    builder.Append(context.LinePrefix).AppendLine($"_lockAnalyzer?.Analysis(ref {keyVar}, ref {valueVar}, {tmpCode});");
+                    lockKey = context.GetVarName("lockKey");
+                    lockValue = context.GetVarName("lockValue");
+                    builder.Append(context.LinePrefix).AppendLine($"string {lockKey} = {key}, {lockValue} = {value};");
+                    tmpCode = context.GetMethodParameterMapName(method);
+                    builder.Append(context.LinePrefix).AppendLine($"_lockAnalyzer?.Analysis(ref {lockKey}, ref {lockValue}, {tmpCode});");
                 }
-                //  加锁执行业务逻辑：有返回值和无返回值的逻辑区分开；替换下面的旧代码
-                tmpCode = string.Join(", ", new List<string> { keyVar, valueVar, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null));
+                else
+                {
+                    lockKey = key;
+                    lockValue = value;
+                }
+                //  执行加锁逻辑
+                builder.Append(context.LinePrefix).AppendLine("ThrowIfNull(_locker, \"_locker为null，无法进行Lock操作\");");
+                tmpCode = string.Join(", ", new List<string> { lockKey, lockValue, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null));
                 _ = options.ReturnType == null
                     ? builder.Append(context.LinePrefix).AppendLine($"RunResult rt = await _locker.Run({tmpCode});")
                     : builder.Append(context.LinePrefix).AppendLine($"RunResult<{options.ReturnType}> rt = await _locker.Run<{options.ReturnType}>({tmpCode});");
@@ -240,24 +242,17 @@ namespace Snail.Aspect.Distribution
             }
             //  添加需要的命名空间
             context.AddNamespaces(FixedNamespaces);
-            //  解析属性标签节点：生成Server和Analyzer的依赖依赖注入代码
-            string serverInjectCode, analyzerInjectCode;
-            {
-                AttributeArgumentSyntax analyzer = null;
-                serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context, (agName, ag) =>
-                {
-                    analyzer = agName == "Analyzer" ? ag : analyzer;
-                });
-                //      生成分析器Analyzer注入代码，无分析器则不生成 Inject(Key="{Key}");
-                analyzerInjectCode = analyzer != null ? $"Inject(Key = {analyzer.Expression})" : $"Inject";
-            }
-            //  合并代码返回
-            return $@"{context.LinePrefix}//  生成[LockAspect]辅助代码
-{context.LinePrefix}//      [Locker]相关依赖注入属性
-{context.LinePrefix}[Locker, {serverInjectCode}]
-{context.LinePrefix}private ILocker? _locker {{ init; get; }} 
-{context.LinePrefix}[{analyzerInjectCode}]
-{context.LinePrefix}private ILockAnalyzer? _lockAnalyzer {{ init; get; }}";
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append(context.LinePrefix).AppendLine("//  生成[LockAspect]辅助代码;");
+            //      Locker属性注入
+            string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
+            builder.Append(context.LinePrefix).AppendLine($"[Locker, {serverInjectCode}]")
+                   .Append(context.LinePrefix).AppendLine("private ILocker? _locker { init; get; }");
+            //      分析器属性注入
+            GenerateAnalyzerAssistantCode(builder, context, AnalyzerArg, nameof(ILockAnalyzer), "_lockAnalyzer");
+
+            return builder.ToString();
         }
         #endregion
 

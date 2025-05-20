@@ -12,7 +12,8 @@
 			"**/.hg": true,
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
-		}
+		},
+		"svn.ignoreMissingSvnWarning": true
 	},
 	"extensions": {
 		"recommendations": [
