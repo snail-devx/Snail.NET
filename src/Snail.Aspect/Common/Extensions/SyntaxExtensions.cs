@@ -103,14 +103,20 @@ namespace Snail.Aspect.Common.Extensions
         /// <returns></returns>
         public static string GetNamespace(this TypeDeclarationSyntax tds)
         {
-            SyntaxNode tmpNode = tds;
-            while ((tmpNode = tmpNode.Parent) != null)
+            // 向上查找最近的命名空间声明
+            var namespaceDeclaration = tds.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            if (namespaceDeclaration != null)
             {
-                if (tmpNode is NamespaceDeclarationSyntax ns)
-                {
-                    return ns.Name.ToString();
-                }
+                return namespaceDeclaration.Name.ToString();
             }
+            // 如果是文件作用域命名空间
+            var compilationUnit = tds.SyntaxTree.GetCompilationUnitRoot();
+            var fileScopedNamespace = compilationUnit.Members.OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault();
+            if (fileScopedNamespace != null)
+            {
+                return fileScopedNamespace.Name.ToString();
+            }
+
             return null;
         }
         /// <summary>
@@ -139,6 +145,10 @@ namespace Snail.Aspect.Common.Extensions
                         //  namespace xxxx.xxxx.xx
                         case NamespaceDeclarationSyntax nd:
                             nss.Add($"{nd.Name}");
+                            break;
+                        //  文件级别命名空间
+                        case FileScopedNamespaceDeclarationSyntax fnsd:
+                            nss.Add($"{fnsd.Name}");
                             break;
                         //  
                         default: break;

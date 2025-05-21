@@ -209,29 +209,31 @@ namespace Snail.Aspect.Common.Utils
             return nextCode;
         }
 
-
         /// <summary>
-        /// 生成【分析器】的辅助代码
+        /// 生成依赖注入代码的辅助代码
         /// </summary>
         /// <param name="builder">代码构建器</param>
         /// <param name="context"></param>
-        /// <param name="analyzerArg">分析器属性参数</param>
-        /// <param name="typeName">分析器类型名：如 ICacheAnalyzer</param>
-        /// <param name="analyzerName">分析器变量名：如 _cacheAnalyzer</param>
+        /// <param name="injectKeyArg">依赖注入属性参数</param>
+        /// <param name="typeName">from类型名：如 ICacheAnalyzer</param>
+        /// <param name="injectVarName">依赖注入实例变量名：如 _cacheAnalyzer</param>
+        /// <returns>生成成功返回true；否则false</returns>
         /// <remarks>
         /// 生成的示例代码：<br />
         ///     [Inject(Key = "xxx")]<br />
         ///     private ICacheAnalyzer? _cacheAnalyzer { init; get; }<br />
         /// </remarks>
-        public static void GenerateAnalyzerAssistantCode(StringBuilder builder, SourceGenerateContext context, AttributeArgumentSyntax analyzerArg, string typeName, string analyzerName)
+        public static bool GenerateInjectAssistantCode(StringBuilder builder, SourceGenerateContext context, AttributeArgumentSyntax injectKeyArg, string typeName, string injectVarName)
         {
-            if (analyzerArg != null)
+            if (injectKeyArg != null)
             {
-                string tmpCode = $"{analyzerArg.Expression}";
+                string tmpCode = $"{injectKeyArg.Expression}";
                 tmpCode = tmpCode == "null" ? "[Inject]" : $"[Inject(Key = {tmpCode})]";
                 builder.Append(context.LinePrefix).AppendLine(tmpCode)
-                       .Append(context.LinePrefix).AppendLine($"private {typeName}? {analyzerName} {{ init; get; }}");
+                       .Append(context.LinePrefix).AppendLine($"private {typeName}? {injectVarName} {{ init; get; }}");
+                return true;
             }
+            return false;
         }
         #endregion
     }

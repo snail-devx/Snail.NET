@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -40,15 +41,9 @@ namespace Snail.Aspect.Common.Components
         public bool TypeIsClass => TypeSyntax.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ClassDeclaration);
 
         /// <summary>
-        /// 本地方法代码
-        /// </summary>
-        public StringBuilder LocalMethods { get; } = new StringBuilder();
-
-        /// <summary>
         /// 代码行前缀，指定每行代码的缩进；生成格式化代码用
         /// </summary>
         public string LinePrefix { set; get; } = string.Empty;
-
         /// <summary>
         /// 是否生成了源码；<see cref="ITypeDeclarationMiddleware"/>中若生成了自己的代码，设置为true
         /// </summary>
@@ -59,15 +54,26 @@ namespace Snail.Aspect.Common.Components
         ///     2、生成IDictionary 字典，包含方法的所有参数，key为参数名，value为object参数值
         /// </summary>
         public bool NeedMethodParameterMap { get; private set; } = false;
+
+        /// <summary>
+        /// 方法生成过程中需要的本地方法代码
+        /// </summary>
+        public StringBuilder LocalMethods { get; } = new StringBuilder();
         /// <summary>
         /// 实际生成过代码的中间件编码；在生成代码返回前添加
         /// </summary>
         public IList<string> Middlewares = new List<string>();
-
         /// <summary>
         /// 生成过程中用到的参数名称
         /// </summary>
         private readonly List<string> _varNames = new List<string>();
+        /// <summary>
+        /// 必须的字段信息<br />
+        ///     1、key：字段名称；value为字段为null时的提示信息<br />
+        ///     2、如CacheAspect中需要强制 _cacher字段非null，否则无法进行缓存操作<br />
+        ///     3、在生成代码后，如有必须字段，则生成依赖注入方法做验证，确保代码符合运行条件<br />
+        /// </summary>
+        private readonly IDictionary<string, string> _requiredFields = new Dictionary<string, string>();
         #endregion
 
         #region 构造方法
@@ -91,11 +97,12 @@ namespace Snail.Aspect.Common.Components
         public SourceGenerateContext Reset(string linePrefix)
         {
             LinePrefix = linePrefix;
+            Generated = false;
+            NeedMethodParameterMap = false;
+
             LocalMethods.Clear();
             Middlewares.Clear();
             _varNames.Clear();
-
-            NeedMethodParameterMap = false;
 
             return this;
         }
@@ -169,6 +176,43 @@ namespace Snail.Aspect.Common.Components
             }
             //  无参数个数时返回“null”
             return "null";
+        }
+
+        /// <summary>
+        /// 添加【必须字段】
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public bool AddRequiredField(string fieldName, string message)
+        {
+            //  去除换行符、替换双引号
+            fieldName = fieldName.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"");
+            message = message.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"");
+            //  存在则报错，否则追加
+            if (_requiredFields.ContainsKey(fieldName) == false)
+            {
+                _requiredFields.Add(fieldName, message);
+                return true;
+            }
+            ReportError($"AddRequiredField：fieldName[{fieldName}]已存在", null);
+            return false;
+        }
+        /// <summary>
+        /// 是否存在【必须字段】
+        /// </summary>
+        /// <returns></returns>
+        public bool HasRequiredFields() => _requiredFields.Count > 0;
+        /// <summary>
+        /// 遍历【必须字段】
+        /// </summary>
+        /// <returns></returns>
+        public void ForEachRequiredFields(Action<KeyValuePair<string, string>> each)
+        {
+            foreach (var kv in _requiredFields)
+            {
+                each(kv);
+            }
         }
 
         /// <summary>

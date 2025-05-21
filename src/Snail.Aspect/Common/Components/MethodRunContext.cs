@@ -21,7 +21,7 @@ namespace Snail.Aspect.Common.Components
         /// <summary>
         /// 方法传入的参数
         /// </summary>
-        public IReadOnlyDictionary<string, object> Parameters { get; }
+        public IDictionary<string, object> Parameters { get; }
 
         /// <summary>
         /// 执行方法的返回值；若方法为void或者Task，则无返回值
@@ -38,7 +38,7 @@ namespace Snail.Aspect.Common.Components
         public MethodRunContext(string method, IDictionary<string, object> parameters)
         {
             Method = method;
-            Parameters = new ReadOnlyDictionary<string, object>(parameters);
+            Parameters = parameters;
         }
         #endregion
 

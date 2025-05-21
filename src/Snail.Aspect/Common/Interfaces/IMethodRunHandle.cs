@@ -6,7 +6,7 @@ namespace Snail.Aspect.Common.Interfaces
 {
     /// <summary>
     /// 接口：方法运行句柄，实现此接口的类型下的方法运行时自动进行方法拦截<br />
-    ///     1、配合<see cref="GeneralSyntaxMiddleware"/>实现对有<see cref="IMethodRunHandle"/>接口的类型进行切面注入<br />
+    ///     1、配合<see cref="Attributes.AspectAttribute"/>实现对有<see cref="IMethodRunHandle"/>接口的类型进行切面注入<br />
     /// </summary>
     public interface IMethodRunHandle
     {

@@ -176,7 +176,7 @@ namespace Snail.Aspect.Distribution
                     lockValue = context.GetVarName("lockValue");
                     builder.Append(context.LinePrefix).AppendLine($"string {lockKey} = {key}, {lockValue} = {value};");
                     tmpCode = context.GetMethodParameterMapName(method);
-                    builder.Append(context.LinePrefix).AppendLine($"_lockAnalyzer?.Analysis(ref {lockKey}, ref {lockValue}, {tmpCode});");
+                    builder.Append(context.LinePrefix).AppendLine($"_lockAnalyzer.Analysis(ref {lockKey}, ref {lockValue}, {tmpCode});");
                 }
                 else
                 {
@@ -184,44 +184,21 @@ namespace Snail.Aspect.Distribution
                     lockValue = value;
                 }
                 //  执行加锁逻辑
-                builder.Append(context.LinePrefix).AppendLine("ThrowIfNull(_locker, \"_locker为null，无法进行Lock操作\");");
-                tmpCode = string.Join(", ", new List<string> { lockKey, lockValue, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null));
+                tmpCode = string.Join(
+                    ", ",
+                    new List<string> { lockKey, lockValue, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null)
+                );
                 _ = options.ReturnType == null
-                    ? builder.Append(context.LinePrefix).AppendLine($"RunResult rt = await _locker.Run({tmpCode});")
-                    : builder.Append(context.LinePrefix).AppendLine($"RunResult<{options.ReturnType}> rt = await _locker.Run<{options.ReturnType}>({tmpCode});");
+                    ? builder.Append(context.LinePrefix)
+                             .AppendLine($"RunResult rt = await _locker.Run({tmpCode});")
+                    : builder.Append(context.LinePrefix)
+                             .AppendLine($"RunResult<{options.ReturnType}> rt = await _locker.Run<{options.ReturnType}>({tmpCode});");
                 //  解析执行结果，报错则throw出去
                 builder.Append(context.LinePrefix).AppendLine("TryThrow(rt.Exception);");
                 if (options.ReturnType != null)
                 {
                     builder.Append(context.LinePrefix).AppendLine("return rt.Data;");
                 }
-
-                /* 旧代码备份：采用try、catch、finally逻辑，性能最优但代码冗余；优化成上面的 Run 方法调用
-                 //  加锁执行业务代码：进行try、finally处理
-                 {
-                     builder.Append(context.LinePrefix).AppendLine("bool lockSuccess = false;");
-                     builder.Append(context.LinePrefix).AppendLine("try")
-                             .Append(context.LinePrefix).AppendLine("{");
-                     //      尝试加锁，执行业务逻辑代码
-                     tmpCode = string.Join(", ", new List<string> { "lockKey", "lockValue", tryCount, expireSeconds }.Where(item => item != null));
-                     builder.Append(context.LinePrefix).Append('\t').AppendLine($"lockSuccess = await _locker!.Lock({tmpCode});");
-                     builder.Append(context.LinePrefix).Append('\t').AppendLine("if (lockSuccess == false)")
-                             .Append(context.LinePrefix).Append('\t').AppendLine("{")
-                             .Append(context.LinePrefix).Append('\t').Append('\t').AppendLine("throw new LockException(lockKey, lockValue);")
-                             .Append(context.LinePrefix).Append('\t').AppendLine("}");
-                     tmpCode = options.ReturnType == null ? nextRunCode : $"return {nextRunCode}";
-                     builder.Append(context.LinePrefix).Append('\t').AppendLine(tmpCode);
-                     builder.Append(context.LinePrefix).AppendLine("}");
-                     //      finally处理，加锁成功则执行解锁逻辑
-                     builder.Append(context.LinePrefix).AppendLine("finally")
-                             .Append(context.LinePrefix).AppendLine("{")
-                             .Append(context.LinePrefix).Append("\t").AppendLine("if (lockSuccess == true)")
-                             .Append(context.LinePrefix).Append("\t").AppendLine("{")
-                             .Append(context.LinePrefix).Append("\t\t").AppendLine("await _locker!.TryUnlock(lockKey, lockValue);")
-                             .Append(context.LinePrefix).Append("\t").AppendLine("}")
-                             .Append(context.LinePrefix).AppendLine("}");
-                 }
-                 */
             }
 
             context.AddGeneratedMiddleware("[LockAspect]");
@@ -236,23 +213,36 @@ namespace Snail.Aspect.Distribution
         /// <returns></returns>
         string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
         {
-            if (_needAssistantCode == false)
+            /** 辅助代码示例：_lockAnalyzer按需生成
+            
+            //  生成[LockAspect]辅助代码;
+            [Locker, Server(Workspace = "Test", Code = "Default")]
+            private ILocker? _locker { init; get; }
+            [Inject(Key = "dddddd")]
+            private ILockAnalyzer? _lockAnalyzer { init; get; }
+            */
+            if (_needAssistantCode == true)
             {
-                return null;
+                context.AddNamespaces(FixedNamespaces);
+
+                StringBuilder builder = new StringBuilder();
+                builder.Append(context.LinePrefix).AppendLine("//  生成[LockAspect]辅助代码;");
+                //  生成 ILocker 注入代码；加入必填验证
+                string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
+                builder.Append(context.LinePrefix).AppendLine($"[Locker, {serverInjectCode}]")
+                       .Append(context.LinePrefix).AppendLine("private ILocker? _locker { init; get; }");
+                context.AddRequiredField("_locker", "_locker为null，无法进行Lock操作");
+
+                //  生成 ILockAnalyzer 注入代码，加入必填字段验证
+                if (GenerateInjectAssistantCode(builder, context, AnalyzerArg, nameof(ILockAnalyzer), "_lockAnalyzer") == true)
+                {
+                    context.AddRequiredField("_lockAnalyzer", "_lockAnalyzer为null，无法进行Lock操作分析");
+                }
+
+                return builder.ToString();
             }
-            //  添加需要的命名空间
-            context.AddNamespaces(FixedNamespaces);
+            return null;
 
-            StringBuilder builder = new StringBuilder();
-            builder.Append(context.LinePrefix).AppendLine("//  生成[LockAspect]辅助代码;");
-            //      Locker属性注入
-            string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
-            builder.Append(context.LinePrefix).AppendLine($"[Locker, {serverInjectCode}]")
-                   .Append(context.LinePrefix).AppendLine("private ILocker? _locker { init; get; }");
-            //      分析器属性注入
-            GenerateAnalyzerAssistantCode(builder, context, AnalyzerArg, nameof(ILockAnalyzer), "_lockAnalyzer");
-
-            return builder.ToString();
         }
         #endregion
 

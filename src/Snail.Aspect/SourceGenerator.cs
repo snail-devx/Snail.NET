@@ -26,7 +26,7 @@ namespace Snail.Aspect
         {
             //  配置【class和Interface】语法的源码生成中间件
             //      通用的切面编程句柄方法；为实现【IAspectHandle】接口的方法生成
-            ClassInterfaceSyntaxProxy.Config(GeneralSyntaxMiddleware.Build);
+            ClassInterfaceSyntaxProxy.Config(AspectSyntaxMiddleware.Build);
             //      打了<see cref="LockAspectAttribute"/>标签的class和interface节点，自动生成实现类
             ClassInterfaceSyntaxProxy.Config(LockSyntaxMiddleware.Build);
             //      打了<see cref="CacheAspectAttribute"/>标签的class和interface节点，自动生成实现类
@@ -50,7 +50,6 @@ namespace Snail.Aspect
                 //HttpSyntaxProxy.BuildProvider(context).Collect(),//合并到ClassInterfaceSyntaxProxy处理
                 //  为类+接口代理生成源码：predicate先始终为true，具体的处理，在transform中做逻辑
                 ClassInterfaceSyntaxProxy.BuildProvider(context).Collect(),
-
             };
             //  遍历注册提供程序，并执行源码生成
             foreach (var provider in providers)

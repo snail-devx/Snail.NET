@@ -89,13 +89,13 @@ namespace Snail.Aspect.Common
             IsInterface = node is InterfaceDeclarationSyntax;
             Semantic = semantic;
             Middlewares = new ReadOnlyCollection<ITypeDeclarationMiddleware>(middlewares);
-            //  生成类型的唯一标记：基于命名空间+类型名做md5
+            //  生成类型的唯一标记：基于命名空间+类型名做md5(截取前10位作为Key)
             {
                 Namespace = node.GetNamespace() ?? string.Empty;
                 string key = node.TypeParameterList == null
-                    ? Namespace.AsMD5()
-                    : $"{Namespace}_{node.TypeParameterList}".AsMD5();
-                Key = $"{node.Identifier}_Impl{key}";
+                    ? Namespace.AsMD5().Substring(0, 10)
+                    : $"{Namespace}_{node.TypeParameterList}".AsMD5().Substring(0, 10);
+                Key = $"{node.Identifier}Impl_{key}";
             }
             //  类名称
             Class = $"{Node.Identifier}_Impl";
@@ -174,7 +174,7 @@ namespace Snail.Aspect.Common
             }
             //  构造方法；有才生成，忽略private标记的、忽略static的
             GenerateConstructor(builder, context);
-            //  重写的方法代码：如果是 接口方法 显示实现方法，这里忽略掉
+            //  遍历重写的方法代码
             {
                 builder.Append("\t\t").AppendLine($"#region 重写{Node.Identifier}方法");
                 foreach (MethodDeclarationSyntax mNode in Node.ChildNodes().OfType<MethodDeclarationSyntax>())
@@ -194,6 +194,19 @@ namespace Snail.Aspect.Common
                     {
                         builder.AppendLine(code);
                     }
+                }
+                //  生成依赖注入字段的非null验证方法；方法名称 AspectRequiredFieldValidate，通过[Inject]属性标记
+                if (context.HasRequiredFields() == true)
+                {
+                    builder.Append("\t\t").AppendLine("//   依赖注入的必填字段验证")
+                           .Append("\t\t").AppendLine("[Inject]")
+                           .Append("\t\t").AppendLine("private void AspectRequiredFieldValidate()")
+                           .Append("\t\t").AppendLine("{");
+                    context.ForEachRequiredFields(kv =>
+                    {
+                        builder.Append("\t\t\t").AppendLine($"ThrowIfNull({kv.Key} ,\"{kv.Value}\");");
+                    });
+                    builder.Append("\t\t").AppendLine("}");
                 }
                 builder.Append("\t\t").AppendLine("#endregion");
             }
@@ -228,7 +241,7 @@ namespace Snail.Aspect.Common
             //  加入特性标签
             {
                 //  强制加上aspct和继承实现类型组件注入生命
-                builder.Append("\t").AppendLine("[Aspect]");
+                builder.Append("\t").AppendLine($"[{nameof(AspectCodeAttribute).Replace("Attribute", "")}]");
                 string tmpCode = null;
                 if (Node.TypeParameterList?.Parameters.Count > 0)
                 {
@@ -317,6 +330,11 @@ namespace Snail.Aspect.Common
         /// <returns>是成功生成代码，返回true；否则返回false</returns>
         private bool GenerateMethod(StringBuilder builder, MethodDeclarationSyntax mNode, SourceGenerateContext context)
         {
+            //      显式指定了Ignore，则忽略
+            if (mNode.AttributeLists.GetAttribute(context.Semantic, TYPENAME_AspectIgnoreAttribute) != null)
+            {
+                return false;
+            }
             //  执行【中间件】生成具体代码；未生成代码，直接返回不生成
             MethodGenerateOptions options = new MethodGenerateOptions(mNode, context);
             string code = GenerateMethodByRunMiddleware(mNode, context, options);
@@ -405,10 +423,16 @@ namespace Snail.Aspect.Common
             {
                 return null;
             }
-            //      已生成：接口实现方法；不做实现
+            //      已生成：显示接口实现方法：忽略
             if (options.ExplicitInterface == true)
             {
                 context.ReportWarning($"显示实现接口的方法[{mNode.Identifier}]，将忽略Aspect相关实现", mNode);
+                return null;
+            }
+            //      已生成： 类方法，非virtual/abstract：给出错误警告：忽略
+            if (IsInterface == false && options.IsVirtual == false && options.IsAbstract == false)
+            {
+                context.ReportError(message: "类方法无法重写实现，除非标记为virtual/abstract", mNode);
                 return null;
             }
             //      已生成：分析可用的访问修饰符；则判断方法是否能够进行【切面编程】，如private、static方法不能重写，无法进行切面逻辑
@@ -417,15 +441,6 @@ namespace Snail.Aspect.Common
                 context.ReportError
                 (
                     message: "private/static/sealed方法，无法进行重写实现",
-                    syntax: mNode
-                );
-                return null;
-            }
-            if (IsInterface == false && options.IsVirtual == false && options.IsAbstract == false)
-            {
-                context.ReportError
-                (
-                    message: "类方法无法重写实现，除非标记为virtual/abstract：" + code,
                     syntax: mNode
                 );
                 return null;

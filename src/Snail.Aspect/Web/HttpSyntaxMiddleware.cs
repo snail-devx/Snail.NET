@@ -19,7 +19,7 @@ namespace Snail.Aspect.Web
 {
     /// <summary>
     /// [Http]语法节点源码中间件 <br />
-    ///     1、侦测打了<see cref="HttpAspectAttribute"/>标签的Interface，为其生成实现class，并注册为组件 <br />
+    ///     1、侦测打了<see cref="HttpAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 <br />
     /// </summary>
     /// <remarks>将作为最底层插件，不会再执行next插件动作</remarks>
     internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
@@ -201,23 +201,35 @@ namespace Snail.Aspect.Web
         /// <returns></returns>
         string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
         {
-            if (_needAssistantCode == false)
-            {
-                return null;
-            }
-            //  添加需要的命名空间
-            context.AddNamespaces(FixedNamespaces);
-            //  生成辅助代码
-            StringBuilder builder = new StringBuilder();
-            builder.Append(context.LinePrefix).AppendLine("//  生成[HttpAspect]辅助代码;");
-            //      解析属性标签节点：生成Server的依赖依赖注入代码
-            string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
-            builder.Append(context.LinePrefix).AppendLine($"[HttpRequestor, {serverInjectCode}]")
-                   .Append(context.LinePrefix).AppendLine("private IHttpRequestor? _requestor { init; get; }");
-            //      生成分析器代码
-            GenerateAnalyzerAssistantCode(builder, context, AnalyzerArg, nameof(IHttpAnalyzer), "_httpAnalyzer");
+            /** 辅助代码样例
+            
+            //  生成[HttpAspect]辅助代码;
+            [HttpRequestor, Server(Workspace = "Test", Code = "BAIDU")]
+            private IHttpRequestor? _requestor { init; get; }
+            [Inject(Key = Cons.Analyzer)]
+            private IHttpAnalyzer? _httpAnalyzer { init; get; }
+            */
 
-            return builder.ToString();
+            if (_needAssistantCode == true)
+            {
+                context.AddNamespaces(FixedNamespaces);
+
+                StringBuilder builder = new StringBuilder();
+                builder.Append(context.LinePrefix).AppendLine("//  生成[HttpAspect]辅助代码;");
+                //  生成 IHttpRequestor 注入代码；加入必填验证
+                string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
+                builder.Append(context.LinePrefix).AppendLine($"[HttpRequestor, {serverInjectCode}]")
+                       .Append(context.LinePrefix).AppendLine("private IHttpRequestor? _requestor { init; get; }");
+                context.AddRequiredField("_requestor", "_requestor为null，无法进行Http请求");
+                //  生成 IHttpAnalyzer 注入代码，加入必填字段验证
+                if (GenerateInjectAssistantCode(builder, context, AnalyzerArg, nameof(IHttpAnalyzer), "_httpAnalyzer") == true)
+                {
+                    context.AddRequiredField("_httpAnalyzer", "_httpAnalyzer为null，无法进行Http请求分析");
+                }
+
+                return builder.ToString();
+            }
+            return null;
         }
         #endregion
 
@@ -234,7 +246,6 @@ namespace Snail.Aspect.Web
         /// <param name="isVoidMethod">是否是void类型方法，如void或者Task</param>
         private void GenerateHttpRequestCode(StringBuilder builder, MethodDeclarationSyntax mNode, AttributeSyntax methodAttr, SourceGenerateContext context, List<string> parameters, string bodyParameter, bool isVoidMethod)
         {
-            builder.Append(context.LinePrefix).AppendLine("ThrowIfNull(_requestor, \"_requestor为null，无法进行Http请求\");");
             //  分析url和method类型
             HttpMethodType method = HttpMethodType.Get; string url;
             {

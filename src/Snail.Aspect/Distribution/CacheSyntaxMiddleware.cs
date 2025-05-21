@@ -30,10 +30,6 @@ namespace Snail.Aspect.Distribution
         /// </summary>
         protected const string NAME_LocalMethod = "_CacheNextCodeMethod";
         /// <summary>
-        /// 代码：Cacher判空
-        /// </summary>
-        protected const string CODE_CacherJudgeNull = "ThrowIfNull(_cacher, \"_cacher为null，无法进行Cache操作\");";
-        /// <summary>
         /// 变量名：<see cref=" CacheMethodAttribute.MasterKey"/>
         /// </summary>
         protected const string VAR_MasterKey = "aspectMasterKey";
@@ -278,23 +274,25 @@ namespace Snail.Aspect.Distribution
             private ICacheAnalyzer? _cacheAnalyzer { init; get; }
 
             */
-            if (_needAssistantCode == false)
+            if (_needAssistantCode == true)
             {
-                return null;
-            }
-            //  添加需要的命名空间
-            context.AddNamespaces(FixedNamespaces);
-            //  生成辅助代码
-            StringBuilder builder = new StringBuilder();
-            builder.Append(context.LinePrefix).AppendLine("//  生成[CacheAspect]辅助代码;");
-            //      解析属性标签节点：生成Server的依赖依赖注入代码
-            string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
-            builder.Append(context.LinePrefix).AppendLine($"[Cacher, {serverInjectCode}]")
-                   .Append(context.LinePrefix).AppendLine("private ICacher? _cacher { init; get; }");
-            //      生成解析器依赖注入代码
-            GenerateAnalyzerAssistantCode(builder, context, AnalyzerArg, nameof(ICacheAnalyzer), "_cacheAnalyzer");
+                context.AddNamespaces(FixedNamespaces);
+                StringBuilder builder = new StringBuilder();
+                builder.Append(context.LinePrefix).AppendLine("//  生成[CacheAspect]辅助代码;");
+                //  生成 ICacher 注入代码；加入必填验证
+                string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
+                builder.Append(context.LinePrefix).AppendLine($"[Cacher, {serverInjectCode}]")
+                       .Append(context.LinePrefix).AppendLine("private ICacher? _cacher { init; get; }");
+                context.AddRequiredField("_cacher", "_cacher为null，无法进行Cache操作");
+                //  生成 ICacheAnalyzer 注入代码，加入必填字段验证
+                if (GenerateInjectAssistantCode(builder, context, AnalyzerArg, nameof(ICacheAnalyzer), "_cacheAnalyzer") == true)
+                {
+                    context.AddRequiredField("_cacheAnalyzer", "_cacheAnalyzer为null，无法进行Cache操作分析");
+                }
 
-            return builder.ToString();
+                return builder.ToString();
+            }
+            return null;
         }
         #endregion
 
@@ -352,6 +350,7 @@ namespace Snail.Aspect.Distribution
                 //      执行Next中间件代码，并根据需要保存数据
                 if (hasNextRunCode == true)
                 {
+
                     builder.Append(context.LinePrefix).AppendLine($"if (IsNullOrEmpty({keyOptions.VarName}) == false)")
                            .Append(context.LinePrefix).AppendLine("{")
                            .Append(context.LinePrefix).Append("\t").AppendLine($"cacheNextData = {nextRunCode}");
@@ -359,7 +358,7 @@ namespace Snail.Aspect.Distribution
                     {
                         nextRunCode = context.LinePrefix;
                         context.LinePrefix = $"{context.LinePrefix}\t";
-                        GenerateSaveCodeWithNextData(builder, context, options, cacheOptions, rtOptions, needCacherJudge: false);
+                        GenerateSaveCodeWithNextData(builder, context, options, cacheOptions, rtOptions);
                         context.LinePrefix = nextRunCode;
                     }
                     builder.Append(context.LinePrefix).AppendLine("}");
@@ -402,7 +401,6 @@ namespace Snail.Aspect.Distribution
                 builder.Append(context.LinePrefix).AppendLine($"var {cacheDataKey} = CombineDataKey({key}, {VAR_DataKeyPrefix});");
             }
             //  从缓存取数据：如果有DataKeyPrefix，则需要先处理做拼接
-            builder.Append(context.LinePrefix).AppendLine(CODE_CacherJudgeNull);
             switch (cacheOptions.Type)
             {
                 case CacheType.ObjectCache:
@@ -557,8 +555,7 @@ namespace Snail.Aspect.Distribution
         /// <param name="options"></param>
         /// <param name="cacheOptions"></param>
         /// <param name="rtOptions"></param>
-        /// <param name="needCacherJudge">是否需要进行_cacher判断</param>
-        private static void GenerateSaveCodeWithNextData(StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, ReturnTypeOptions rtOptions, bool needCacherJudge = true)
+        private static void GenerateSaveCodeWithNextData(StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, ReturnTypeOptions rtOptions)
         {
             /*  生成代码参考：
                 TestDataBag? cacheNextData = await base.SaveObject(key);
@@ -650,8 +647,7 @@ namespace Snail.Aspect.Distribution
             //  3、执行删除缓存操作：基于key的模式做处理
             {
                 builder.Append(context.LinePrefix).AppendLine($"if (IsNullOrEmpty({keyOptions.VarName}) == false)")
-                       .Append(context.LinePrefix).AppendLine("{")
-                       .Append(context.LinePrefix).Append('\t').AppendLine(CODE_CacherJudgeNull);
+                       .Append(context.LinePrefix).AppendLine("{");
                 //  合并DataKeyPrefi
                 string key = keyOptions.VarName;
                 if (cacheOptions.DataKeyPrefix != null)
