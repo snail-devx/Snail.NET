@@ -123,7 +123,7 @@ namespace Snail.Aspect.Common
                 transform: (ctx, _) =>
                 {
                     TypeDeclarationSyntax tds = ctx.Node as TypeDeclarationSyntax;
-                    //  如果标记为AspectAttribute，则忽略掉
+                    //  如果标记为AspectIgnoreAttribute，则忽略掉
                     AttributeSyntax attr = tds.AttributeLists.GetAttribute(ctx.SemanticModel, TYPENAME_AspectIgnoreAttribute);
                     if (attr != null)
                     {
@@ -241,7 +241,7 @@ namespace Snail.Aspect.Common
             //  加入特性标签
             {
                 //  强制加上aspct和继承实现类型组件注入生命
-                builder.Append("\t").AppendLine($"[{nameof(AspectCodeAttribute).Replace("Attribute", "")}]");
+                builder.Append("\t").AppendLine($"[{nameof(AspectAttribute).Replace("Attribute", "")}]");
                 string tmpCode = null;
                 if (Node.TypeParameterList?.Parameters.Count > 0)
                 {

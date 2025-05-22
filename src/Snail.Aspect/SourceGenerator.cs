@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis;
 using Snail.Aspect.Common;
 using Snail.Aspect.Common.Interfaces;
 using Snail.Aspect.Distribution;
+using Snail.Aspect.General;
+using Snail.Aspect.General.Attributes;
 using Snail.Aspect.Web;
 using Snail.Aspect.Web.Attributes;
 
@@ -25,8 +27,10 @@ namespace Snail.Aspect
         static SourceGenerator()
         {
             //  配置【class和Interface】语法的源码生成中间件
+            //      打了<see cref="ValidateAspectAttribute"/>标签的class和interface节点，自动生成实现类
+            ClassInterfaceSyntaxProxy.Config(ValidateSyntaxMiddleware.Build);
             //      通用的切面编程句柄方法；为实现【IAspectHandle】接口的方法生成
-            ClassInterfaceSyntaxProxy.Config(AspectSyntaxMiddleware.Build);
+            ClassInterfaceSyntaxProxy.Config(MethodSyntaxMiddleware.Build);
             //      打了<see cref="LockAspectAttribute"/>标签的class和interface节点，自动生成实现类
             ClassInterfaceSyntaxProxy.Config(LockSyntaxMiddleware.Build);
             //      打了<see cref="CacheAspectAttribute"/>标签的class和interface节点，自动生成实现类

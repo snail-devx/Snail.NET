@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Snail.Aspect.Common.Components;
-using Snail.Aspect.Common.Interfaces;
+using Snail.Aspect.General.Components;
+using Snail.Aspect.General.Interfaces;
 
-namespace Snail.Aspect.Common.Extensions
+namespace Snail.Aspect.General.Extensions
 {
     /// <summary>
     /// <see cref="IMethodRunHandle"/>扩展方法

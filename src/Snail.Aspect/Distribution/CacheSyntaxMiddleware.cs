@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -21,6 +20,7 @@ namespace Snail.Aspect.Distribution
     /// <summary>
     /// 【CacheAspect】语法节点源码中间件<br/>
     ///     1、侦测打了<see cref="CacheAspectAttribute"/>标签的class和interface节点，为其生成实现class，并注册为组件 <br />
+    ///     2、自动为方法加入【分布式缓存】控制代码，实现自动缓存加载、保存、删除操作 <br />
     /// </summary>
     internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     {

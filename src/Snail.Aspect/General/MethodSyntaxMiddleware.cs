@@ -4,24 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Snail.Aspect.Common.Attributes;
 using Snail.Aspect.Common.Components;
 using Snail.Aspect.Common.DataModels;
 using Snail.Aspect.Common.Delegates;
 using Snail.Aspect.Common.Extensions;
 using Snail.Aspect.Common.Interfaces;
+using Snail.Aspect.General.Attributes;
+using Snail.Aspect.General.Components;
+using Snail.Aspect.General.Extensions;
+using Snail.Aspect.General.Interfaces;
 using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 
-namespace Snail.Aspect.Common
+namespace Snail.Aspect.General
 {
     /// <summary>
-    /// [Http]语法节点源码中间件 <br />
-    ///     1、侦测打了<see cref="AspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 <br />
+    /// [GeneralAspect]语法节点通用源码中间件 <br />
+    ///     1、侦测打了<see cref="MethodAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 <br />
     ///     2、自动分析可重写实现的方法，拦截方法执行<see cref="IMethodRunHandle.OnRun"/>或者<see cref="IMethodRunHandle.OnRunAsync"/>方法<br />
     /// </summary>
-    internal class AspectSyntaxMiddleware : ITypeDeclarationMiddleware
+    internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     {
         #region 属性变量
         /// <summary>
@@ -29,9 +31,9 @@ namespace Snail.Aspect.Common
         /// </summary>
         protected const string NAME_LocalMethod = "_AspectNextCodeMethod";
         /// <summary>
-        /// 类型名：<see cref="AspectAttribute"/>
+        /// 类型名：<see cref="MethodAspectAttribute"/>
         /// </summary>
-        protected static readonly string TYPENAME_AspectAttribute = typeof(AspectAttribute).FullName;
+        protected static readonly string TYPENAME_MethodAspectAttribute = typeof(MethodAspectAttribute).FullName;
         /// <summary>
         /// 固定需要引入的命名空间集合
         /// </summary>
@@ -46,7 +48,7 @@ namespace Snail.Aspect.Common
             "Snail.Utilities.Collections.Extensions",
             "static Snail.Utilities.Common.Utils.ObjectHelper",
             //  切面编程相关命名空间
-            typeof(AspectAttribute).Namespace,
+            typeof(MethodAspectAttribute).Namespace,
             typeof(IMethodRunHandle).Namespace,
             typeof(MethodRunHandleExtensions).Namespace,
             typeof(MethodRunContext).Namespace,
@@ -71,7 +73,7 @@ namespace Snail.Aspect.Common
         /// 构造方法
         /// </summary>
         /// <param name="aNode"></param>
-        private AspectSyntaxMiddleware(AttributeSyntax aNode)
+        private MethodSyntaxMiddleware(AttributeSyntax aNode)
         {
             ANode = aNode;
             aNode.HasArgument("RunHandle", out RunHandleArg);
@@ -89,9 +91,9 @@ namespace Snail.Aspect.Common
         {
             if (node is InterfaceDeclarationSyntax || node is ClassDeclarationSyntax)
             {
-                AttributeSyntax attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_AspectAttribute);
+                AttributeSyntax attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_MethodAspectAttribute);
                 return attr != null
-                    ? new AspectSyntaxMiddleware(attr)
+                    ? new MethodSyntaxMiddleware(attr)
                     : null;
             }
             return null;

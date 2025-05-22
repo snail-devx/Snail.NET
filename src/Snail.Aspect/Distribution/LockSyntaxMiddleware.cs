@@ -18,6 +18,7 @@ namespace Snail.Aspect.Distribution
     /// <summary>
     /// 【LockAspect】语法节点源码中间件<br/>
     ///     1、侦测打了<see cref="LockAspectAttribute"/>标签的class和interface节点，为其生成实现class，并注册为组件 <br />
+    ///     2、自动为方法加入【分布式并发锁】控制代码
     /// </summary>
     internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     {

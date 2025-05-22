@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Snail.Aspect.Common.Interfaces;
+using Snail.Aspect.General.Interfaces;
 
-namespace Snail.Aspect.Common.Components
+namespace Snail.Aspect.General.Components
 {
     /// <summary>
     /// 方法执行时的上下文；实现方法执行拦截，切面注入逻辑<br />

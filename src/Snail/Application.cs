@@ -345,7 +345,7 @@ namespace Snail
                          *      {System.Runtime.CompilerServices.NullableAttribute}
                          */
                         Type type = attr.GetType();
-                        if (type == typeof(AspectCodeAttribute))
+                        if (type == typeof(AspectAttribute))
                         {
                             isAspectType = true;
                             return false;
