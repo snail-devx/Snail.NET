@@ -42,7 +42,7 @@ namespace Snail.Aspect.Common.Utils
         /// <summary>
         /// 制表符：方法的前置空白
         /// </summary>
-        public const string TAB_MethodSpace = "\t\t\t";
+        public const string TAB_MethodSpace = "\t\t";
         #endregion
 
         #region 公共方法

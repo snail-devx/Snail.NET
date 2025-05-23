@@ -159,6 +159,7 @@ namespace Snail.Aspect.Common.Components
                 varName = $"{varName}{index}";
                 index += 1;
             }
+            _varNames.Add(varName);
             return varName;
         }
         /// <summary>

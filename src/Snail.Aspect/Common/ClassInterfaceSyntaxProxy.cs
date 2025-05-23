@@ -95,7 +95,7 @@ namespace Snail.Aspect.Common
                 string key = node.TypeParameterList == null
                     ? Namespace.AsMD5().Substring(0, 10)
                     : $"{Namespace}_{node.TypeParameterList}".AsMD5().Substring(0, 10);
-                Key = $"{node.Identifier}Impl_{key}";
+                Key = $"{node.Identifier}_{key}";
             }
             //  类名称
             Class = $"{Node.Identifier}_Impl";
@@ -167,26 +167,25 @@ namespace Snail.Aspect.Common
             }
             //  命名空间+类声明+构造方法
             {
-                builder.AppendLine($"namespace {context.DefaultNamespace}.{Namespace.Replace('.', '_')}")
-                       .AppendLine("{");
+                builder.AppendLine($"namespace {context.DefaultNamespace}.{Namespace.Replace('.', '_')};");
                 GenerateClassDeclarationCode(builder, context)
-                       .Append("\t").AppendLine("{");
+                       .AppendLine("{");
             }
             //  构造方法；有才生成，忽略private标记的、忽略static的
             GenerateConstructor(builder, context);
             //  遍历重写的方法代码
             {
-                builder.Append("\t\t").AppendLine($"#region 重写{Node.Identifier}方法");
+                builder.Append('\t').AppendLine($"#region 重写{Node.Identifier}方法");
                 foreach (MethodDeclarationSyntax mNode in Node.ChildNodes().OfType<MethodDeclarationSyntax>())
                 {
                     GenerateMethod(builder, mNode, context);
                 }
-                builder.Append("\t\t").AppendLine("#endregion");
+                builder.Append('\t').AppendLine("#endregion");
             }
             //  合并辅助代码
             {
-                context.Reset("\t\t");
-                builder.AppendLine().Append("\t\t").AppendLine("#region 辅助代码");
+                context.Reset("\t");
+                builder.AppendLine().Append('\t').AppendLine("#region 辅助代码");
                 foreach (var middleware in Middlewares)
                 {
                     string code = middleware.GenerateAssistantCode(context)?.TrimEnd();
@@ -198,17 +197,17 @@ namespace Snail.Aspect.Common
                 //  生成依赖注入字段的非null验证方法；方法名称 AspectRequiredFieldValidate，通过[Inject]属性标记
                 if (context.HasRequiredFields() == true)
                 {
-                    builder.Append("\t\t").AppendLine("//   依赖注入的必填字段验证")
-                           .Append("\t\t").AppendLine("[Inject]")
-                           .Append("\t\t").AppendLine("private void AspectRequiredFieldValidate()")
-                           .Append("\t\t").AppendLine("{");
+                    builder.Append('\t').AppendLine("//   依赖注入的必填字段验证")
+                           .Append('\t').AppendLine("[Inject]")
+                           .Append('\t').AppendLine("private void AspectRequiredFieldValidate()")
+                           .Append('\t').AppendLine("{");
                     context.ForEachRequiredFields(kv =>
                     {
-                        builder.Append("\t\t\t").AppendLine($"ThrowIfNull({kv.Key} ,\"{kv.Value}\");");
+                        builder.Append("\t\t").AppendLine($"ThrowIfNull({kv.Key} ,\"{kv.Value}\");");
                     });
-                    builder.Append("\t\t").AppendLine("}");
+                    builder.Append('\t').AppendLine("}");
                 }
-                builder.Append("\t\t").AppendLine("#endregion");
+                builder.Append('\t').AppendLine("#endregion");
             }
             //  组装代码：using 命名空间；插入到最前面
             //      using处理：插入到最前面；using命名空间，只有再最后的时候才知道要引入哪些
@@ -217,8 +216,7 @@ namespace Snail.Aspect.Common
                    .Insert(0, "#pragma warning disable CS1591, CS8600, CS8602, CS8603, CS8604\r\n")
                    .Insert(0, "#nullable enable\r\n");
             //      类和命名空间收尾，追加到最后面：
-            builder.Append("\t").AppendLine("}")
-                   .AppendLine("}")
+            builder.AppendLine("}")
                    .AppendLine("#pragma warning restore CS1591, CS8600, CS8602, CS8603, CS8604")
                    .AppendLine("#nullable disable");
 
@@ -241,7 +239,7 @@ namespace Snail.Aspect.Common
             //  加入特性标签
             {
                 //  强制加上aspct和继承实现类型组件注入生命
-                builder.Append("\t").AppendLine($"[{nameof(AspectAttribute).Replace("Attribute", "")}]");
+                builder.AppendLine($"[{nameof(AspectAttribute).Replace("Attribute", "")}]");
                 string tmpCode = null;
                 if (Node.TypeParameterList?.Parameters.Count > 0)
                 {
@@ -249,20 +247,19 @@ namespace Snail.Aspect.Common
                     tmpCode = $"[Component(Lifetime = LifetimeType.Singleton, From = typeof({Node.Identifier}<{tmpCode}>))]";
                 }
                 tmpCode = tmpCode ?? $"[Component<{baseName}>(Lifetime = LifetimeType.Singleton)]";
-                builder.Append('\t').AppendLine(tmpCode);
+                builder.AppendLine(tmpCode);
                 //  其他特性标签的处理，去掉[Component]
                 foreach (var attr in Node.AttributeLists.GetAttributes())
                 {
                     string attrName = $"[{attr}]";
                     if (attrName != "[Component]")
                     {
-                        builder.Append("\t").AppendLine(attrName);
+                        builder.AppendLine(attrName);
                     }
                 }
             }
             //  类声明，强制加入sealed扩展，并移除一些不然abstract生命
             {
-                builder.Append("\t");
                 foreach (var token in Node.Modifiers)
                 {
                     switch (token.Kind())
@@ -291,7 +288,7 @@ namespace Snail.Aspect.Common
         /// <returns></returns>
         private void GenerateConstructor(StringBuilder builder, SourceGenerateContext context)
         {
-            context.LinePrefix = "\t\t";
+            context.LinePrefix = "\t";
             //有才生成，忽略private标记的、忽略static的
             var nodes = Node.ChildNodes().OfType<ConstructorDeclarationSyntax>();
             if (nodes.Any() == true)
@@ -313,7 +310,7 @@ namespace Snail.Aspect.Common
                            .Append(Class);
                     var pNames = GenerateCodeByParameter(builder, cNode.ParameterList, context);
                     //      base访问基类 + 空方法实现
-                    builder.Append(context.LinePrefix).Append('\t').AppendLine($": base({string.Join(", ", pNames)})");
+                    builder.Append(context.LinePrefix).AppendLine($": base({string.Join(", ", pNames)})");
                     builder.Append(context.LinePrefix).AppendLine("{ }");
                 }
                 builder.Append(context.LinePrefix).AppendLine("#endregion")
@@ -346,21 +343,21 @@ namespace Snail.Aspect.Common
             //      1、生成方法代码：保留属性信息，并分析命名空间
             GenerateCodeByAttribute(builder, mNode.AttributeLists, context);
             //      2、返回值、修饰符：接口忽略访问修饰符；方法追加override   示例 public async override string
-            builder.Append("\t\t")
-                    .Append(IsInterface == false && options.AccessTokens.Count > 0
+            builder.Append('\t')
+                   .Append(IsInterface == false && options.AccessTokens.Count > 0
                         ? $"{string.Join(" ", options.AccessTokens)} "
                         : string.Empty
-                    )
-                    .Append(options.IsAsync ? "async " : string.Empty)
-                    .Append(IsInterface ? string.Empty : "override ")
-                    .Append($"{mNode.ReturnType} ");
+                   )
+                   .Append(options.IsAsync ? "async " : string.Empty)
+                   .Append(IsInterface ? string.Empty : "override ")
+                   .Append($"{mNode.ReturnType} ");
             //      3、方法名称声明：若为接口，则显示声明
             builder.Append(IsInterface ? $"{Node.Identifier}{Node.TypeParameterList}." : string.Empty)
                    .Append($"{mNode.Identifier}");
             //      4、方法参数：保留参数属性标记；分析参数和参数属性用到的命名空间 示例：(string x,LockList<string>? x2,[HttpBody, Inject]string xx1}
             _ = GenerateCodeByParameter(builder, mNode.ParameterList, context);
             //      5、合并方法实现代码：根据需要生成【切面方法参数映射字段】信息
-            builder.Append("\t\t").AppendLine("{");
+            builder.Append('\t').AppendLine("{");
             if (context.NeedMethodParameterMap == true)
             {
                 builder.Append(context.LinePrefix).Append($"var {context.GetMethodParameterMapName(mNode)} = ");
@@ -379,7 +376,7 @@ namespace Snail.Aspect.Common
             }
             builder.Append(context.LocalMethods)
                    .AppendLine(code.TrimEnd());
-            builder.Append("\t\t").AppendLine("}");
+            builder.Append('\t').AppendLine("}");
 
             return true;
         }
@@ -473,7 +470,7 @@ namespace Snail.Aspect.Common
             foreach (var attr in attributeList.GetAttributes())
             {
                 context.AddNamespaces(attr.GetUsedNamespaces(context.Semantic));
-                builder.Append("\t\t").AppendLine($"[{attr}]");
+                builder.Append('\t').AppendLine($"[{attr}]");
             }
         }
         /// <summary>

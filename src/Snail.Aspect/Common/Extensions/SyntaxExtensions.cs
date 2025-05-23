@@ -169,7 +169,6 @@ namespace Snail.Aspect.Common.Extensions
         /// <returns></returns>
         public static IEnumerable<AttributeSyntax> GetAttributes(this SyntaxList<AttributeListSyntax> attributeLists)
         {
-            List<AttributeSyntax> atts = new List<AttributeSyntax>();
             foreach (var aList in attributeLists)
             {
                 foreach (var attr in aList.Attributes)

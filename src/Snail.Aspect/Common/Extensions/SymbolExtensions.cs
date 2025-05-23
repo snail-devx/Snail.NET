@@ -14,6 +14,24 @@ namespace Snail.Aspect.Common.Extensions
 
         #region ITypeSymbol
         /// <summary>
+        /// 是否是可空类型，如int?
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsNullable(this ITypeSymbol type)
+        {
+            //  这个还没验证出来具体是什么意思，先注释掉
+            // if (type.NullableAnnotation == NullableAnnotation.Annotated)
+            // {
+            //     return true;
+            // }
+            //  int? nullable<int>、、、
+            return type is INamedTypeSymbol nts
+                ? nts.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T && nts.TypeArguments.Length == 1
+                : false;
+        }
+
+        /// <summary>
         /// 是否是class
         /// </summary>
         /// <param name="type"></param>
@@ -113,7 +131,6 @@ namespace Snail.Aspect.Common.Extensions
             }
             return false;
         }
-
         /// <summary>
         /// 是否是数据包类型：Snail.Abstractions.Common.Interfaces.IDataBag
         /// </summary>
@@ -145,16 +162,17 @@ namespace Snail.Aspect.Common.Extensions
             }
             return false;
         }
+
         /// <summary>
-        /// 是否是【IIdentity】类型：Snail.Abstractions.Identity.Interfaces.IIdentity
+        /// 是否是指定的接口
         /// </summary>
         /// <param name="type"></param>
+        /// <param name="predicate">接口断言：传入参数：要断言的类型，类型全路径（如“Snail.Aspect.Web.Enumerations.HttpMethodType”）</param>
         /// <param name="inherit">是否算竭诚类型：为true时，则查找<paramref name="type"/>的所有实现接口</param>
         /// <returns></returns>
-        public static bool IsIIdentity(this ITypeSymbol type, bool inherit = true)
+        public static bool IsInterface(this ITypeSymbol type, Func<ITypeSymbol, string, bool> predicate, bool inherit = true)
         {
-            //  遍历自身+基类实现接口
-            if ($"{type}" == "Snail.Abstractions.Identity.Interfaces.IIdentity" == true)
+            if (predicate(type, $"{type}") == true)
             {
                 return true;
             }
@@ -162,7 +180,7 @@ namespace Snail.Aspect.Common.Extensions
             {
                 foreach (INamedTypeSymbol iNode in type.AllInterfaces)
                 {
-                    if (IsIIdentity(iNode) == true)
+                    if (IsInterface(iNode, predicate, inherit) == true)
                     {
                         return true;
                     }
@@ -170,6 +188,22 @@ namespace Snail.Aspect.Common.Extensions
             }
             return false;
         }
+        /// <summary>
+        /// 是否是【IIdentity】类型：Snail.Abstractions.Identity.Interfaces.IIdentity
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="inherit">是否算竭诚类型：为true时，则查找<paramref name="type"/>的所有实现接口</param>
+        /// <returns></returns>
+        public static bool IsIIdentity(this ITypeSymbol type, bool inherit = true)
+            => IsInterface(type, (_, typeName) => typeName == "Snail.Abstractions.Identity.Interfaces.IIdentity", inherit);
+        /// <summary>
+        /// 是否是【IValidatable】类型：Snail.Abstractions.Common.Interfaces.IValidatable
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="inherit">是否算竭诚类型：为true时，则查找<paramref name="type"/>的所有实现接口</param>
+        /// <returns></returns>
+        public static bool IsIValidatable(this ITypeSymbol type, bool inherit = true)
+            => IsInterface(type, (_, typeName) => typeName == "Snail.Abstractions.Common.Interfaces.IValidatable", inherit);
         #endregion
 
         #endregion
