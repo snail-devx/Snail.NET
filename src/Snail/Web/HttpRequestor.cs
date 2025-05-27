@@ -52,10 +52,15 @@ namespace Snail.Web
             ThrowIfNull(request);
             ThrowIfNull(request.Method);
             ThrowIfNull(request.RequestUri);
-            //  发送请求；默认接收json格式
+            //  接收数据格式；默认接收json格式
             if (request.Headers.Accept.Count == 0)
             {
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }
+            //  接收数据编码：默认强制UTF-8编码
+            if (request.Headers.AcceptEncoding.Count == 0)
+            {
+                request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("UTF-8"));
             }
             HttpResponseMessage response = await _sender.Invoke(request);
             //  构建请求结果：后期考虑做一下异常拦截，把异常信息具象化，如是否请求成功，请求状态码，异常信息都解析出来

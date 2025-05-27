@@ -70,12 +70,15 @@ namespace Snail.Abstractions.Web.Extensions
             //  构建请求对象
             method ??= HttpMethod.Post;
             HttpRequestMessage request = new(method, url);
-            //  组装提交数据；强制json格式
+            //  组装提交数据；非HttpContent时强制json格式
             if (data != null)
             {
-                string str = data.AsJson();
-                HttpContent content = new StringContent(str);
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                if (data is HttpContent content == false)
+                {
+                    string str = data.AsJson();
+                    content = new StringContent(str);
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                }
                 request.Content = content;
             }
             return request;
