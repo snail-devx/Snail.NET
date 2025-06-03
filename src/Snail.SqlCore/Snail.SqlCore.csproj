@@ -1,0 +1,20 @@
+﻿<!-- 部分公共配置信息，走解决方案根目录下的【Directory.Build.props】文件 -->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>关系型数据库核心基础类库，提供sql助手类方法和Snail中Database的抽象实现</Description>
+	</PropertyGroup>
+	
+	<!-- 默认配置项-->
+	<ItemGroup>
+		<!-- 1、同项目包依赖:使用项目依赖；直接nuget包依赖也行，但生成项目时，同解决方案下先后关系混乱冗余报错-->
+		<!-- <PackageReference Include="Snail.Abstractions" Version="$(Version)" />
+		<PackageReference Include="Snail" Version="$(Version)" /> -->
+		<ProjectReference Include="..\Snail.Abstractions\Snail.Abstractions.csproj" />
+		<ProjectReference Include="..\Snail\Snail.csproj" />
+	</ItemGroup>
+	
+	<!-- 依赖三方的Nuget包 -->
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.35" />
+	</ItemGroup>
+</Project>
