@@ -26,5 +26,18 @@
 			"ms-vscode.vs-keybindings",
 			"MS-CEINTL.vscode-language-pack-zh-hans",
 		],
-	}
+	},
+	//  运行启动 配置
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			//  附加进程，方便调试iis站点
+			{
+				"name": "🎉 .NET Core Attach",
+				"type": "coreclr",
+				"request": "attach",
+			},
+		],
+		"compounds": []
+	},
 }
