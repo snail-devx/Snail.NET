@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Primitives;
+using Snail.Abstractions.Dependency.Attributes;
 using Snail.Utilities.Common.Extensions;
 
 namespace Snail.WebApp.Components
@@ -9,6 +10,7 @@ namespace Snail.WebApp.Components
     ///     1、解决外部传入cookie值包含“{”、“}”等关键字时，无法识别的问题 <br />
     ///     2、确保此中间件在第一位执行，否则可能导致前面取到的cookie有问题 <br />
     /// </summary>
+    [Component<CookieMiddleware>]
     public sealed class CookieMiddleware : IMiddleware
     {
         #region 属性变量

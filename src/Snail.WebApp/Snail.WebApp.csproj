@@ -16,6 +16,7 @@
 		<!-- <PackageReference Include="Snail.Abstractions" Version="$(Version)" />
 		<PackageReference Include="Snail" Version="$(Version)" /> -->
 		<ProjectReference Include="..\Snail.Abstractions\Snail.Abstractions.csproj" />
+		<ProjectReference Include="..\Snail.Aspect\Snail.Aspect.csproj" />
 		<ProjectReference Include="..\Snail\Snail.csproj" />
 	</ItemGroup>
 	
