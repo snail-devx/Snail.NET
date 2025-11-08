@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -34,6 +32,10 @@ namespace Snail.Aspect.General
         /// 类型名：<see cref="MethodAspectAttribute"/>
         /// </summary>
         protected static readonly string TYPENAME_MethodAspectAttribute = typeof(MethodAspectAttribute).FullName;
+        /// <summary>
+        /// 类型名：<see cref="IMethodRunHandle"/>
+        /// </summary>
+        protected static readonly string TYPENAME_IMethodRunHandle = typeof(IMethodRunHandle).FullName;
         /// <summary>
         /// 固定需要引入的命名空间集合
         /// </summary>
@@ -110,15 +112,13 @@ namespace Snail.Aspect.General
             context.ReportErrorIf
             (
                 condition: RunHandleArg == null || $"{RunHandleArg.Expression}" == "null",
-                message: $"[Aspect]必须传入RunHandle值，且不能为null",
+                message: $"[MethodAspect]必须传入RunHandle值，且不能为null",
                 syntax: ANode
             );
-            context.ReportErrorIf
-            (
-                condition: context.TypeSyntax.TypeParameterList?.Parameters.Count > 0,
-                message: $"[Aspect]暂不支持在泛型class/interface中使用",
-                syntax: context.TypeSyntax.TypeParameterList?.Parameters.First()
-            );
+            //  不支持泛型类型标记[MethodAspect]；可能导致分析类型失败，先简化强制禁用
+            context.DisableGenericAspect("MethodAspect");
+            //  自身不能实现 [IMethodRunHandle]；若[MethodAspect]指定的RunHandle也是当前类型自身，则会造成依赖注入构建实例时死循环
+            context.DisableImplementAspect("CacheAspect", TYPENAME_IMethodRunHandle);
         }
         /// <summary>
         /// 生成方法代码；仅包括方法内部代码
@@ -150,7 +150,7 @@ namespace Snail.Aspect.General
             {
                 context.ReportError
                 (
-                    message: $"无实际代码，无法进行[Aspect]拦截，可配合[HttpAspect]等标签自动生成代码",
+                    message: $"无实际代码，无法进行[MethodAspect]拦截，可配合[HttpAspect]等标签自动生成代码",
                     syntax: method
                 );
                 return null;
@@ -185,7 +185,7 @@ namespace Snail.Aspect.General
         {
             /** 生成的辅助代码样例：
 
-            //  生成[Aspect]辅助代码;
+            //  生成[MethodAspect]辅助代码;
             [Inject(Key = "111")]
             private IMethodRunHandle? _aspectRunHandle { init; get; }
             */
@@ -194,7 +194,7 @@ namespace Snail.Aspect.General
                 context.AddNamespaces(FixedNamespaces);
                 //  直接生成，在【PrepareGenerate】判断了RunHandleArg必须存在且有效
                 StringBuilder builder = new StringBuilder();
-                builder.Append(context.LinePrefix).AppendLine("//  生成[Aspect]辅助代码;");
+                builder.Append(context.LinePrefix).AppendLine("//  生成[MethodAspect]辅助代码;");
                 GenerateInjectAssistantCode(builder, context, RunHandleArg, nameof(IMethodRunHandle), "_aspectRunHandle");
                 context.AddRequiredField("_aspectRunHandle", $"_aspectRunHandle为null，无法进行Aspect操作");
                 return builder.ToString();

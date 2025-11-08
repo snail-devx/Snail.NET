@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,6 +36,10 @@ namespace Snail.Aspect.Web
         /// 类型名：HttpBodyAttribute
         /// </summary>
         protected static readonly string TYPENAME_HttpBodyAttribute = typeof(HttpBodyAttribute).FullName;
+        /// <summary>
+        /// 类型名：IHttpAnalyzer
+        /// </summary>
+        protected static readonly string TYPENAME_IHttpAnalyzer = typeof(IHttpAnalyzer).FullName;
 
         /// <summary>
         /// 固定需要引入的命名空间几何
@@ -115,12 +118,10 @@ namespace Snail.Aspect.Web
         /// <param name="context"></param>
         void ITypeDeclarationMiddleware.PrepareGenerate(SourceGenerateContext context)
         {
-            context.ReportErrorIf
-            (
-                condition: context.TypeSyntax.TypeParameterList?.Parameters.Count > 0,
-                message: $"[HttpAspect]暂不支持在泛型class/interface中使用",
-                syntax: context.TypeSyntax.TypeParameterList?.Parameters.First()
-            );
+            //  不支持泛型类型标记[HttpAspect]；可能导致分析类型失败，先简化强制禁用
+            context.DisableGenericAspect("HttpAspect");
+            //  自身不能实现 [IHttpAnalyzer]；若[HttpAspect]指定的Analyzer也是当前类型自身，则会造成依赖注入构建实例时死循环
+            context.DisableImplementAspect("CacheAspect", TYPENAME_IHttpAnalyzer);
         }
 
         /// <summary>

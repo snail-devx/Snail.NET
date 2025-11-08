@@ -285,6 +285,45 @@ namespace Snail.Aspect.Common.Components
 
             return true;
         }
+
+        /// <summary>
+        /// 禁用【泛型】类型 <br />
+        ///     1、不支持泛型时报错
+        /// </summary>
+        /// <param name="aspectTitle"></param>
+        /// <returns></returns>
+        public bool DisableGenericAspect(string aspectTitle)
+        {
+            ReportErrorIf
+            (
+                condition: TypeSyntax.TypeParameterList?.Parameters.Count > 0,
+                message: $"[{aspectTitle}]暂不支持在泛型class/interface中使用",
+                syntax: TypeSyntax.TypeParameterList?.Parameters.First()
+            );
+            return true;
+        }
+        /// <summary>
+        /// 禁用【接口实现】 <br />
+        /// 1、若 <see cref="TypeSyntax" />实现了<paramref name="iTypeFullName"/>则报错
+        /// </summary>
+        /// <param name="aspectTitle">标题；切面标题</param>
+        /// <param name="iTypeFullName">接口全名</param>
+        /// <returns></returns>
+        public bool DisableImplementAspect(string aspectTitle, string iTypeFullName)
+        {
+            //  如 [LockAspect]标记的类型不能实现 [ILockAnalyzer]；若[LockAspect]指定的Analyzer也是当前类型自身，则会造成依赖注入构建实例时死循环
+            if (TypeSyntax.BaseList != null)
+            {
+                ITypeSymbol ts = Semantic.GetDeclaredSymbol(TypeSyntax) as ITypeSymbol;
+                ReportErrorIf
+                (
+                    condition: ts != null && ts.IsInterface(iTypeFullName),
+                    message: $"[{aspectTitle}]不支持实现[{iTypeFullName}]接口的类型，可能导致依赖注入死循环",
+                    syntax: TypeSyntax
+                );
+            }
+            return true;
+        }
         #endregion
     }
 }

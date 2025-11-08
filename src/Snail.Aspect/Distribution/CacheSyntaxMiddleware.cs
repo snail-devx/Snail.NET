@@ -51,6 +51,10 @@ namespace Snail.Aspect.Distribution
         /// </summary>
         protected static readonly string TYPENAME_CacheKeyAttribute = typeof(CacheKeyAttribute).FullName;
         /// <summary>
+        /// 类型名：<see cref="ICacheAnalyzer"/>
+        /// </summary>
+        protected static readonly string TYPENAME_ICacheAnalyzer = typeof(ICacheAnalyzer).FullName;
+        /// <summary>
         /// 类型名：IIdentity
         /// </summary>
         protected const string TYPENAME_IIdentity = "Snail.Abstractions.Identity.Interfaces.IIdentity";
@@ -145,12 +149,10 @@ namespace Snail.Aspect.Distribution
         /// <param name="context"></param>
         void ITypeDeclarationMiddleware.PrepareGenerate(SourceGenerateContext context)
         {
-            context.ReportErrorIf
-            (
-                condition: context.TypeSyntax.TypeParameterList?.Parameters.Count > 0,
-                message: $"[CacheAspect]暂不支持在泛型class/interface中使用",
-                syntax: context.TypeSyntax.TypeParameterList?.Parameters.First()
-            );
+            //  不支持泛型类型标记[CacheAspect]；可能导致分析类型失败，先简化强制禁用
+            context.DisableGenericAspect("CacheAspect");
+            //  自身不能实现 [ICacheAnalyzer]；若[CacheAspect]指定的Analyzer也是当前类型自身，则会造成依赖注入构建实例时死循环
+            context.DisableImplementAspect("CacheAspect", TYPENAME_ICacheAnalyzer);
         }
 
         /// <summary>

@@ -36,6 +36,10 @@ namespace Snail.Aspect.Distribution
         /// </summary>
         protected static readonly string TYPENAME_LockMethodAttribute = typeof(LockMethodAttribute).FullName;
         /// <summary>
+        /// 类型名：<see cref="ILockAnalyzer"/>
+        /// </summary>
+        protected static readonly string TYPENAME_ILockAnalyzer = typeof(ILockAnalyzer).FullName;
+        /// <summary>
         /// 固定需要引入的命名空间集合
         /// </summary>
         protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
@@ -120,7 +124,10 @@ namespace Snail.Aspect.Distribution
         /// </summary>
         /// <param name="context"></param>
         void ITypeDeclarationMiddleware.PrepareGenerate(SourceGenerateContext context)
-        { }
+        {
+            //  自身不能实现 [ILockAnalyzer]；若[LockAspect]指定的Analyzer也是当前类型自身，则会造成依赖注入构建实例时死循环
+            context.DisableImplementAspect("CacheAspect", TYPENAME_ILockAnalyzer);
+        }
 
         /// <summary>
         /// 生成方法代码；仅包括方法内部代码
