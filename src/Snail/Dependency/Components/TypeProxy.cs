@@ -53,22 +53,12 @@ namespace Snail.Dependency.Components
         /// <param name="type">类型</param>
         private TypeProxy(Type type) : base(type)
         {
-            //  1、选举构造方法：优先有依赖注入标签的，否则找参数最长的
+            //  1、选举构造方法
             {
-                ConstructorInfo? ctor = null;
-                foreach (var ct in type.GetConstructors(BINDINGFLAGS))
-                {
-                    if (ct.HasInjectAttribute(out _) == true)
-                    {
-                        ctor = ct;
-                        break;
-                    }
-                    if (ctor == null || ctor.GetParameters().Length < ct.GetParameters().Length)
-                    {
-                        ctor = ct;
-                    }
-                }
-                Constructor = ThrowIfNull(ctor, $"传入类型无实例构造方法：{type.FullName}");
+                Constructor = ThrowIfNull(ElectConstructor(type), $"传入类型无实例构造方法：{type.FullName}");
+#if DEBUG
+                Debug.WriteLine($"-----------代理类型： {type.FullName} 构造方法： {Constructor.ToString()}");
+#endif
             }
             //  2、选举需要注入的字段：仅要可写的引用类型
             {
@@ -190,6 +180,60 @@ namespace Snail.Dependency.Components
         #endregion
 
         #region 私有方法
+        /// <summary>
+        /// 选举类型的构造方法
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private static ConstructorInfo? ElectConstructor(Type type)
+        {
+            /** 优先有依赖注入标签的，否则根据访问优先级（public->internal->protected->private） */
+            ConstructorInfo[] ctors = type.GetConstructors(BINDINGFLAGS);
+            ConstructorInfo? ctor = null;
+            if (ctors?.Length > 0)
+            {
+                //  优先取有依赖注入标签的，取到第一个就算
+                ctor = ctors.FirstOrDefault(item => item.HasInjectAttribute(out _));
+                //  按访问权限排序；取优先级最高的一组  private > internal > protected > public；优先public
+                if (ctor == null)
+                {
+                    //  1、按访问权限枚举值分组排序，取最高的一组
+                    IGrouping<int, ConstructorInfo> group = ctors.GroupBy(item =>
+                    {
+                        MethodAttributes attr = item.Attributes & MethodAttributes.MemberAccessMask;
+                        switch (attr)
+                        {
+                            //  取枚举值的实际数值
+                            case MethodAttributes.Private://  private                         1
+                            case MethodAttributes.FamANDAssem://  internal and protected      2
+                            case MethodAttributes.Assembly://  internal                       3
+                            case MethodAttributes.Family://   protected                       4
+                            case MethodAttributes.FamORAssem://  internal or protected        5
+                            case MethodAttributes.Public://  public                           6
+                                return Convert.ToInt32(attr) * 1000;
+                            //  其他情况，强制最低优先级：0
+                            default:
+                                return 0;
+                        }
+                    }).OrderByDescending(item => item.Key).First();
+                    //  2、按照构造方法参数数量分组排序，取参数最高的一组
+                    group = group.GroupBy(item => item.GetParameters().Length).OrderByDescending(item => item.Key).First();
+                    //  3、取第一个参数最多的构造方法作为依赖注入的构造方法
+                    ctor = group.First();
+                }
+
+                // if (ctor == null)
+                // {
+                //     var enumerable = ctors.OrderByDescending(item => item.GetParameters().Length);
+                //     ctor = enumerable.FirstOrDefault(item => item.IsPublic)
+                //         ?? ctors.FirstOrDefault(item => item.Attributes)
+                //         ?? ctors.FirstOrDefault(item => item)
+                //         ?? ctors.FirstOrDefault(item => item.IsPrivate);
+                // }
+            }
+
+            return ctor;
+        }
         /// <summary>
         /// 构建方法的参数数值
         /// </summary>
