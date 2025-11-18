@@ -616,6 +616,36 @@ namespace Snail.Database.Components
 
         #region 公共方法
         /// <summary>
+        /// 动态计算表达式，构建其常量表达式
+        ///     如 new <see cref="List{String}"/>(){"1","2"} 直接构建成一个常量表达式节点
+        /// </summary>
+        /// <param name="titile">操作标题，在报错时做提示语</param>
+        /// <param name="expression">要执行的表达式</param>
+        /// <returns></returns>
+
+        public static ConstantExpression BuildConstant(string titile, Expression expression)
+        {
+            ThrowIfNull(expression);
+            //  常量直接返回，不用浪费性能了
+            if (expression.NodeType == ExpressionType.Constant)
+            {
+                return (expression as ConstantExpression)!;
+            }
+            //  执行动态计算，报错则标记表达式无效
+            try
+            {
+                var result = Expression.Lambda(expression).Compile().DynamicInvoke();
+                return Expression.Constant(result, expression.Type);
+                //if (ReflectHelper.IsNullAble(expression.Type) != true) return Expression.Constant(result);
+                //else return Expression.Constant(result, expression.Type);
+            }
+            catch (Exception ex)
+            {
+                string msg = $"解析{titile}结果失败：无法计算其'{expression}'结果值";
+                throw new NotSupportedException(msg, ex);
+            }
+        }
+        /// <summary>
         /// 尝试从表达式中分析成员节点
         /// </summary>
         /// <param name="node">要分析的表达式节点</param>
@@ -671,37 +701,6 @@ namespace Snail.Database.Components
         #endregion
 
         #region 私有方法
-        /// <summary>
-        /// 动态计算表达式，构建其常量表达式
-        ///     如 new <see cref="List{String}"/>(){"1","2"} 直接构建成一个常量表达式节点
-        /// </summary>
-        /// <param name="titile">操作标题，在报错时做提示语</param>
-        /// <param name="expression">要执行的表达式</param>
-        /// <returns></returns>
-
-        private static ConstantExpression BuildConstant(String titile, Expression expression)
-        {
-            ThrowIfNull(expression);
-            //  常量直接返回，不用浪费性能了
-            if (expression.NodeType == ExpressionType.Constant)
-            {
-                return (expression as ConstantExpression)!;
-            }
-            //  执行动态计算，报错则标记表达式无效
-            try
-            {
-                var result = Expression.Lambda(expression).Compile().DynamicInvoke();
-                return Expression.Constant(result, expression.Type);
-                //if (ReflectHelper.IsNullAble(expression.Type) != true) return Expression.Constant(result);
-                //else return Expression.Constant(result, expression.Type);
-            }
-            catch (Exception ex)
-            {
-                string msg = $"解析{titile}结果失败：无法计算其'{expression}'结果值";
-                throw new NotSupportedException(msg, ex);
-            }
-        }
-
         /// <summary>
         /// 构建&amp;&amp;、||表达式
         /// </summary>
@@ -960,75 +959,94 @@ namespace Snail.Database.Components
              *  1、静态方法调用时：methodCallNode为null
              *      1、Array的Contains方法，是在【Enumerable】中定义的
              *      2、List的Contains方法，是自己的List<>中定义的
+             *      3、ReadOnlySpan<T>的Contains方法，是在[System.MemoryExtensions]定义的
+             *          在.net10中，对数组做了性能优化，编译时隐式转为 ReadOnlySpan<T>；此时.contains方法位于System.MemoryExtensions
+             *          仅针对编译时能够确定的数组做了优化，如动态查询条件中的数组，仍然编译时确定不了，仍然会保持为数组，而不是ReadOnlySpan<T>
+             *          源码：(TestDbModel item) => new ExpressionType?[] { ExpressionType.Add, null,  }.Contains(item.NodeTypeNull) == true
+             *          编译后： 
+             *               (TestDbModel item) => MemoryExtensions.Contains(
+             *                   new ExpressionType?[3]{ExpressionType.Add,null,ExpressionType.GreaterThanOrEqual}, 
+             *                   item.NodeTypeNull, null
+             *               ) == true);
+             *          调试时，可以看到数组被隐式转换了：op_Implicit(new [] {Convert(Add, Nullable`1), null, Convert(GreaterThanOrEqual, Nullable`1)})
              *  2、下面集中情况调用时，methodCallNode非空，为调用前变量方法
              *      1、临时构建list等变量  item=>new List<String>{}.Contains
              *      2、上下文定义的Contains实例方法  item=>Contains(item.String)==true;      无效
              *  这里的成员节点有一下几种情况
-             *      1、成员自身          item.Name               正常属性访问
+             *      1、成员自身           item.Name               正常属性访问
              *      2、Convert           item.NodeType           枚举的Convert节点
              *      3、Nullable<>        item.BooleanNull        成员可空类型
              *      4、Convert+Nullable  item.NodeTypeNull       枚举类型可空时
              */
-            if (node.Method.Name != "Contains")
-            {
-                return null;
-            }
             //  1、分析Contains的调用方节点和调用参数：只支持List和Array，其他情况不支持
-            Type methodType = node.Method.DeclaringType!;
-            Expression? paramNode = null;
-            int paramIndex;
-            Expression? methodCallNode = null;
-            //      若是String.Contains调用，则直接提示不支持
-            if (methodType.IsString() == true)
+            if (node.Method.Name == "Contains")
             {
-                string msg = $"不支持常量字符串的Contains调用。node：{node}";
-                throw new NotSupportedException(msg);
-            }
-            //      List<>类型数据
-            else if (methodType.IsList(out _) == true)
-            {
-                methodCallNode = node.Object;
-                paramNode = node.Arguments.First();
-            }
-            //      数组类型的Contains，扩展子 System.Linq.Enumerable；或者list类型调用 Contains<>
-            else if (methodType == typeof(Enumerable))
-            {
-                if (node.Arguments[0].Type.IsArray != true && node.Arguments[0].Type.IsList(out _) != true)
+                Type methodType = node.Method.DeclaringType!;
+                //  String.Contains调用，则直接提示不支持
+                if (methodType.IsString() == true)
                 {
-                    string msg = $"不支持Array、List外的IEnumerable类型调用Contains。node：{node}";
+                    string msg = $"不支持常量字符串的Contains调用。node：{node}";
                     throw new NotSupportedException(msg);
                 }
-                paramIndex = 1;
-                //  仅支持数组
-                paramNode = node.Arguments[paramIndex];
-                methodCallNode = node.Arguments.First();
+                //  List<>类型数据；自身实现了Contains方法
+                if (methodType.IsList(out _) == true)
+                {
+                    Expression constValue = BuildConstant("Contains调用方", node.Object!);
+                    ValidateMemberNodeOfContainsMethod(node, node.Arguments[0], true);
+                    return Expression.Call(constValue, node.Method, node.Arguments[0]);
+                }
+                //  Array、List类型的Contains，扩展子 System.Linq.Enumerable；或者list类型调用 Contains<>
+                if (methodType == typeof(Enumerable))
+                {
+                    Expression constValue = node.Arguments[0];
+                    if (constValue.Type.IsArray != true && constValue.Type.IsList(out _) != true)
+                    {
+                        string msg = $"不支持Array、List外的IEnumerable类型调用Contains。node：{node}";
+                        throw new NotSupportedException(msg);
+                    }
+                    constValue = BuildConstant("Contains调用方", constValue);
+                    ValidateMemberNodeOfContainsMethod(node, node.Arguments[1], true);
+                    return Expression.Call(node.Method, constValue, node.Arguments[1]);
+                }
+                //  ReadOnlySpan<T>类型数据：不进行常量计算处理，比较麻烦（需要反射构建出Contains方法调用Lambda表达式），运行时使用时再分析
+                if (methodType == typeof(MemoryExtensions))
+                {
+                    ValidateMemberNodeOfContainsMethod(node, node.Arguments[1], false);
+                    return node;
+                }
             }
-            //  2、进行新的表达式构建
-            if (paramNode == null || methodCallNode == null) return null;
-            //      1、验证参数必须是一个，且直接时 成员节点 item.Node；但要注意成员为枚举和可空类型时
-            if (node.Arguments.Last() != paramNode)
+
+            return null;
+        }
+        /// <summary>
+        /// 验证cotnains方法的成员节点 <br />
+        /// 1、验证成员节点是否合法，是否支持 <br />
+        /// 2、如 new ExpressionType?[] { ExpressionType.Add, null }.Contains(item.NodeTypeNull) 的 item.NodeTypeNull 节点
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="memberNode"></param>
+        /// <param name="mustLastParam">成员节点是否必须是最后一个参数</param>
+        /// <exception cref="NotSupportedException"></exception>
+        private static void ValidateMemberNodeOfContainsMethod(MethodCallExpression node, Expression memberNode, bool mustLastParam)
+        {
+            //  检测参数节点是否是第一个
+            if (mustLastParam == true && node.Arguments.Last() != memberNode)
             {
                 string msg = $"Contains的{node.Arguments.Last()}参数无效。node：{node}";
                 throw new NotSupportedException(msg);
             }
-            if (TryAnalysisMemberExpress(paramNode, out _) == false)
+            //  验证是 成员节点 item.Node；但要注意成员为枚举和可空类型时
+            if (TryAnalysisMemberExpress(memberNode, out _) == false)
             {
-                string msg = $"Contains参数无效，正确示例:item.Contains(item.Name)。node：{node}";
+                string msg = $"Contains参数无效，正确示例:xxx.Contains(item.Name)。node：{node}";
                 throw new NotSupportedException(msg);
             }
-            //      2、验证成员节点为基础数据类型
-            if (paramNode.Type.IsBaseType() == false)
+            //  验证成员节点为基础数据类型
+            if (memberNode.Type.IsBaseType() == false)
             {
-                string msg = $"Contains不支持的数据类型{paramNode.Type.Name}。node：{node}";
+                string msg = $"Contains不支持的数据类型{memberNode.Type.Name}。node：{node}";
                 throw new NotSupportedException(msg);
             }
-            //      3、验证调用方nextNode必须是常量
-            methodCallNode = BuildConstant("Contains调用方", methodCallNode);
-            //      4、构建新的表达式：针对特例做区分
-            node = node.Object == null
-                ? Expression.Call(node.Method, methodCallNode, paramNode)
-                : Expression.Call(methodCallNode, node.Method, paramNode);
-            return node;
         }
         #endregion
     }

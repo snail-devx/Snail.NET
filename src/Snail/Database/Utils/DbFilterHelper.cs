@@ -63,7 +63,7 @@ namespace Snail.Database.Utils
                 string msg = "仅支持分析Contains方法调用值";
                 throw new NotSupportedException(msg);
             }
-            //  分析in查询的字段成员信息
+            //  1、分析in查询的字段成员信息
             Expression tmpNode = methodExpress.Object == null ? methodExpress.Arguments[1] : methodExpress.Arguments[0];
             DbFilterFormatter.TryAnalysisMemberExpress(tmpNode, out member!);
             if (member == null)
@@ -71,35 +71,12 @@ namespace Snail.Database.Utils
                 string msg = $"构建in/nin时不支持的成员表达式：{tmpNode}";
                 throw new NotSupportedException(msg);
             }
-            //  分析in查询值：分析出具体谁调用的Contains方法
-            ConstantExpression whoCall = (methodExpress.Object ?? methodExpress.Arguments[0]) as ConstantExpression
-                ?? throw new NotSupportedException($"无法分析Contains调用方节点：{methodExpress}");
-            Type? genericType = null,
-                  lgenericType = null,
-                  listType = null;
-            bool bValue = whoCall.Type.IsArray(out genericType) == true || whoCall.Type.IsList(out lgenericType) == true;
-            if (bValue == false)
-            {
-                string msg = $"IN筛选条件时，仅支持List和Array，当前为：{whoCall.Type.Name}。{methodExpress}";
-                throw new NotSupportedException(msg);
-            }
-            //      遍历整理查询值：注意对DateTime的处理，强制转成utc时间
-            dynamic? value = whoCall.Value;
-            genericType = genericType ?? lgenericType;
-            //枚举类型时，当做int处理
-            if (genericType!.IsEnum)
-            {
-                genericType = typeof(int);
-            }
-            else if (genericType.IsEnumNullable(out Type? enumN))
-            {
-                genericType = typeof(int?);
-            }
-            // 通过反射创建泛型列表类型
-            listType = typeof(List<>).MakeGenericType(genericType);
-            // 创建泛型列表对象:此处值必须显示构建。因为postgres数据库是强类型。不显示指定，in查询时会报错。
+            //  2、分析in查询值和相关泛型类型：针对特定类型做一下兼容处理
+            dynamic? inValues = AnalysisInQueryValues(methodExpress, out Type genericType);
+            //  3、整理in查询值，进行类型反射创建；此处值必须显示构建。因为postgres数据库是强类型。不显示指定，in查询时会报错。
+            Type listType = typeof(List<>).MakeGenericType(genericType!);
             dynamic values = Activator.CreateInstance(listType)!;
-            foreach (var item in value!)
+            foreach (var item in inValues!)
             {
                 //  根据item的类型，做一些特定逻辑处理
                 switch (item)
@@ -151,6 +128,53 @@ namespace Snail.Database.Utils
                     {"Page",pageCount },
                     {"Skip",preSkipValue + pageCount },
                 }.AsJson().AsBase64Encode();
+        }
+        #endregion
+
+        #region 私有方法
+        /// <summary>
+        /// 分析in查询的参数值
+        /// </summary>
+        /// <param name="methodExpress"></param>
+        /// <param name="genericType"></param>
+        /// <returns></returns>
+        private static dynamic? AnalysisInQueryValues(MethodCallExpression methodExpress, out Type genericType)
+        {
+            genericType = null!;
+            dynamic? inValues = null;
+            //  1、固定Array的.contains表达式，.net10会优化为ReadOnlySpan<T>，此时在【DbFilterFormatter.BuildMethodCallByContains】格式化时，转常量比较麻烦，还得反射查类型
+            if (methodExpress.Method.DeclaringType == typeof(MemoryExtensions))
+            {
+                //  op_Implicit(new [] {Convert(Add, Nullable`1), null, Convert(GreaterThanOrEqual, Nullable`1)})
+                MethodCallExpression methodNode = (methodExpress.Arguments[0] as MethodCallExpression)!;
+                inValues = DbFilterFormatter.BuildConstant("Contains获取in数值", methodNode.Arguments[0]).Value;
+                genericType = methodNode.Type.GenericTypeArguments[0];
+            }
+            //  2、List和Array的contains表达式
+            else
+            {
+                ConstantExpression whoCall = (methodExpress.Object ?? methodExpress.Arguments[0]) as ConstantExpression
+                    ?? throw new NotSupportedException($"无法分析Contains调用方节点：{methodExpress}");
+                _ = whoCall.Type.IsArray(out genericType!) || whoCall.Type.IsList(out genericType!);
+                if (genericType == null)
+                {
+                    string msg = $"IN筛选条件时，仅支持List和Array，当前为：{whoCall.Type.Name}。{methodExpress}";
+                    throw new NotSupportedException(msg);
+                }
+                inValues = whoCall.Value;
+            }
+            //  3、分析出的泛型数据类型做校验处理
+            //      若为枚举类型时，当做int处理
+            if (genericType!.IsEnum)
+            {
+                genericType = typeof(int);
+            }
+            else if (genericType.IsEnumNullable(out _))
+            {
+                genericType = typeof(int?);
+            }
+
+            return inValues;
         }
         #endregion
     }
