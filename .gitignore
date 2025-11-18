@@ -10,3 +10,5 @@ test/
 TestResults/
 *.xlsx
 desktop.ini
+
+publish.ps1

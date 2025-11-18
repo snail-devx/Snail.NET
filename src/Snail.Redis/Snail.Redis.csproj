@@ -20,6 +20,6 @@
 	
 	<!-- 依赖三方的Nuget包 -->
 	<ItemGroup>
-		<PackageReference Include="StackExchange.Redis" Version="2.8.22" />
+		<PackageReference Include="StackExchange.Redis" Version="2.9.32" />
 	</ItemGroup>
 </Project>

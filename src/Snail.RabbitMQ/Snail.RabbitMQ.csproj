@@ -20,6 +20,6 @@
 	
 	<!-- 依赖三方的Nuget包 -->
 	<ItemGroup>
-		<PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
 	</ItemGroup>
 </Project>

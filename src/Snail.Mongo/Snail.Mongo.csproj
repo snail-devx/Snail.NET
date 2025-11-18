@@ -25,7 +25,7 @@
 	<!-- 依赖三方的Nuget包 -->
 	<ItemGroup>
 		<!-- mongo驱动，给一个最小依赖版本-->
-		<PackageReference Include="SharpCompress" Version="0.39.0"/>
+		<PackageReference Include="SharpCompress" Version="0.41.0" />
 		<PackageReference Include="MongoDB.Driver" Version="2.13.3" />
 	</ItemGroup>
 </Project>

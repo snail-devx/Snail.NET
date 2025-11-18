@@ -1,42 +1,42 @@
-<!-- ÏîÄ¿µÄÈ«¾ÖÊôĞÔ£¬¸÷¸ö .csproj ÏîÄ¿ÎÄ¼şÖĞµÄ¹²Í¬ÊôĞÔÅäÖÃ
-		1¡¢ÏîÄ¿Ä¬ÈÏÉú³É¹æÔò
-		2¡¢Éú³ÉÇ°ºóµÄµÄ¶îÍâ´¦Àí
+ï»¿<!-- é¡¹ç›®çš„å…¨å±€å±æ€§ï¼Œå„ä¸ª .csproj é¡¹ç›®æ–‡ä»¶ä¸­çš„å…±åŒå±æ€§é…ç½®
+		1ã€é¡¹ç›®é»˜è®¤ç”Ÿæˆè§„åˆ™
+		2ã€ç”Ÿæˆå‰åçš„çš„é¢å¤–å¤„ç†
 -->
 <Project>
-	<!-- ÏîÄ¿Ä¬ÈÏÊôĞÔ -->
+	<!-- é¡¹ç›®é»˜è®¤å±æ€§ -->
 	<PropertyGroup>
-		<!-- ¶¨Òå¿ÉÈ«¾ÖÊ¹ÓÃ±äÁ¿ -->
-		<Version>1.1.2</Version>
-		<TargetFramework>net9.0</TargetFramework>
-		<!-- ¹Ì»¯ĞÅÏ¢-->
+		<!-- å®šä¹‰å¯å…¨å±€ä½¿ç”¨å˜é‡ -->
+		<Version>1.10.0</Version>
+		<TargetFramework>net10.0</TargetFramework>
+		<!-- å›ºåŒ–ä¿¡æ¯-->
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<!-- Éú³Énuget°ü£¨.nupkg)£»°üº¬µ÷ÊÔĞÅÏ¢pdf°ü£¨.snupkg£©-->
+		<!-- ç”ŸæˆnugetåŒ…ï¼ˆ.nupkg)ï¼›åŒ…å«è°ƒè¯•ä¿¡æ¯pdfåŒ…ï¼ˆ.snupkgï¼‰-->
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     	<IncludeSymbols>true</IncludeSymbols>
     	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<!-- ÌØ¶¨¾¯¸æºöÂÔ£º
-				1587ÎªÔÚ´úÂëÄÚÊ¹ÓÃ/***/×¢ÊÍÊ±µÄ¾¯¸æ
-				RS1041£¬·ÖÎöÆ÷ÏîÄ¿£¬½öÔÚnetÆ½Ì¨ÏÂÊ¹ÓÃ£¬²»¿¼ÂÇFrameworkÆ½Ì¨£¬ºöÂÔ´Ë¾®¸Ç²»Ó¦ÔÚ¾ßÓĞÄ¿±ê¿ò¼Ü¡°.NET 8.0¡±µÄ³ÌĞò¼¯ÖĞÊµÏÖ´Ë±àÒëÆ÷À©Õ¹
-				NU1903£¬nuget°üµÄ¾¯¸æ£¬ºöÂÔ´Ë¾¯¸æ£¬²»Ó°ÏìÏîÄ¿¹¹½¨
+		<!-- ç‰¹å®šè­¦å‘Šå¿½ç•¥ï¼š
+				1587ä¸ºåœ¨ä»£ç å†…ä½¿ç”¨/***/æ³¨é‡Šæ—¶çš„è­¦å‘Š
+				RS1041ï¼Œåˆ†æå™¨é¡¹ç›®ï¼Œä»…åœ¨netå¹³å°ä¸‹ä½¿ç”¨ï¼Œä¸è€ƒè™‘Frameworkå¹³å°ï¼Œå¿½ç•¥æ­¤äº•ç›–ä¸åº”åœ¨å…·æœ‰ç›®æ ‡æ¡†æ¶â€œ.NET 8.0â€çš„ç¨‹åºé›†ä¸­å®ç°æ­¤ç¼–è¯‘å™¨æ‰©å±•
+				NU1903ï¼ŒnugetåŒ…çš„è­¦å‘Šï¼Œå¿½ç•¥æ­¤è­¦å‘Šï¼Œä¸å½±å“é¡¹ç›®æ„å»º
 		-->
 		<NoWarn>1587;RS1041</NoWarn>
-		<!-- Ğí¿ÉÊÚÈ¨µÈĞÅÏ¢ -->
+		<!-- è®¸å¯æˆæƒç­‰ä¿¡æ¯ -->
     	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>snail_dev@163.com</Authors>
 	</PropertyGroup>
 
-	<!-- ÏîÄ¿¹¹½¨Ê±£¬Õë¶ÔNuget°ü×ö´¦Àí£º¸´ÖÆµ½Í³Ò»Ä¿Â¼ÏÂ -->
-	<!--	ÏîÄ¿¹¹½¨Ç°£¬ÏÈ½«Ö®Ç°µÄnuget°üÉ¾³ıµô-->
+	<!-- é¡¹ç›®æ„å»ºæ—¶ï¼Œé’ˆå¯¹NugetåŒ…åšå¤„ç†ï¼šå¤åˆ¶åˆ°ç»Ÿä¸€ç›®å½•ä¸‹ -->
+	<!--	é¡¹ç›®æ„å»ºå‰ï¼Œå…ˆå°†ä¹‹å‰çš„nugetåŒ…åˆ é™¤æ‰-->
 	<Target Name="CleanupBeforeBuild" BeforeTargets="BeforeBuild">
 		<ItemGroup>
 			<FilesToDelete Include="$(ProjectDir)/*/*/*.*nupkg" />
 		</ItemGroup>
 		<Delete Files="@(FilesToDelete)" />
 	</Target>
-	<!--	Nuget°üÉú³Éºó£¬½«°ü¸´ÖÆµ½ ¸ù ¡¾packages¡¿ Ä¿Â¼ÏÂ£¬·½±ãÍ³Ò»¹ÜÀí -->
+	<!--	NugetåŒ…ç”Ÿæˆåï¼Œå°†åŒ…å¤åˆ¶åˆ° æ ¹ ã€packagesã€‘ ç›®å½•ä¸‹ï¼Œæ–¹ä¾¿ç»Ÿä¸€ç®¡ç† -->
 	<Target Name="CopyNuGetPackage" AfterTargets="Pack">
 		<ItemGroup>
 			<NupkgFiles Include="$(OutputPath)../*.*nupkg" />

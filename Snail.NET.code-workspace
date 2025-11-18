@@ -1,8 +1,70 @@
 {
 	"folders": [
 		{
-			"path": "."
-		}
+			"path": ".",
+			"name": "ROOT"
+		},
+		//	--	系统扩展：工具层面
+		{
+			"path": "./src/Snail.Utilities",
+			"name": "💎 src/Snail.Utilities"
+		},
+		//	--	抽象层
+		{
+			"path": "./src/Snail.Abstractions",
+			"name": "📌 src/Snail.Abstractions"
+		},
+		{
+			"path": "./src/Snail.Aspect",
+			"name": "📌 src/Snail.Aspect"
+		},
+		//	--	实现类库
+		{
+			"path": "./src/Snail",
+			"name": "📦 src/Snail"
+		},
+		{
+			"path": "./src/Snail.Logger",
+			"name": "📦 src/Snail.Logger"
+		},
+		{
+			"path": "./src/Snail.RabbitMQ",
+			"name": "📦 src/Snail.RabbitMQ"
+		},
+		{
+			"path": "./src/Snail.WebApp",
+			"name": "📦 src/Snail.WebApp"
+		},
+		//	--	实现类库：数据库实现
+		{
+			"path": "./src/Snail.Elastic",
+			"name": "🗄️ src/Snail.Elastic"
+		},
+		{
+			"path": "./src/Snail.Mongo",
+			"name": "🗄️ src/Snail.Mongo"
+		},
+		{
+			"path": "./src/Snail.MySql",
+			"name": "🗄️ src/Snail.MySql"
+		},
+		{
+			"path": "./src/Snail.SqlCore",
+			"name": "🗄️ src/Snail.SqlCore"
+		},
+		{
+			"path": "./src/Snail.PostgreSql",
+			"name": "🗄️ src/Snail.PostgreSql"
+		},
+		//	--	测试类库
+		{
+			"path": "./test/Snail.Test",
+			"name": "🧰 test/Snail.Test"
+		},
+		{
+			"path": "./test/Snail.WebApiTest",
+			"name": "🧰 test/Snail.WebApiTest"
+		},
 	],
 	"settings": {
 		"files.exclude": {

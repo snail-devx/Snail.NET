@@ -18,6 +18,6 @@
 
 	<!-- 依赖三方的Nuget包 -->
 	<ItemGroup>
-		<PackageReference Include="log4net" Version="3.0.3" />
+		<PackageReference Include="log4net" Version="3.2.0" />
 	</ItemGroup>
 </Project>
