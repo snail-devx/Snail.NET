@@ -19,8 +19,8 @@ namespace Snail.Aspect.Distribution.Utils
         public static string CombineDataKey(string dataKey, string dataKeyPrefix)
         {
             return string.IsNullOrEmpty(dataKeyPrefix)
-                ? $"{dataKeyPrefix}{dataKey}"
-                : dataKey;
+                ? dataKey
+                : $"{dataKeyPrefix}{dataKey}";
         }
         /// <summary>
         /// 组合缓存数据Key
@@ -35,12 +35,11 @@ namespace Snail.Aspect.Distribution.Utils
                 IList<string> cacheKeys = new List<string>(dataKeys.Count);
                 for (int index = 0; index < dataKeys.Count; index++)
                 {
-                    cacheKeys[index] = CombineDataKey(dataKeys[index], dataKeyPrefix);
+                    cacheKeys.Add(CombineDataKey(dataKeys[index], dataKeyPrefix));
                 }
                 return cacheKeys;
             }
             return dataKeys;
-
         }
         /// <summary>
         /// 组合缓存数据Key
