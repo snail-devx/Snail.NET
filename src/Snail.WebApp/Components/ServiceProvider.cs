@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
-using Snail.Abstractions.Dependency.DataModels;
+﻿using Snail.Abstractions.Dependency.DataModels;
 using Snail.Dependency;
 using Snail.Utilities.Collections;
 using Snail.Utilities.Common.Extensions;
+using System.Diagnostics;
 
 namespace Snail.WebApp.Components
 {
@@ -149,6 +149,9 @@ namespace Snail.WebApp.Components
                     .Register<IKeyedServiceProvider>(LifetimeType.Scope, this)
                     .Register<IServiceScopeFactory>(LifetimeType.Scope, this)
                     .Register<IServiceScope>(LifetimeType.Scope, this);
+
+            //  注册IDIManager为当前实例中管理器
+            _manager.Unregister<IDIManager>().Register(LifetimeType.Scope, _manager);
         }
 
         /// <summary>
