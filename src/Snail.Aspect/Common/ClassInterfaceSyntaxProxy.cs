@@ -272,8 +272,7 @@ namespace Snail.Aspect.Common
                             break;
                     }
                 }
-                builder.Append("sealed ")
-                       .Append("class ").Append(Class)
+                builder.Append("class ").Append(Class)
                        .Append(Node.TypeParameterList).Append(" : ").AppendLine(baseName);
             }
 
