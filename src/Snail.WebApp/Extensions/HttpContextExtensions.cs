@@ -1,5 +1,3 @@
-using System;
-
 namespace Snail.WebApp.Extensions;
 
 /// <summary>
