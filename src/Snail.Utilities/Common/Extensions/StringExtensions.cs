@@ -62,10 +62,11 @@ namespace Snail.Utilities.Common.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="str"></param>
         /// <param name="value"></param>
+        /// <param name="settings">json序列化配置</param>
         /// <returns></returns>
-        public static bool TryAs<T>(this string str, out T? value)
+        public static bool TryAs<T>(this string str, out T? value, JsonSerializerSettings? settings = null)
         {
-            RunResult<T?> rt = Run(JsonConvert.DeserializeObject<T>, str);
+            RunResult<T?> rt = Run(JsonConvert.DeserializeObject<T>, str, settings);
             value = rt.Data;
             return rt;
         }
@@ -142,9 +143,15 @@ namespace Snail.Utilities.Common.Extensions
         {
             byte[] data = MD5.Create().ComputeHash(Encoding.Default.GetBytes(str));
             StringBuilder sBuilder = new();
-            for (int i = 0; i < data.Length; i++) sBuilder.Append(data[i].ToString("x2"));
+            for (int i = 0; i < data.Length; i++)
+            {
+                sBuilder.Append(data[i].ToString("x2"));
+            }
             //  返回
-            if (needStrikethrough == false) sBuilder = sBuilder.Replace("-", string.Empty);
+            if (needStrikethrough == false)
+            {
+                sBuilder = sBuilder.Replace("-", string.Empty);
+            }
             return sBuilder.ToString();
         }
         #endregion
@@ -159,7 +166,7 @@ namespace Snail.Utilities.Common.Extensions
         public static string AsBase64Encode(this string str, in Base64FormattingOptions options = Base64FormattingOptions.None)
         {
             byte[] bytes = str.AsBytes();
-            return Convert.ToBase64String(bytes, Base64FormattingOptions.None);
+            return Convert.ToBase64String(bytes, options);
         }
         /// <summary>
         /// Base64解码

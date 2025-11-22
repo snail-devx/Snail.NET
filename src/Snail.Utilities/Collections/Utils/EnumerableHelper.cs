@@ -44,6 +44,14 @@ namespace Snail.Utilities.Collections.Utils
                 throw BuildArgException(message, paramName);
             }
         }
+        /// <summary>
+        /// 是null或者空字典
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool IsNullOrEmpty<T>(IEnumerable<T>? value)
+            => value == null || value.Any();
         #endregion
 
         #endregion

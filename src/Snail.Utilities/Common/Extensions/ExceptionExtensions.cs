@@ -1,4 +1,4 @@
-﻿namespace Snail.Utilities.Collections.Extensions
+﻿namespace Snail.Utilities.Common.Extensions
 {
     /// <summary>
     /// <see cref="Exception"/>扩展方法

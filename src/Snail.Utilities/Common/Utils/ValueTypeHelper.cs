@@ -9,7 +9,7 @@ namespace Snail.Utilities.Common.Utils
     {
         #region 公共方法
 
-        #region 数据验证
+        #region bool 相关
         /// <summary>
         /// 【布尔】值为true时抛出异常
         /// </summary>

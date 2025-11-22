@@ -1,5 +1,5 @@
 ﻿using Snail.RabbitMQ.Exceptions;
-using Snail.Utilities.Collections.Extensions;
+using Snail.Utilities.Common.Extensions;
 
 namespace Snail.RabbitMQ.Components
 {

@@ -45,13 +45,13 @@ namespace Snail.Utilities.Common.Extensions
         public static bool IsString(this Type type) => type == _stringType;
 
         /// <summary>
-        /// <paramref name="type"/>是否是<paramref name="definitionType"/>泛型创建的类型<br />
+        /// <paramref name="type"/>是否是泛型类型创建<br />
         /// 1、即<paramref name="type"/>是通过<see cref="Type.MakeGenericType(Type[])"/>指定泛型参数构建出来的新类型<br />
         /// 2、举例List&lt;String&gt;就是基于<see cref="List{T}"/>构建的
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="definitionType">泛型的定义类型，如<see cref="List{String}"/>，则definitiontype=typeof <see cref="List{T}"/></param>
-        /// <returns></returns>
+        /// <param name="definitionType">out参数：泛型定义类型，如<see cref="List{String}"/>，则definitiontype=typeof <see cref="List{T}"/></param>
+        /// <returns>是泛型类型创建的新类型返回true；否则返回false</returns>
         public static bool IsGenericMakeType(this Type type, out Type? definitionType)
         {
             definitionType = type.IsGenericType == true
@@ -66,7 +66,7 @@ namespace Snail.Utilities.Common.Extensions
         /// </summary>
         /// <param name="type"></param>
         /// <param name="definitionType">泛型类型，如 typeof(<see cref="List{T}"/>)</param>
-        /// <returns></returns>
+        /// <returns>是泛型类型<paramref name="definitionType"/>创建的新类型返回true；否则返回false</returns>
         public static bool IsGenericMakeType(this Type type, Type definitionType)
         {
             //  直接调用 IsMakeGenericType(this Type type, out Type? definitionType) 更方便，但更繁琐，简化调用堆栈
@@ -96,15 +96,17 @@ namespace Snail.Utilities.Common.Extensions
         /// 是否是数组，如String[]
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="genericArg">数组泛型参数，如String[]，则genericArg=typeof(String)</param>
+        /// <param name="genericArg">数组泛型参数，如String[]，则genericArg = typeof(String)</param>
         /// <returns></returns>
         public static bool IsArray(this Type type, out Type? genericArg)
         {
             genericArg = null;
-            if (type.IsArray != true) return false;
             //  数组的具体类型比较麻烦，拼接上具体的程序集名称。遇到ExpressType不拼接加载不出来
-            string newType = $"{type.FullName![..^2]},{type.Assembly.FullName}";
-            genericArg = TypeHelper.LoadType(newType);
+            if (type.IsArray == true)
+            {
+                string newType = $"{type.FullName![..^2]},{type.Assembly.FullName}";
+                genericArg = TypeHelper.LoadType(newType);
+            }
             return genericArg != null;
         }
         /// <summary>
@@ -140,7 +142,7 @@ namespace Snail.Utilities.Common.Extensions
         public static bool IsEnumNullable(this Type type, out Type? genericArg)
         {
             type.IsNullable(out genericArg);
-            genericArg = genericArg?.IsEnum != true ? null : genericArg;
+            genericArg = genericArg?.IsEnum == true ? genericArg : null;
             return genericArg != null;
         }
         #endregion
