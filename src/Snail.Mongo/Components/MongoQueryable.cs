@@ -42,23 +42,21 @@ namespace Snail.Mongo
         /// </summary>
         /// <remarks>仅使用Where条件做查询；Skip、Take、Order等失效</remarks>
         /// <returns>符合条件的数据条数</returns>
-        public override async Task<long> Count()
+        public override Task<long> Count()
         {
             FilterDefinition<DbModel> filter = BuildFilter();
-            long count = await DbCollection.Find(filter).CountDocumentsAsync();
-            return count;
+            return DbCollection.Find(filter).CountDocumentsAsync();
         }
         /// <summary>
         /// 是否存在符合条件的数据
         /// </summary>
         /// <remarks>Where、Order、Take、Skip都生效</remarks>
         /// <returns>存在返回true；否则返回false</returns>
-        public override async Task<bool> Any()
+        public override Task<bool> Any()
         {
             //  mongo的any，内部用的FirstOrDefault逻辑，这里优化性能，强制只要id值返回
             var fluent = BuildFindFluent(false, out _).Project("{_id:\"1\"}").Limit(1);
-            bool has = await fluent.AnyAsync();
-            return has;
+            return fluent.AnyAsync();
         }
 
         /// <summary>
@@ -66,11 +64,10 @@ namespace Snail.Mongo
         /// </summary>
         /// <remarks>Where、Order、Take、Skip都生效</remarks>
         /// <returns>数据实体；无则返回默认值</returns>
-        public override async Task<DbModel?> FirstOrDefault()
+        public override Task<DbModel?> FirstOrDefault()
         {
             var fluent = BuildFindFluent(true, out _);
-            DbModel? model = await FirstOrDefault();
-            return model;
+            return fluent.FirstOrDefaultAsync()!;
         }
         /// <summary>
         /// 获取符合筛选条件+分页的所有数据<br />

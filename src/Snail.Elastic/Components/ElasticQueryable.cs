@@ -53,7 +53,7 @@ namespace Snail.Elastic.Components
             //  _发送count查询请求
             ElasticSearchModel search = BuildFilter();
             string api = BuildAction(ElasticModelRunner<DbModel>.Table.Name, "_count", Routing);
-            string? ret = await Runner.Post(isReadonly: true, title: "CountAsync", api, search.AsJson());
+            string? ret = await Runner.Post(isReadonly: true, title: "Count", api, search.AsJson());
             //  解析count值
             /*  { "count": 1, "_shards": {...} } */
             long? count = JToken.Parse(ret ?? "{}")["count"]?.Value<long>();

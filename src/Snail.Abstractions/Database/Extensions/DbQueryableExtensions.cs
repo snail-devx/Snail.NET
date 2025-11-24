@@ -1,5 +1,5 @@
-﻿using System.Linq.Expressions;
-using Snail.Abstractions.Database.Interfaces;
+﻿using Snail.Abstractions.Database.Interfaces;
+using System.Linq.Expressions;
 
 namespace Snail.Abstractions.Database.Extensions
 {
@@ -16,7 +16,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="query">数据库查询接口</param>
         /// <param name="predicate">where条件lambda表达式。lambda表达式目前不支持子文档、子表查询。示例:item=>item.Name=="Test"</param>
         /// <returns></returns>
-        public static Task<long> CountAsync<DbModel>(this IDbQueryable<DbModel> query, Expression<Func<DbModel, bool>> predicate)
+        public static Task<long> Count<DbModel>(this IDbQueryable<DbModel> query, Expression<Func<DbModel, bool>> predicate)
             where DbModel : class
         {
             if (predicate != null)
@@ -33,7 +33,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="query">数据库查询接口</param>
         /// <param name="predicate">where条件lambda表达式。lambda表达式目前不支持子文档、子表查询。示例:item=>item.Name=="Test"</param>
         /// <returns>存在返回true；否则返回false</returns>
-        public static Task<bool> AnyAsync<DbModel>(this IDbQueryable<DbModel> query, Expression<Func<DbModel, bool>> predicate)
+        public static Task<bool> Any<DbModel>(this IDbQueryable<DbModel> query, Expression<Func<DbModel, bool>> predicate)
             where DbModel : class
         {
             if (predicate != null)
@@ -49,7 +49,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="query">数据库查询接口</param>
         /// <param name="predicate">where条件lambda表达式。lambda表达式目前不支持子文档、子表查询。示例:item=>item.Name=="Test"</param>
         /// <returns></returns>
-        public static Task<DbModel?> FirstOrDefaultAsync<DbModel>(this IDbQueryable<DbModel> query, Expression<Func<DbModel, bool>> predicate)
+        public static Task<DbModel?> FirstOrDefault<DbModel>(this IDbQueryable<DbModel> query, Expression<Func<DbModel, bool>> predicate)
             where DbModel : class
         {
             if (predicate != null)

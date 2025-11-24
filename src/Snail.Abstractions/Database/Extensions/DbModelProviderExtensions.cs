@@ -20,7 +20,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="provider">数据库提供程序</param>
         /// <param name="model">数据对象</param>
         /// <returns>插入成功返回true；否则返回false</returns>
-        public static Task<bool> InsertAsync<DbModel>(this IDbModelProvider<DbModel> provider, DbModel model) where DbModel : class
+        public static Task<bool> Insert<DbModel>(this IDbModelProvider<DbModel> provider, DbModel model) where DbModel : class
         {
             ThrowIfNull(model);
             return provider.Insert([model]);
@@ -32,7 +32,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="provider">数据库提供程序</param>
         /// <param name="model">数据对象</param>
         /// <returns>插入成功返回true；否则返回false</returns>
-        public static Task<bool> SaveAsync<DbModel>(this IDbModelProvider<DbModel> provider, DbModel model) where DbModel : class
+        public static Task<bool> Save<DbModel>(this IDbModelProvider<DbModel> provider, DbModel model) where DbModel : class
         {
             ThrowIfNull(model);
             return provider.Save([model]);
@@ -46,7 +46,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="id">主键Id值</param>
         /// <returns>存在返回实体，否则返回null</returns>
         /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="IDbModelProvider{DbModel}.AsQueryable(string)"/>方法</remarks>
-        public static async Task<DbModel?> LoadAsync<DbModel, IdType>(this IDbModelProvider<DbModel> provider, IdType id)
+        public static async Task<DbModel?> Load<DbModel, IdType>(this IDbModelProvider<DbModel> provider, IdType id)
             where DbModel : class where IdType : notnull
         {
             IList<DbModel> rt = await provider.Load([id]);
@@ -62,7 +62,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="updates">要更新的数据；key为DbModel的属性名称，Value为具体值</param>
         /// <returns>更新成功返回true；否则返回false</returns>
         /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="IDbModelProvider{DbModel}.AsUpdatable(string)"/>方法</remarks>
-        public static async Task<bool> UpdateAsync<DbModel, IdType>(this IDbModelProvider<DbModel> provider, IdType id, IDictionary<string, object?> updates)
+        public static async Task<bool> Update<DbModel, IdType>(this IDbModelProvider<DbModel> provider, IdType id, IDictionary<string, object?> updates)
             where DbModel : class where IdType : notnull
         {
             long rt = await provider.Update(updates, [id]);
@@ -77,7 +77,7 @@ namespace Snail.Abstractions.Database.Extensions
         /// <param name="id">主键Id值</param>
         /// <returns>删除成功返回true；否则返回false</returns>
         /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="IDbModelProvider{DbModel}.AsDeletable(string)"/>方法</remarks>
-        public static async Task<bool> DeleteAsync<DbModel, IdType>(this IDbModelProvider<DbModel> provider, IdType id)
+        public static async Task<bool> Delete<DbModel, IdType>(this IDbModelProvider<DbModel> provider, IdType id)
             where DbModel : class where IdType : notnull
         {
             long rt = await provider.Delete(id);
