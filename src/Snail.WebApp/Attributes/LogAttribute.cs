@@ -6,7 +6,7 @@ namespace Snail.WebApp.Attributes;
 /// 特性标签：API日志记录
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
-public sealed class LogAttribute : Attribute, IActionAttribute
+public class LogAttribute : Attribute, IActionAttribute
 {
     /// <summary>
     /// 是否禁用日志记录

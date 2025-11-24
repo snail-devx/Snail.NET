@@ -8,7 +8,7 @@ namespace Snail.WebApp.Attributes;
 /// 特性标签：API响应结果处理
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
-public sealed class ResponseAttribute : Attribute, IActionAttribute
+public class ResponseAttribute : Attribute, IActionAttribute
 {
     /// <summary>
     /// 是否禁用响应结果处理
