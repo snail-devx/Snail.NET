@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -30,11 +31,11 @@ namespace Snail.Aspect.Distribution
         /// </summary>
         protected const string NAME_LocalMethod = "_CacheNextCodeMethod";
         /// <summary>
-        /// 变量名：<see cref=" CacheMethodAttribute.MasterKey"/>
+        /// 变量名：<see cref=" CacheMethodBase.MasterKey"/>
         /// </summary>
         protected const string VAR_MasterKey = "aspectMasterKey";
         /// <summary>
-        /// 变量名：<see cref="CacheMethodAttribute.DataKeyPrefix"/>  
+        /// 变量名：<see cref="CacheMethodBase.DataKeyPrefix"/>  
         /// </summary>
         protected const string VAR_DataKeyPrefix = "aspectDataKeyPrefix";
 
@@ -166,9 +167,8 @@ namespace Snail.Aspect.Distribution
         /// <returns>代码字符串</returns>
         string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
         {
-            //  1、无缓存属性标记，直接执行下一步逻辑
-            AttributeSyntax attr = method.AttributeLists.GetAttribute(context.Semantic, TYPENAME_CacheMethodAttribute);
-            if (attr == null)
+            //  1、分析方法的缓存配置
+            if (AnalysisCacheOptions(method, context, out CacheMethodOptions cacheOptions) == false)
             {
                 string nextCode = next?.Invoke(method, context, options);
                 return nextCode;
@@ -191,7 +191,6 @@ namespace Snail.Aspect.Distribution
             }
             //  3、进行缓存请求相关代码实现：将next代码构建为本地方法
             _needAssistantCode = true;
-            CacheMethodOptions cacheOptions = new CacheMethodOptions(attr, context);
             StringBuilder builder = new StringBuilder();
             //      辅助代码：masterKey和dataKeyPrefix处理
             cacheOptions.DeconstructKey(out string masterKey, out string dataKeyPrefix);
@@ -299,6 +298,45 @@ namespace Snail.Aspect.Distribution
         #endregion
 
         #region 私有方法
+        /// <summary>
+        /// 分析方法的缓存配置选项
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="context"></param>
+        /// <param name="cacheOptions">out参数</param>
+        /// <returns>分析成功返回true，否则false</returns>
+        private static bool AnalysisCacheOptions(MethodDeclarationSyntax method, SourceGenerateContext context, out CacheMethodOptions cacheOptions)
+        {
+            //  分析CacheMethodAttribute：先分析 CacheMethodAttribute；分析不出来，则尝试 CacheMethodAttribute<T>
+            ITypeSymbol genericDataType = null;
+            AttributeSyntax attr = method.AttributeLists.GetAttribute(context.Semantic, symbol =>
+            {
+                string typeName = $"{symbol.ContainingType}";
+                if (typeName == TYPENAME_CacheMethodAttribute)
+                {
+                    return true;
+                }
+                //  泛型类型时，做分析处理，解析时具体的数据类型信息
+                if (symbol.ContainingType.IsGenericType && typeName.StartsWith($"{TYPENAME_CacheMethodAttribute}<"))
+                {
+                    genericDataType = symbol.ContainingType.TypeArguments[0];
+                    return true;
+                }
+                return false;
+            });
+            if (attr == null)
+            {
+                cacheOptions = default;
+                return false;
+            }
+            //  分析泛型参数的具体类型Syntax节点
+            SyntaxNode dataTypeNode = genericDataType != null
+                ? attr.ChildNodes().OfType<GenericNameSyntax>().First().TypeArgumentList.Arguments[0]
+                : null;
+            cacheOptions = new CacheMethodOptions(attr, context, dataTypeNode, genericDataType);
+            return true;
+        }
+
         /// <summary>
         /// 生成【加载缓存】的相关代码实现 <br />
         ///     1、先从缓存中基于<see cref="CacheKeyAttribute"/>取数据，能全部取到则直接返回 <br />

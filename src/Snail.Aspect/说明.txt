@@ -4,7 +4,7 @@ Snail.Aspect	作为面向切面编程实现类库，用于对【Snail.Abstractions】进行功能扩充
 	
 2、功能模块说明	
 	Common					基础通用，为语法树的通用功能
-	Distribution			分布式相关切面编程，如自动为打了[Cache]标签的方法做代码注入，自动实现对象缓存维护
+	Distribution			分布式相关切面编程，如自动为打了[CacheMethod]标签的方法做代码注入，自动实现对象缓存维护
 	General					通用语法插件，通用方法拦截，数据验证插件
 	Web						网络相关切面编程，如自动为打了[Http]标签的[Interface]生成实现类
 

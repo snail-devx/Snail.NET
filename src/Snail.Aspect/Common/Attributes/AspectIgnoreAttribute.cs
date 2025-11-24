@@ -8,7 +8,7 @@ namespace Snail.Aspect.Common.Attributes
     ///     2、用在方法上时，进行切面编程源码生成时，忽略此方法的自动实现 <br />
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public class AspectIgnoreAttribute : Attribute
+    public sealed class AspectIgnoreAttribute : Attribute
     {
     }
 }

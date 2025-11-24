@@ -9,7 +9,7 @@ namespace Snail.Aspect.General.Attributes
     ///     3、若类型中的方法参数为【Snail.Abstractions.Common.Interfaces.IValidatable】类型，则自动执行Validate()方法
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
-    public class ValidateAspectAttribute : Attribute
+    public sealed class ValidateAspectAttribute : Attribute
     {
     }
 }

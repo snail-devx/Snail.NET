@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -193,6 +194,29 @@ namespace Snail.Aspect.Common.Extensions
                 {
                     var symbol = semantic.GetSymbolInfo(node).Symbol;
                     if (symbol != null && $"{symbol.ContainingType}" == typeSymbol)
+                    {
+                        return node;
+                    }
+                }
+            }
+            return null;
+        }
+        /// <summary>
+        /// 获取指定类型的属性
+        /// </summary>
+        /// <param name="attributeLists"></param>
+        /// <param name="semantic"></param>
+        /// <param name="predicate">属性类型的Symbol断言</param>
+        /// <returns></returns>
+        public static AttributeSyntax GetAttribute(this SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semantic, Predicate<ISymbol> predicate)
+        {
+            //  遍历找属性值
+            foreach (var aList in attributeLists)
+            {
+                foreach (var node in aList.Attributes)
+                {
+                    var symbol = semantic.GetSymbolInfo(node).Symbol;
+                    if (symbol != null && predicate(symbol) == true)
                     {
                         return node;
                     }

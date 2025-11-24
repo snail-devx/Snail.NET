@@ -9,7 +9,7 @@ namespace Snail.Aspect.General.Attributes
     ///     3、仅拦截实例方法（可override实例方法，接口方法），不拦截静态方法 <br />
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class MethodAspectAttribute : Attribute
+    public sealed class MethodAspectAttribute : Attribute
     {
         /// <summary>
         /// 方法运行句柄 <br/>
