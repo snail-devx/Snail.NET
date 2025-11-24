@@ -55,7 +55,7 @@ namespace Snail.Web.Components
         /// <param name="server">请求服务器</param>
         /// <param name="next">下一个操作</param>
         /// <returns></returns>
-        async Task<HttpResponseMessage> IHttpMiddleware.SendAsync(HttpRequestMessage request, IServerOptions server, HttpDelegate next)
+        async Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, HttpDelegate next)
         {
             //  初始化，记录发送日志：查询日志记录标签，null走默认值
             DiagnosticsHelper.GetEntryMethod(typeof(LogMiddleware), out HttpLogAttribute? attr);

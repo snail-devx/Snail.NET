@@ -32,7 +32,7 @@ namespace Snail.Abstractions.Web.Extensions
             manager.Use(name, next =>
             {
                 HttpDelegate @delegate = (HttpRequestMessage request, IServerOptions server) =>
-                    middleware.SendAsync(request, server, next);
+                    middleware.Send(request, server, next);
                 return @delegate;
             });
             return manager;

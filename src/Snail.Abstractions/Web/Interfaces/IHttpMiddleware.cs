@@ -14,6 +14,6 @@ namespace Snail.Abstractions.Web.Interfaces
         /// <param name="server">请求服务器</param>
         /// <param name="next">下一个操作</param>
         /// <returns></returns>
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, IServerOptions server, HttpDelegate next);
+        Task<HttpResponseMessage> Send(HttpRequestMessage request, IServerOptions server, HttpDelegate next);
     }
 }

@@ -18,7 +18,7 @@ namespace Snail.Web.Components
         /// <param name="server">请求服务器</param>
         /// <param name="next">下一个操作</param>
         /// <returns></returns>
-        Task<HttpResponseMessage> IHttpMiddleware.SendAsync(HttpRequestMessage request, IServerOptions server, HttpDelegate next)
+        Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, HttpDelegate next)
         {
             string? shareKeyChain = RunContext.Current.GetShareKeyChain()?.AsJson();
             if (string.IsNullOrEmpty(shareKeyChain) == false)
