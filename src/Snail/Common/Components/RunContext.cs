@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Snail.Utilities.Collections;
+﻿using Snail.Utilities.Collections;
 using Snail.Utilities.Threading.Extensions;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Common.Components
 {
@@ -103,7 +103,7 @@ namespace Snail.Common.Components
         /// <param name="key">数据的key值；同一个类型，基于key做唯一区分。</param>
         /// <param name="obj">数据实例</param>
         /// <returns>自身，方便链式调用</returns>
-        public RunContext Add<T>(string key, T obj)
+        public RunContext Add<T>(string? key, T obj)
         {
             Type type = typeof(T);
             ContextItem item = new(key, type, obj);

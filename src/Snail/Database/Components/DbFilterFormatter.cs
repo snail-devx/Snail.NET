@@ -1,7 +1,7 @@
-﻿using System.Linq.Expressions;
-using Snail.Utilities.Collections.Extensions;
+﻿using Snail.Utilities.Collections.Extensions;
 using Snail.Utilities.Common.Extensions;
 using Snail.Utilities.Linq.Extensions;
+using System.Linq.Expressions;
 
 namespace Snail.Database.Components
 {
@@ -9,9 +9,6 @@ namespace Snail.Database.Components
     /// 数据库过滤表达式格式化程序 <br />
     ///     1、Where条件表达式做计算，如将new <see cref="List{String}"/>(){}等变量计算出来 <br />
     ///     2、对Where条件表达式做验证，不支持的表达式梳理提示出来 <br />
-    ///     3、后续优化，考虑对lambda错误提示做友好处理，而不是输出下面这种 <br />
-    ///         (p.IdValue + Convert(value(Leading.Framework.Test.DatabaseTest.DbManagerTest+&lt;&gt;c__DisplayClass3_1).tmpInt, Object)) <br />
-    ///         期望结果：p.IdValue+tmpInt <br />
     /// </summary>
     public sealed class DbFilterFormatter : ExpressionVisitor
     {

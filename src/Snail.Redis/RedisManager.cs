@@ -3,6 +3,7 @@ using Snail.Abstractions.Web;
 using Snail.Abstractions.Web.DataModels;
 using Snail.Abstractions.Web.Interfaces;
 using Snail.Utilities.Collections;
+using Snail.Utilities.Common.Extensions;
 using Snail.Web;
 
 using StackExchange.Redis;
@@ -42,7 +43,7 @@ namespace Snail.Redis
         {
             ThrowIfNull(server);
             ServerDescriptor? descriptor = (this as IServerManager).GetServer(server);
-            ThrowIfNull(descriptor);
+            ThrowIfNull(descriptor, $"获取redis服务器地址失败：{server.AsJson()}");
             var multiplexer = _multiplexers.GetOrAdd(descriptor!.Server, key => ConnectionMultiplexer.Connect(key));
             return multiplexer.GetDatabase(dbIndex);
         }

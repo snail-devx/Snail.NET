@@ -1,5 +1,3 @@
-using System;
-
 namespace Snail.Abstractions.Common.Interfaces;
 /// <summary>
 /// 接口：标记实现类可进行验证操作 <br />
@@ -12,5 +10,5 @@ public interface IValidatable
     /// </summary>
     /// <param name="message">验证失败时的错误消息</param>
     /// <returns>验证成功返回true；否则返回false</returns>
-    bool Validate(out string message);
+    bool Validate(out string? message);
 }

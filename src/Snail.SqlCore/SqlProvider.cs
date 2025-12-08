@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Data;
-using System.Data.Common;
-using Snail.Abstractions;
+﻿using Snail.Abstractions;
 using Snail.Abstractions.Database.DataModels;
 using Snail.Database.Components;
 using Snail.Database.Utils;
@@ -10,6 +7,9 @@ using Snail.SqlCore.Enumerations;
 using Snail.SqlCore.Interfaces;
 using Snail.Utilities.Collections.Extensions;
 using Snail.Utilities.Common.Extensions;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.Common;
 
 namespace Snail.SqlCore
 {
@@ -285,7 +285,7 @@ namespace Snail.SqlCore
                 }
                 setSql = setFields.AsString(" , ");
                 //  合并filter参数
-                param = param.Combine(filterParam);
+                param = param.Combine(filterParam!);
             }
             ThrowIfNull(setSql, $"组装出来的set语句为空，无法进行更新操作：{updates}");
             //  组装语句返回

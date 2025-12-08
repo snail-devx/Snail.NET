@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Xml;
-using Snail.Abstractions.Setting;
+﻿using Snail.Abstractions.Setting;
 using Snail.Abstractions.Setting.Delegates;
 using Snail.Abstractions.Setting.Enumerations;
 using Snail.Setting.DataModels;
@@ -9,6 +7,8 @@ using Snail.Utilities.Common.Extensions;
 using Snail.Utilities.IO.Utils;
 using Snail.Utilities.Xml.Extensions;
 using Snail.Utilities.Xml.Utils;
+using System.Runtime.CompilerServices;
+using System.Xml;
 
 namespace Snail.Setting
 {
@@ -143,7 +143,7 @@ namespace Snail.Setting
                                     ?.ToDictionary($"环境变量:{file}");
             }
             //  3、合并环境变量；优先File模式
-            _envs.Combine(inEnvs, fileEnvs);
+            _envs.Combine(inEnvs!, fileEnvs!);
         }
         /// <summary>
         /// 构建配置资源

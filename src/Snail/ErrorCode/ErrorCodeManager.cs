@@ -1,11 +1,11 @@
-﻿using System.Xml;
-using Snail.Abstractions.ErrorCode;
+﻿using Snail.Abstractions.ErrorCode;
 using Snail.Abstractions.ErrorCode.DataModels;
 using Snail.Abstractions.ErrorCode.Interfaces;
 using Snail.Abstractions.Setting.Enumerations;
 using Snail.Utilities.Collections;
 using Snail.Utilities.Xml.Extensions;
 using Snail.Utilities.Xml.Utils;
+using System.Xml;
 
 namespace Snail.ErrorCode
 {
@@ -71,7 +71,7 @@ namespace Snail.ErrorCode
             //  查找信息，若失败则从默认语言环境再试一下
             _errorMap.TryGetValue(culture, out List<IErrorCode>? codes);
             IErrorCode? error = codes?.FirstOrDefault(item => item.Code == code);
-            if (error == null)
+            if (error == null && culture != CULTURE_Default)
             {
                 _errorMap.TryGetValue(CULTURE_Default, out codes);
                 error = codes?.FirstOrDefault(item => item.Code == code);

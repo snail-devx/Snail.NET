@@ -1,13 +1,13 @@
-﻿using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Snail.Database.Components;
 using Snail.Database.Utils;
 using Snail.Elastic.DataModels;
 using Snail.Elastic.Extensions;
 using Snail.Utilities.Common.Extensions;
 using Snail.Utilities.Linq.Extensions;
-using static Leading.Framework.Adapter.Database.Utils.ElasticBuilder;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using static Snail.Elastic.Utils.ElasticBuilder;
 
 namespace Snail.Elastic.Components
 {
@@ -336,7 +336,8 @@ namespace Snail.Elastic.Components
                 //  默认情况：不会进入，预防一下，做强制报错处理
                 default:
                     throw new ApplicationException($"tmpIndex[{tmpIndex}]值异常；仅支持：0、1、10、11");
-            };
+            }
+            ;
             return query!;
         }
 

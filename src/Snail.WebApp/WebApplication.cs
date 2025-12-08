@@ -1,4 +1,6 @@
-﻿using Snail.WebApp.Components;
+﻿using Snail.Abstractions.Setting;
+using Snail.Abstractions.Setting.Delegates;
+using Snail.WebApp.Components;
 using Snail.WebApp.Interfaces;
 
 namespace Snail.WebApp;
@@ -44,16 +46,20 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
 
     #region IApplication
     /// <summary>
-    /// 运行应用程序，执行顺序 <br />
-    ///     1、添加控制器：添加完控制器后，触发<see cref="OnController"/>事件，进行控制器选项自身配置 <br />
-    ///     2、执行<see cref="WebApplicationBuilder.Build"/>构建web应用程序，固化内置服务 <br />
-    ///     3、执行基类<see cref="Application{App}.Run(Func{App}?)"/>方法，完成程序集扫描、配置读取，OnScan、OnRegister、OnBuild、OnRun事件触发
-    ///     4、执行<see cref="Microsoft.AspNetCore.Builder.WebApplication.Run(string?)"/>方法启动Web应用，响应api请求，
+    /// 运行应用程序，执行顺序
+    /// <para>1、内置服务注册（在app构造方法执行）</para>
+    /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
+    /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
+    /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
+    /// <para>5、控制器构建；触发<see cref="OnController"/> 进行API自定义配置</para>
+    /// <para>6、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
+    /// <para>7、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
     /// </summary>
     public void Run()
     {
-        //  1、构建web应用程序；先配置控制器支持，触发OnController事件、确保在应用程序的依赖注入信息之前，固化.NET自带服务注册
-        Microsoft.AspNetCore.Builder.WebApplication app;
+        Microsoft.AspNetCore.Builder.WebApplication? app = null;
+        //  1、执行基类run方法，完成程序集扫描、配置读取，OnScan、OnRegister、OnBuild、OnRun事件触发
+        Run(() =>
         {
             //  添加控制器支持：AddControllers，支持Controller自定义，mvcbuilder干预；通过事件
             var mvc = Builder.Services.AddControllers();
@@ -61,13 +67,11 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
             OnController?.Invoke(mvc);
             //  内部会固化IServiceCollection注册服务，并转换成ServiceProvider对外提供
             app = Builder.Build();
-        }
-        //  2、启动程序
-        //      执行基类run方法，完成程序集扫描、配置读取，OnScan、OnRegister、OnBuild、OnRun事件触发
-        Run(() => app);
-        //      映射控制器，启动服务响应api请求
-        app.MapControllers();
-        app.Run();
+            return app;
+        });
+        //  2、映射控制器，启动服务响应api请求
+        app!.MapControllers();
+        app!.Run();
     }
     #endregion
 }

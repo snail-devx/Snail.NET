@@ -1,7 +1,7 @@
 ﻿using Snail.Elastic.DataModels;
 using Snail.Elastic.Extensions;
 
-namespace Leading.Framework.Adapter.Database.Utils
+namespace Snail.Elastic.Utils
 {
     /// <summary>
     /// ElasticSearch构建器 <br />

@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Snail.Abstractions.ErrorCode;
 using Snail.Abstractions.ErrorCode.DataModels;
@@ -16,6 +15,7 @@ using Snail.WebApp.DataModels;
 using Snail.WebApp.Enumerations;
 using Snail.WebApp.Extensions;
 using Snail.WebApp.Interfaces;
+using System.Collections.ObjectModel;
 using ILogger = Snail.Abstractions.Logging.ILogger;
 using LogLevel = Snail.Abstractions.Logging.Enumerations.LogLevel;
 
@@ -418,7 +418,7 @@ public abstract class ActionBaseFilter : IAsyncActionFilter
         }
         else if (string.IsNullOrEmpty(attr.ErrorCode) == false)
         {
-            error = ErrorManager.Get(attr.ErrorCode);
+            error = ErrorManager.GetRequired(attr.ErrorCode);
         }
         error ??= new ErrorCodeDescriptor("-1", "Unknown Error!");
         //  将异常信息写入返回值中：方便调试，返回详细异常信息

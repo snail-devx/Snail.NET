@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.Loader;
-using Snail.Abstractions.Common.Delegates;
+﻿using Snail.Abstractions.Common.Delegates;
 using Snail.Abstractions.Setting;
 using Snail.Abstractions.Setting.Delegates;
 using Snail.Aspect.Common.Attributes;
@@ -9,6 +7,8 @@ using Snail.Setting;
 using Snail.Utilities.Collections.Extensions;
 using Snail.Utilities.Common.Extensions;
 using Snail.Utilities.Common.Utils;
+using System.Diagnostics;
+using System.Runtime.Loader;
 
 namespace Snail
 {
@@ -85,11 +85,13 @@ namespace Snail
         /// </summary>
         ISettingManager IApplication.Setting => Setting;
         /// <summary>
-        /// 运行应用程序，执行顺序 <br />
-        ///     1、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="OnScan"/>事件<br />
-        ///     2、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置 <br />
-        ///     3、自定义服务注册；触发<see cref="OnRegister"/>事件，用于完成个性化di替换等<br />
-        ///     4、服务启动；触发<see cref="OnRun"/>事件
+        /// 运行应用程序，执行顺序
+        /// <para>1、内置服务注册（在app构造方法执行）</para>
+        /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
+        /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
+        /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
+        /// <para>5、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
+        /// <para>6、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
         /// </summary>
         void IApplication.Run() => Run(appBuilder: null);
         #endregion
@@ -370,12 +372,13 @@ namespace Snail
     {
         #region IApplication
         /// <summary>
-        /// 运行应用程序，执行顺序 <br />
-        ///     1、内置服务注册（在app构造方法执行）<br />
-        ///     2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件<br />
-        ///     3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置 <br />
-        ///     4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等<br />
-        ///     5、服务启动；触发<see cref="IApplication.OnRun"/>事件
+        /// 运行应用程序，执行顺序
+        /// <para>1、内置服务注册（在app构造方法执行）</para>
+        /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
+        /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
+        /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
+        /// <para>5、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
+        /// <para>6、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
         /// </summary>
         public void Run() => Run(appBuilder: () => this);
         #endregion
