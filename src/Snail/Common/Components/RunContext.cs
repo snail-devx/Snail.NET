@@ -1,7 +1,7 @@
-﻿using Snail.Utilities.Collections;
-using Snail.Utilities.Threading.Extensions;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Snail.Utilities.Collections;
+using Snail.Utilities.Threading.Extensions;
 
 namespace Snail.Common.Components
 {
@@ -110,19 +110,6 @@ namespace Snail.Common.Components
             _items.Replace(item => item.Key == key && item.Type == type, item);
             return this;
         }
-
-        /// <summary>
-        /// 是否存在指定类型数据
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">数据的key值；同一个类型，基于key做唯一区分。</param>
-        /// <returns></returns>
-        public Boolean Exists<T>(string? key = null)
-        {
-            Type type = typeof(T);
-            return _items.Any(item => item.Key == key && item.Type == type);
-        }
-
         /// <summary>
         /// 获取数据
         /// </summary>
@@ -135,17 +122,35 @@ namespace Snail.Common.Components
             ContextItem? item = _items.Get(item => item.Key == key && item.Type == type, false);
             return item == null ? default : (T?)item.Value;
         }
-
         /// <summary>
-        /// 遍历数据
+        /// 获取数据；若不存在则添加
         /// </summary>
-        /// <param name="each">key，type，实例数据</param>
-        public void ForEach(Action<string?, Type, Object?> each)
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">数据的key值；同一个类型，基于key做唯一区分。</param>
+        /// <param name="addFunc"></param>
+        /// <returns></returns>
+        public T? GetOrAdd<T>(string? key, Func<string?, T> addFunc)
         {
-            ThrowIfNull(each);
-            _items.Foreach(item => each(item.Key, item.Type, item.Value));
+            Type type = typeof(T);
+            ThrowIfNull(addFunc);
+            ContextItem? item = _items.GetOrAdd(item => item.Key == key && item.Type == type, false, () =>
+            {
+                T @new = addFunc(key);
+                return @new == null ? null : new ContextItem(key, type, @new);
+            });
+            return item == null ? default : (T?)item.Value;
         }
-
+        /// <summary>
+        /// 是否存在指定类型数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">数据的key值；同一个类型，基于key做唯一区分。</param>
+        /// <returns></returns>
+        public Boolean Exists<T>(string? key = null)
+        {
+            Type type = typeof(T);
+            return _items.Any(item => item.Key == key && item.Type == type);
+        }
         /// <summary>
         /// 移除数据
         /// </summary>
@@ -155,6 +160,16 @@ namespace Snail.Common.Components
         {
             Type type = typeof(T);
             _items.RemoveAll(item => item.Key == key && item.Type == type);
+        }
+
+        /// <summary>
+        /// 遍历数据
+        /// </summary>
+        /// <param name="each">key，type，实例数据</param>
+        public void ForEach(Action<string?, Type, Object?> each)
+        {
+            ThrowIfNull(each);
+            _items.Foreach(item => each(item.Key, item.Type, item.Value));
         }
         #endregion
 

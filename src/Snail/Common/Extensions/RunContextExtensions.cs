@@ -1,50 +1,37 @@
 ﻿using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
 
-namespace Snail.Common.Extensions
+namespace Snail.Common.Extensions;
+/// <summary>
+/// <see cref="RunContext"/>扩展方法
+/// </summary>
+public static class RunContextExtensions
 {
-    /// <summary>
-    /// <see cref="RunContext"/>扩展方法
-    /// </summary>
-    public static class RunContextExtensions
+    extension(RunContext context)
     {
-        #region 属性变量
+        #region 扩展属性
+        /// <summary>
+        /// 授信权限Id
+        /// <para>1、涉及到多站点协作时，用于进行多站点之间缓存数据共享等授信操作</para>
+        /// <para>2、获取失败，则默认使用ContextId填充值</para>
+        /// </summary>
+        public string TrustAuthId => Default(context.Get<string>(CONTEXT_TrustAuthId), context.ContextId)!;
+        /// <summary>
+        /// 父级操作Id
+        /// <para>1、涉及到子操作时，在子的运行时上下文上传递</para>
+        /// <para>2、涉及到其他站点调用过来时，本站点操作挂载到传递过来的父级操作Id下</para>
+        /// </summary>
+        /// <returns></returns>
+        public string? ParentActionId => context.Get<string>(CONTEXT_ParentActionId);
         #endregion
 
-        #region 公共方法
-
-        #region 其他快捷访问操作
-        /// <summary>
-        /// 授信权限Id  <br />
-        ///     1、涉及到多站点协作时，用于进行多站点之间缓存数据共享等授信操作  <br />
-        ///     2、获取失败，则默认使用ContextId填充值  <br />
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static string TrustAuthId(this RunContext context)
-        {
-            string? tmpId = context.Get<string>(CONTEXT_TrustAuthId);
-            return string.IsNullOrEmpty(tmpId) ? context.ContextId : tmpId;
-        }
-        /// <summary>
-        /// 父级操作Id  <br />
-        ///     1、涉及到子操作时，在子的运行时上下文上传递  <br />
-        ///     2、涉及到其他站点调用过来时，本站点操作挂载到传递过来的父级操作Id下  <br />
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static string? ParentActionId(this RunContext context)
-            => context.Get<string>(CONTEXT_ParentActionId);
-        #endregion
-
-        #region 共享钥匙串相关：实现跨站点数据共享
+        #region 共享钥匙串相关
         /// <summary>
         /// 初始化共享钥匙串
         /// </summary>
-        /// <param name="context"></param>
         /// <param name="shareKeyChainJson">共享钥匙串JSON数据</param>
         /// <returns></returns>
-        public static RunContext InitShareKeyChain(this RunContext context, string? shareKeyChainJson)
+        public RunContext InitShareKeyChain(string? shareKeyChainJson)
         {
             //  反序列化取值
             IDictionary<string, string> map = new Dictionary<string, string>();
@@ -78,31 +65,14 @@ namespace Snail.Common.Extensions
 
             return context;
         }
-        //  先不放开
-        //  /// <summary>
-        //  /// 初始化共享钥匙串
-        //  /// </summary>
-        //  /// <param name="context"></param>
-        //  /// <param name="map">初始化字典</param>
-        //  /// <returns></returns>
-        //  public static RunContext InitShareKeyChain(this RunContext context, IDictionary<string, string>? map)
-        //  {
-        //      if (map?.Count > 0)
-        //      {
-        //          RunShareKeyChain(context, forceInit: true, dict => dict.Combine(map));
-        //      }
-        //      return context;
-        //  }
-
 
         /// <summary>
         /// 添加共享钥匙串 <br />
         ///     1、key、value为空，不加
         /// </summary>
-        /// <param name="context"></param>
         /// <param name="key">钥匙串Key</param>
         /// <param name="value">钥匙串Value</param>
-        public static RunContext AddShareKeyChain(this RunContext context, string key, string value)
+        public RunContext AddShareKeyChain(string key, string value)
         {
             if (key?.Length > 0 && value?.Length > 0)
             {
@@ -114,32 +84,30 @@ namespace Snail.Common.Extensions
         /// <summary>
         /// 获取共享钥匙串值
         /// </summary>
-        /// <param name="context"></param>
         /// <param name="key">钥匙串Key</param>
         /// <returns>key为空，返回null；否则返回具体值</returns>
-        public static string? GetShareKeyChain(this RunContext context, string key)
+        public string? GetShareKeyChain(string key)
         {
             //  取数据返回
             string? tmpValue = null;
             if (key?.Length > 0)
             {
-                RunShareKeyChain(context, forceInit: false, dict => dict?.TryGetValue(key, out tmpValue));
+                context.RunShareKeyChain(forceInit: false, dict => dict?.TryGetValue(key, out tmpValue));
             }
             return tmpValue;
         }
         /// <summary>
         /// 获取共享钥匙串存储信息字典
         /// </summary>
-        /// <param name="context"></param>
         /// <returns></returns>
-        public static IDictionary<string, string>? GetShareKeyChain(this RunContext context)
+        public IDictionary<string, string>? GetShareKeyChain()
         {
             IDictionary<string, string>? keyChain = RunShareKeyChain(context, forceInit: false);
             //  重新转成新字典，避免外部操作
             IDictionary<string, string> map = keyChain?.ToDictionary(kv => kv.Key, kv => kv.Value)
                 ?? new Dictionary<string, string>();
             //  强制加上授信Id
-            map[CONTEXT_TrustAuthId] = context.TrustAuthId();
+            map[CONTEXT_TrustAuthId] = context.TrustAuthId;
 
             return map;
         }
@@ -147,39 +115,32 @@ namespace Snail.Common.Extensions
         /// <summary>
         /// 移除指定的共享钥匙串
         /// </summary>
-        /// <param name="context"></param>
         /// <param name="key">钥匙串Key</param>
         /// <returns>返回移除的value值</returns>
-        public static string? RemoveShareKeyChain(this RunContext context, string key)
+        public string? RemoveShareKeyChain(string key)
         {
             string? tmpValue = null;
             if (key?.Length > 0)
             {
-                RunShareKeyChain(context, forceInit: false, dict => dict.Remove(key, out tmpValue));
+                context.RunShareKeyChain(forceInit: false, dict => dict.Remove(key, out tmpValue));
             }
             return tmpValue;
         }
-        #endregion
 
-        #endregion
-
-        #region 私有方法
         /// <summary>
         /// 运行共享钥匙串相关操作
         /// </summary>
-        /// <param name="context"></param>
         /// <param name="forceInit">为null时是否强制初始化共享钥匙串字典</param>
         /// <param name="action">取到的钥匙串字典例外处理；取到的字典非null时触发</param>
         /// <returns>共享钥匙串字典</returns>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private static IDictionary<string, string>? RunShareKeyChain(RunContext context, bool forceInit, Action<IDictionary<string, string>>? action = null)
+        private IDictionary<string, string>? RunShareKeyChain(bool forceInit, Action<IDictionary<string, string>>? action = null)
         {
-            var keyChain = context.Get<Dictionary<string, string>>(CONTEXT_ShareKeyChain);
-            if (keyChain == null && forceInit == true)
+            Dictionary<string, string>? keyChain = forceInit == true
+                ? context.GetOrAdd<Dictionary<string, string>>(CONTEXT_ShareKeyChain, _ => new Dictionary<string, string>())
+                : context.Get<Dictionary<string, string>>(CONTEXT_ShareKeyChain);
+            if (keyChain?.Count > 0 && action != null)
             {
-                keyChain = new Dictionary<string, string>();
-                context.Add(CONTEXT_ShareKeyChain, keyChain);
-                action?.Invoke(keyChain!);
+                action.Invoke(keyChain);
             }
             return keyChain;
         }
