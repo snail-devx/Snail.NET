@@ -97,25 +97,6 @@ public static class DictionaryExtensions
             }
             return dictionary;
         }
-        /// <summary>
-        /// 尝试移除字段中的指定Key
-        /// </summary>
-        /// <param name="key">要移除的Key</param>
-        /// <param name="value">移除成功时，移除的Key对应的Value值</param>
-        /// <returns>是否移除成功</returns>
-        public bool TryRemove(in TKey key, out TValue? value)
-        {
-            if (dictionary.TryGetValue(key, out value) == true)
-            {
-                dictionary.Remove(key);
-                return true;
-            }
-            else
-            {
-                value = default;
-                return false;
-            }
-        }
         #endregion
     }
 }

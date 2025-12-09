@@ -40,10 +40,6 @@
         /// 上下文Key：禁用日志
         /// </summary>
         public const string CONTEXT_DisableLog = "_DISABLE_LOG_";
-        /// <summary>
-        /// 上下文Key：运行时上下文为null
-        /// </summary>
-        public const string CONTEXT_ContextIsNull = "_CONTEXT_ISNULL_";
 
         /// <summary>
         /// 上下文Key：trace_id

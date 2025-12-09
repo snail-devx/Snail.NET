@@ -43,6 +43,14 @@ public static class ObjectExtensions
             ? JsonConvert.SerializeObject(obj, Formatting.None, _ignoreNullValue)
             : JsonConvert.SerializeObject(obj, Formatting.None);
     }
+    /// <summary>
+    /// 基于JSON序列化进行对象复制
+    /// <para>1、先将对象JSOn序列化，然后再反序列化</para>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public static T AsJsonCopy<T>(this T obj) => obj.AsJson().As<T>();
     #endregion
 
     #region 字典、集合操作

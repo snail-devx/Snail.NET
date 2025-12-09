@@ -61,7 +61,9 @@ namespace Snail.Message.Components
             {
                 string parentSpanId = IdGenerator.NewId("MessageLog");
                 InitializeSend(message, RunContext.Current, parentSpanId);
-                message.Context!["_LOGSENDDATA_"] = "True";
+                //  记录日志，并将【_LOGSENDDATA_】标记传入到消息上下文中
+                message.Context ??= new Dictionary<string, string>();
+                message.Context["_LOGSENDDATA_"] = "True";
                 Logger.Log(new MessageSendLogDescriptor(isForce: true)
                 {
                     Title = $"发送{type}消息：{message.Name}",
@@ -107,7 +109,13 @@ namespace Snail.Message.Components
             //  初始化遥测追踪数据，记录消息日志
             {
                 InitializeReceive(message, RunContext.Current);
-                bool logData = message.Context?.ContainsKey("_LOGSENDDATA_") != true;
+                //  若发送方标记了已经记录了消息数据，则这里不再重复记录了
+                bool logData = true;
+                if (message.Context?.ContainsKey("_LOGSENDDATA_") == true)
+                {
+                    message.Context.Remove("_LOGSENDDATA_", out string? tmpString);
+                    logData = bool.TrueString.IsEqual(tmpString, ignoreCase: true) != true;
+                }
                 Logger.Log(new LogDescriptor(forceLog: true)
                 {
                     Level = LogLevel.Trace,
@@ -170,10 +178,7 @@ namespace Snail.Message.Components
         /// <param name="parentSpanId"></param>
         protected virtual void InitializeSend(MessageData message, RunContext context, string parentSpanId)
         {
-            message.Context ??= new Dictionary<string, string>
-            {
-                [CONTEXT_ContextIsNull] = "1"
-            };
+            message.Context ??= new Dictionary<string, string>();
             //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
             message.Context[CONTEXT_TraceId] = context.TraceId;
             message.Context[CONTEXT_ParentSpanId] = parentSpanId;
@@ -189,8 +194,8 @@ namespace Snail.Message.Components
             //  分析消息中的 标准化参数，构建 trace-id和parent-span-id
             if (message.Context?.Count > 0)
             {
-                message.Context.TryRemove(CONTEXT_TraceId, out string? traceId);
-                message.Context.TryGetValue(CONTEXT_ParentSpanId, out string? parentSpanId);
+                message.Context.Remove(CONTEXT_TraceId, out string? traceId);
+                message.Context.Remove(CONTEXT_ParentSpanId, out string? parentSpanId);
                 context.InitTelemetry(traceId, parentSpanId);
             }
         }
