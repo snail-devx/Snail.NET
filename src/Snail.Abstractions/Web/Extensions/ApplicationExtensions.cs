@@ -1,4 +1,5 @@
 ﻿namespace Snail.Abstractions.Web.Extensions;
+
 /// <summary>
 /// <see cref="IApplication"/>针对<see cref="Web"/>下的相关扩展
 /// </summary>

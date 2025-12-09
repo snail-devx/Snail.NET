@@ -1,5 +1,4 @@
 ﻿//  基础通用
-global using Snail.Abstractions.Dependency.Enumerations;
 global using Snail.Abstractions.Dependency.Extensions;
 global using Snail.Abstractions.Message.Enumerations;
 global using Snail.Abstractions.Message.Interfaces;

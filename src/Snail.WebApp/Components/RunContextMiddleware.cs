@@ -1,4 +1,5 @@
 ﻿namespace Snail.WebApp.Components;
+
 /// <summary>
 /// 上下文中间件
 /// <para>1、为每个请求构建全新的运行时上下文，互不干扰</para>

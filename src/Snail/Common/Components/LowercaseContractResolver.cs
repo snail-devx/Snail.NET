@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
 
-namespace Snail.WebApp.Components;
+namespace Snail.Common.Components;
 
 /// <summary>
 /// JSON序列化时，将属性名全小写

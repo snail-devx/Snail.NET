@@ -1,4 +1,5 @@
 ﻿namespace Snail.Common.Extensions;
+
 /// <summary>
 /// <see cref="RunContext"/>扩展方法
 /// </summary>

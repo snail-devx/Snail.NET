@@ -1,6 +1,4 @@
-using System;
 using Snail.Abstractions.Identity.Interfaces;
-using Snail.Utilities.Common.Extensions;
 
 namespace Snail.Abstractions.Identity.Extensions;
 

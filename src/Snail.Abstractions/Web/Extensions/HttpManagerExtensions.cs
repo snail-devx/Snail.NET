@@ -2,6 +2,7 @@
 using Snail.Abstractions.Web.Interfaces;
 
 namespace Snail.Abstractions.Web.Extensions;
+
 /// <summary>
 /// <see cref="IHttpManager"/>扩展方法
 /// </summary>
