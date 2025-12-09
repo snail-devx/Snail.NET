@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Newtonsoft.Json.Linq;
-
-namespace Snail.Common.Extensions;
+﻿namespace Snail.Common.Extensions;
 /// <summary>
 /// <see cref="RunContext"/>扩展方法
 /// </summary>
@@ -11,138 +8,52 @@ public static class RunContextExtensions
     {
         #region 扩展属性
         /// <summary>
-        /// 授信权限Id
-        /// <para>1、涉及到多站点协作时，用于进行多站点之间缓存数据共享等授信操作</para>
-        /// <para>2、获取失败，则默认使用ContextId填充值</para>
+        /// 当前上下文是否禁用日志
         /// </summary>
-        public string TrustAuthId => Default(context.Get<string>(CONTEXT_TrustAuthId), context.ContextId)!;
-        /// <summary>
-        /// 父级操作Id
-        /// <para>1、涉及到子操作时，在子的运行时上下文上传递</para>
-        /// <para>2、涉及到其他站点调用过来时，本站点操作挂载到传递过来的父级操作Id下</para>
-        /// </summary>
-        /// <returns></returns>
-        public string? ParentActionId => context.Get<string>(CONTEXT_ParentActionId);
-        #endregion
-
-        #region 共享钥匙串相关
-        /// <summary>
-        /// 初始化共享钥匙串
-        /// </summary>
-        /// <param name="shareKeyChainJson">共享钥匙串JSON数据</param>
-        /// <returns></returns>
-        public RunContext InitShareKeyChain(string? shareKeyChainJson)
+        public bool DisableLog
         {
-            //  反序列化取值
-            IDictionary<string, string> map = new Dictionary<string, string>();
-            {
-                try
-                {
-                    JObject jObject = string.IsNullOrEmpty(shareKeyChainJson) == true
-                        ? new JObject()
-                        : JObject.Parse(shareKeyChainJson);
-                    foreach (var kv in jObject)
-                    {
-                        if (string.IsNullOrEmpty(kv.Key) == false && kv.Value != null)
-                        {
-                            map[kv.Key] = kv.Value.ToString();
-                        }
-                    }
-                }
-                catch { }
-            }
-            //  做一些兼容性工作；实际上不应该放到这里来做的
-            //      取得TrustAuthId值，独立加入上下文，并从钥匙串中干掉
-            if (map.Remove(CONTEXT_TrustAuthId, out string? tmpVlaue) == true)
-            {
-                tmpVlaue = Default(tmpVlaue, context.ContextId);
-                context.Add(CONTEXT_TrustAuthId, tmpVlaue);
-            }
-            //      老系统中，会把ParentActionId做成shareKeyChain传递，这里干掉，避免往下流转时出问题
-            map.Remove(CONTEXT_ParentActionId);
-            //  加入上下文中
-            context.Add(CONTEXT_ShareKeyChain, map);
-
-            return context;
+            get => STR_True.IsEqual(context.Get<string>(CONTEXT_DisableLog), ignoreCase: true) == false;
+            set => context.Add<string>(CONTEXT_DisableLog, value.ToString());
         }
 
         /// <summary>
-        /// 添加共享钥匙串 <br />
-        ///     1、key、value为空，不加
+        /// trace_id；追踪Id 
         /// </summary>
-        /// <param name="key">钥匙串Key</param>
-        /// <param name="value">钥匙串Value</param>
-        public RunContext AddShareKeyChain(string key, string value)
+        /// <para>1、分布式系统中用于唯一标识一次完整请求调用链路的全局唯一标识符</para>
+        /// <para>2、全局唯一、贯穿整条调用链、所有 Span 共享同一个 trace_id</para>
+        /// <para>3、若上下文中无此值，则表示为第一个入口请求，此时默认为<see cref="RunContext.ContextId"/>值</para>
+        public string TraceId => Default(context.Get<string>(CONTEXT_TraceId), context.ContextId)!;
+        /// <summary>
+        /// span_id；操作id
+        /// <para>1、封装此属性和标准分布式系统的追踪信息对齐，但从<see cref="RunContext.ContextId"/>取值</para>
+        /// </summary>
+        public string SpanId => context.ContextId;
+        /// <summary>
+        /// parent_span_id；父级操作Id
+        /// <para>1、用于分布式系统进行链路追踪使用</para>
+        /// <para>2、涉及到子操作时，在子的运行时上下文上传递</para>
+        /// <para>3、涉及到其他系统站点调用过来时，本站点操作挂载到传递过来的父级操作Id下</para>
+        /// </summary>
+        /// <returns></returns>
+        public string? ParentSpanId => context.Get<string>(CONTEXT_ParentSpanId);
+
+        /// <summary>
+        /// 初始化分布式追踪信息
+        /// </summary>
+        /// <param name="traceId"></param>
+        /// <param name="parentSpanId"></param>
+        /// <returns></returns>
+        public RunContext InitTelemetry(string? traceId, string? parentSpanId)
         {
-            if (key?.Length > 0 && value?.Length > 0)
+            if (IsNullOrEmpty(traceId) == false)
             {
-                RunShareKeyChain(context, forceInit: true, dict => dict[key] = value);
+                context.Add<string>(CONTEXT_TraceId, traceId!);
+            }
+            if (IsNullOrEmpty(parentSpanId) == false)
+            {
+                context.Add<string>(CONTEXT_ParentSpanId, parentSpanId!);
             }
             return context;
-        }
-
-        /// <summary>
-        /// 获取共享钥匙串值
-        /// </summary>
-        /// <param name="key">钥匙串Key</param>
-        /// <returns>key为空，返回null；否则返回具体值</returns>
-        public string? GetShareKeyChain(string key)
-        {
-            //  取数据返回
-            string? tmpValue = null;
-            if (key?.Length > 0)
-            {
-                context.RunShareKeyChain(forceInit: false, dict => dict?.TryGetValue(key, out tmpValue));
-            }
-            return tmpValue;
-        }
-        /// <summary>
-        /// 获取共享钥匙串存储信息字典
-        /// </summary>
-        /// <returns></returns>
-        public IDictionary<string, string>? GetShareKeyChain()
-        {
-            IDictionary<string, string>? keyChain = RunShareKeyChain(context, forceInit: false);
-            //  重新转成新字典，避免外部操作
-            IDictionary<string, string> map = keyChain?.ToDictionary(kv => kv.Key, kv => kv.Value)
-                ?? new Dictionary<string, string>();
-            //  强制加上授信Id
-            map[CONTEXT_TrustAuthId] = context.TrustAuthId;
-
-            return map;
-        }
-
-        /// <summary>
-        /// 移除指定的共享钥匙串
-        /// </summary>
-        /// <param name="key">钥匙串Key</param>
-        /// <returns>返回移除的value值</returns>
-        public string? RemoveShareKeyChain(string key)
-        {
-            string? tmpValue = null;
-            if (key?.Length > 0)
-            {
-                context.RunShareKeyChain(forceInit: false, dict => dict.Remove(key, out tmpValue));
-            }
-            return tmpValue;
-        }
-
-        /// <summary>
-        /// 运行共享钥匙串相关操作
-        /// </summary>
-        /// <param name="forceInit">为null时是否强制初始化共享钥匙串字典</param>
-        /// <param name="action">取到的钥匙串字典例外处理；取到的字典非null时触发</param>
-        /// <returns>共享钥匙串字典</returns>
-        private IDictionary<string, string>? RunShareKeyChain(bool forceInit, Action<IDictionary<string, string>>? action = null)
-        {
-            Dictionary<string, string>? keyChain = forceInit == true
-                ? context.GetOrAdd<Dictionary<string, string>>(CONTEXT_ShareKeyChain, _ => new Dictionary<string, string>())
-                : context.Get<Dictionary<string, string>>(CONTEXT_ShareKeyChain);
-            if (keyChain?.Count > 0 && action != null)
-            {
-                action.Invoke(keyChain);
-            }
-            return keyChain;
         }
         #endregion
     }

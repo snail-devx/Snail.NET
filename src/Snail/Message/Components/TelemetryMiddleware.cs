@@ -10,15 +10,16 @@ using Snail.Abstractions.Message.Enumerations;
 using Snail.Abstractions.Message.Interfaces;
 using Snail.Abstractions.Web.Interfaces;
 using Snail.Message.DataModels;
-using Snail.Utilities.Common.Extensions;
 
 namespace Snail.Message.Components
 {
     /// <summary>
-    /// 日志中间件
+    /// 消息遥测中间件
+    /// <para>1、拦截消息处理，记录消息处理日志</para>
+    /// <para>2、发送请求时，附带标准遥测相关数据</para>
     /// </summary>
-    [Component<IMessageMiddleware>(Key = MIDDLEWARE_Logging, Lifetime = LifetimeType.Singleton)]
-    public class LogMiddleware : IMessageMiddleware
+    [Component<IMessageMiddleware>(Key = MIDDLEWARE_Telemetry)]
+    public class TelemetryMiddleware : IMessageMiddleware
     {
         #region 属性变量
         /// <summary>
@@ -29,10 +30,6 @@ namespace Snail.Message.Components
         /// 主键Id生成器
         /// </summary>
         protected IIdGenerator IdGenerator { private init; get; }
-        /// <summary>
-        /// 是否启用日志追踪功能
-        /// </summary>
-        private readonly bool _starTrace;
         #endregion
 
         #region 构造方法
@@ -40,13 +37,11 @@ namespace Snail.Message.Components
         /// 构造方法
         /// </summary>
         /// <param name="app"></param>
-        /// <param name="starTrace"></param>
-        public LogMiddleware(IApplication app, bool starTrace = true)
+        public TelemetryMiddleware(IApplication app)
         {
             ThrowIfNull(app);
             Logger = app.ResolveRequired<ILogger>();
             IdGenerator = app.ResolveRequired<IIdGenerator>();
-            _starTrace = starTrace;
         }
         #endregion
 
@@ -62,36 +57,24 @@ namespace Snail.Message.Components
         /// <returns></returns>
         async Task<bool> ISendMiddleware.Send(MessageType type, MessageData message, IMessageOptions options, IServerOptions server, SendDelegate next)
         {
-            //  记录发送消息信息
+            //  初始化遥测追踪数据，记录日志
             {
-                //   Context为null，强制初始化，并加标记
-                message.Context ??= new Dictionary<string, string>
-                {
-                    [CONTEXT_ContextIsNull] = "1"
-                };
-                //  上下文上，强制加上发送方已记录请求数据
-                message.Context["_LOGSENDDATA_"] = "True";
-                //  若启用日志追踪，则加入LogId，并强制记录日志
-                string? logId = null;
-                if (_starTrace == true)
-                {
-                    logId = IdGenerator.NewId("MessageLog");
-                    message.Context[CONTEXT_ParentActionId] = logId;
-                }
-                //  发送日志
-                Logger.Log(new MessageSendLogDescriptor(_starTrace)
+                string parentSpanId = IdGenerator.NewId("MessageLog");
+                InitializeSend(message, RunContext.Current, parentSpanId);
+                message.Context!["_LOGSENDDATA_"] = "True";
+                Logger.Log(new MessageSendLogDescriptor(isForce: true)
                 {
                     Title = $"发送{type}消息：{message.Name}",
                     LogTag = type.ToString(),
                     Content = message.AsJson(),
                     Level = LogLevel.Trace,
-                    AssemblyName = GetType().Assembly.FullName,
-                    ClassName = GetType().FullName,
-                    MethodName = "Send",
+                    AssemblyName = typeof(TelemetryMiddleware).Assembly.FullName,
+                    ClassName = typeof(TelemetryMiddleware).FullName,
+                    MethodName = nameof(ISendMiddleware.Send),
                     Exception = null,
 
-                    Id = logId!,
-                    ServerOptions = server.ToString(),
+                    Id = parentSpanId,
+                    ServerOptions = server.AsJson(),
                 });
             }
             //  拦截异常，记录发送消息的错误信息
@@ -121,25 +104,28 @@ namespace Snail.Message.Components
         async Task<bool> IReceiveMiddleware.Receive(MessageType type, MessageData message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next)
         {
             Exception? tmpEx = null;
-            //  记录消息日志：若发送方已经记录消息数据了，则接收方不再记录
-            bool logData = message.Context?.ContainsKey("_LOGSENDDATA_") != true;
-            Logger.Log(new LogDescriptor(forceLog: true)
+            //  初始化遥测追踪数据，记录消息日志
             {
-                Title = $"接收{type}消息：{message.Name}",
-                LogTag = type.ToString(),
-                Content = logData == true
-                    ? message.AsJson()
-                    : new
-                    {
-                        message.Name,
-                        Data = "发送方已记录，不再重复记录",
-                        message.Context
-                    }.AsJson(),
-                Level = LogLevel.Trace,
-                AssemblyName = GetType().Assembly.FullName,
-                ClassName = GetType().FullName,
-                MethodName = "Receive",
-            });
+                InitializeReceive(message, RunContext.Current);
+                bool logData = message.Context?.ContainsKey("_LOGSENDDATA_") != true;
+                Logger.Log(new LogDescriptor(forceLog: true)
+                {
+                    Level = LogLevel.Trace,
+                    Title = $"接收{type}消息：{message.Name}",
+                    LogTag = type.ToString(),
+                    Content = logData == true
+                        ? message.AsJson()
+                        : new
+                        {
+                            message.Name,
+                            Data = "发送方已记录，不再重复记录",
+                            message.Context
+                        }.AsJson(),
+                    AssemblyName = typeof(TelemetryMiddleware).Assembly.FullName,
+                    ClassName = typeof(TelemetryMiddleware).FullName,
+                    MethodName = nameof(IReceiveMiddleware.Receive),
+                });
+            }
             //  进行消息处理；拦截异常，记录耗时时间
             Stopwatch sw = Stopwatch.StartNew();
             try
@@ -157,12 +143,12 @@ namespace Snail.Message.Components
                 sw.Stop();
                 Logger.Log(new MessageReceiveLogDescriptor()
                 {
+                    Level = tmpEx == null ? LogLevel.Trace : LogLevel.Error,
                     Title = tmpEx == null
-                            ? $"完成{type}消息处理：{message.Name}"
-                            : $"接收{type}消息异常：{message?.Name}",
+                        ? $"完成{type}消息处理：{message.Name}"
+                        : $"接收{type}消息异常：{message?.Name}",
                     LogTag = "Result",
                     Content = null,
-                    Level = tmpEx == null ? LogLevel.Trace : LogLevel.Error,
                     AssemblyName = GetType().Assembly.FullName,
                     ClassName = GetType().FullName,
                     MethodName = "Receive",
@@ -171,6 +157,41 @@ namespace Snail.Message.Components
                     Performance = sw.ElapsedMilliseconds,
                     ServerOptions = server.ToString()
                 });
+            }
+        }
+        #endregion
+
+        #region 继承方法
+        /// <summary>
+        /// 【发送消息】初始化遥测追踪信息
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="context"></param>
+        /// <param name="parentSpanId"></param>
+        protected virtual void InitializeSend(MessageData message, RunContext context, string parentSpanId)
+        {
+            message.Context ??= new Dictionary<string, string>
+            {
+                [CONTEXT_ContextIsNull] = "1"
+            };
+            //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
+            message.Context[CONTEXT_TraceId] = context.TraceId;
+            message.Context[CONTEXT_ParentSpanId] = parentSpanId;
+            //  后期支持w3c的 TraceContext 标准逻辑
+        }
+        /// <summary>
+        /// 【接收消息】初始化遥测追踪信息
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="context"></param>
+        protected virtual void InitializeReceive(MessageData message, RunContext context)
+        {
+            //  分析消息中的 标准化参数，构建 trace-id和parent-span-id
+            if (message.Context?.Count > 0)
+            {
+                message.Context.TryRemove(CONTEXT_TraceId, out string? traceId);
+                message.Context.TryGetValue(CONTEXT_ParentSpanId, out string? parentSpanId);
+                context.InitTelemetry(traceId, parentSpanId);
             }
         }
         #endregion

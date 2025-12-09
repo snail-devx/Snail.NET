@@ -1,19 +1,19 @@
-﻿using Snail.WebApp.Extensions;
-using Snail.WebApp.Interfaces;
+﻿using Snail.Abstractions.Common.Interfaces;
+using Snail.WebApp.Extensions;
 
 namespace Snail.WebApp.Components;
 
 /// <summary>
 /// Web应用程序初始化器；只能用于初始化<see cref="WebApplication"/>
 /// </summary>
-public class WebAppInitializer : IWebAppInitializer
+public class WebAppInitializer : IInitializer<WebApplication>
 {
-    #region IAppInitializer
+    #region IInitializer<WebApplication>
     /// <summary>
-    /// 初始化App
+    /// 初始化
     /// </summary>
     /// <param name="application"></param>
-    public virtual void InitApp(WebApplication application)
+    void IInitializer<WebApplication>.Initialize(WebApplication application)
     {
         //  监听【OnController】事件，完成控制器默认配置
         application.OnController += builder =>
@@ -56,6 +56,8 @@ public class WebAppInitializer : IWebAppInitializer
             app.UseMiddleware<CookieMiddleware>();
             //  为每个请求构建全新的运行时上下文，互不干扰
             app.UseMiddleware<RunContextMiddleware>();
+            //  整理遥测信息数据
+            app.UseMiddleware<TelemetryMiddleware>();
         };
     }
     #endregion

@@ -18,6 +18,6 @@ namespace Snail.Abstractions.Logging.Interfaces
         ///     2、记录器为本地日志时，采用哪个工作组下的配置，如log4net配置；此时仅<see cref="IServerOptions.Workspace"/>生效 <br />
         /// </param>
         /// <returns>记录成功；返回true</returns>
-        Boolean Log(LogDescriptor descriptor, ScopeDescriptor? scope, IServerOptions? server);
+        bool Log(LogDescriptor descriptor, ScopeDescriptor? scope, IServerOptions? server);
     }
 }

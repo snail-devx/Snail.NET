@@ -1,7 +1,7 @@
-﻿using Snail.Abstractions.Setting;
+﻿using Snail.Abstractions.Common.Interfaces;
+using Snail.Abstractions.Setting;
 using Snail.Abstractions.Setting.Delegates;
 using Snail.WebApp.Components;
-using Snail.WebApp.Interfaces;
 
 namespace Snail.WebApp;
 
@@ -29,8 +29,8 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
     /// 构造方法
     /// </summary>
     /// <param name="args"></param>
-    /// <param name="initializer">app初始化器，传null则使用<see cref="WebAppInitializer"/>做初始化</param>
-    public WebApplication(string[] args, IWebAppInitializer? initializer = null)
+    /// <param name="initializer">初始化器，为null则使用<see cref="WebAppInitializer"/></param>
+    public WebApplication(string[] args, IInitializer<WebApplication>? initializer = null)
         : base()
     {
         /*base 父级会做如下初始化：di、setting实例初始化、强制内置DI服务注册*/
@@ -40,7 +40,7 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
         //      替换内置ioc服务
         Builder.Host.UseServiceProviderFactory(new ServiceProviderFactory(DI));
         //  2、app自定义初始化工作；传null则使用默认初始化器
-        (initializer ?? new WebAppInitializer()).InitApp(this);
+        (initializer ?? new WebAppInitializer()).Initialize(this);
     }
     #endregion
 

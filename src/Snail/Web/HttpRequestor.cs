@@ -1,8 +1,8 @@
-﻿using System.Net.Http.Headers;
-using Snail.Abstractions.Web;
+﻿using Snail.Abstractions.Web;
 using Snail.Abstractions.Web.DataModels;
 using Snail.Abstractions.Web.Delegates;
 using Snail.Abstractions.Web.Interfaces;
+using System.Net.Http.Headers;
 
 namespace Snail.Web
 {
@@ -34,7 +34,7 @@ namespace Snail.Web
             ThrowIfNull(server);
             //  预热依赖对象
             IHttpManager manager = app.ResolveRequired<IHttpManager>();
-            provider = provider ?? app.ResolveRequired<IHttpProvider>();
+            provider ??= app.ResolveRequired<IHttpProvider>();
             //  构建中间件，构建http发送委托
             HttpDelegate middleware = manager.Build(provider.Send, onionMode: true);
             _sender = request => middleware.Invoke(request, server);

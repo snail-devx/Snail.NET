@@ -7,7 +7,11 @@ namespace Snail.Message.DataModels
     /// <summary>
     /// 消息发送日志描述器
     /// </summary>
-    public sealed class MessageSendLogDescriptor : LogDescriptor, IIdentity
+    /// <remarks>
+    /// 构造方法
+    /// </remarks>
+    /// <param name="isForce"></param>
+    public sealed class MessageSendLogDescriptor(bool isForce) : LogDescriptor(isForce), IIdentity
     {
         #region 属性变量
         /// <summary>
@@ -18,14 +22,6 @@ namespace Snail.Message.DataModels
         /// 消息发送方服务器
         /// </summary>
         public required string ServerOptions { get; init; }
-        #endregion
-
-        #region 构造方法
-        /// <summary>
-        /// 构造方法
-        /// </summary>
-        /// <param name="isForce"></param>
-        public MessageSendLogDescriptor(bool isForce) : base(isForce) { }
         #endregion
     }
 

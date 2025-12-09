@@ -10,9 +10,9 @@ namespace Snail.Logger
     ///     1、从Default工作空间下读取log4net配置，若不存在则采用程序内置的 <br />
     ///     2、记录日志
     /// </summary>
-    [Component<ILogProvider>(Lifetime = LifetimeType.Singleton)]
-    [Component<ILogProvider>(Lifetime = LifetimeType.Singleton, Key = DIKEY_FileLogger)]
-    [Component<ILogProvider>(Lifetime = LifetimeType.Singleton, Key = "Log4Net")]
+    [Component<ILogProvider>()]
+    [Component<ILogProvider>(Key = DIKEY_FileLogger)]
+    [Component<ILogProvider>(Key = "Log4Net")]
     public sealed class Log4NetProvider : ILogProvider
     {
         #region 属性变量

@@ -289,6 +289,11 @@ public abstract class ActionBaseFilter : IAsyncActionFilter
     /// <returns></returns>
     protected virtual async Task<string?> BuildPostContent(HttpRequest request, LogAttribute attr)
     {
+        //  若已经标记记录了数据，则先忽略
+        if (bool.TrueString.IsEqual(request.Cookies["_LOGSENDDATA_"], ignoreCase: true))
+        {
+            return "发送方已记录，不再重复记录";
+        }
         //  分析请求格式：JSON结构特定处理，否则取Form提交数据；其他情况无效
         if (attr.Content == true)
         {

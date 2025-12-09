@@ -3,7 +3,7 @@
     /// <summary>
     /// 日志作用域描述器
     /// </summary>
-    public sealed class ScopeDescriptor
+    public class ScopeDescriptor
     {
         /// <summary>
         /// 上下文操作Id

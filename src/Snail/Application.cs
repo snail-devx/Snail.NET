@@ -122,7 +122,7 @@ namespace Snail
         }
         #endregion
 
-        #region 私有方法
+        #region 继承方法
         /// <summary>
         /// 启动应用扫描
         /// 备注：  <br />

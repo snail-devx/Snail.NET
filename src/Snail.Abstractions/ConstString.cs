@@ -26,13 +26,9 @@
 
         #region 中间件名称
         /// <summary>
-        /// 中间件名称：共享钥匙串
+        /// 中间件名称：遥测追踪
         /// </summary>
-        public const string MIDDLEWARE_ShareKeyChain = "ShareKeyChain";
-        /// <summary>
-        /// 中间件名称：日志记录
-        /// </summary>
-        public const string MIDDLEWARE_Logging = "Logging";
+        public const string MIDDLEWARE_Telemetry = "Telemetry";
         /// <summary>
         /// 中间件名称：运行时上下文
         /// </summary>
@@ -41,25 +37,22 @@
 
         #region 上下文
         /// <summary>
-        /// 上下文Key：运行时上下文为null
-        /// </summary>
-        public const string CONTEXT_ContextIsNull = "_CONTEXT_ISNULL_";
-        /// <summary>
-        /// 上下文Key：共享钥匙串
-        /// </summary>
-        public const string CONTEXT_ShareKeyChain = "_SHARE_KEY_CHAIN_";
-        /// <summary>
         /// 上下文Key：禁用日志
         /// </summary>
         public const string CONTEXT_DisableLog = "_DISABLE_LOG_";
         /// <summary>
-        /// 上下文Key：父级操作Id
+        /// 上下文Key：运行时上下文为null
         /// </summary>
-        public const string CONTEXT_ParentActionId = "_PARENT_ACTION_ID_";
+        public const string CONTEXT_ContextIsNull = "_CONTEXT_ISNULL_";
+
         /// <summary>
-        /// 上下文Key：授信权限Id
+        /// 上下文Key：trace_id
         /// </summary>
-        public const string CONTEXT_TrustAuthId = "_TRUST_AUTH_ID_";
+        public const string CONTEXT_TraceId = "X-Trace-Id";
+        /// <summary>
+        /// 上下文Key：parent_span_id
+        /// </summary>
+        public const string CONTEXT_ParentSpanId = "X-Parent-Span-ID";
         #endregion
 
         #region 依赖注入Key值

@@ -25,16 +25,14 @@ namespace Snail.Message
         /// <summary>
         /// 默认无参构造方法
         /// </summary>
-        public MessageManager()
+        public MessageManager(IApplication app)
         {
-            //  中间件代理；并做一些中间件的初始化工作
-            _sendMiddlewares = new MiddlewareProxy<SendDelegate>();
-            _sendMiddlewares.Use(name: MIDDLEWARE_ShareKeyChain, middleware: null)
-                            .Use(name: MIDDLEWARE_Logging, middleware: null);
-            _receiveMiddlewares = new MiddlewareProxy<ReceiveDelegate>();
-            _receiveMiddlewares.Use(name: MIDDLEWARE_Logging, middleware: null)
-                               .Use(name: MIDDLEWARE_RunContext, middleware: null)
-                               .Use(name: MIDDLEWARE_Logging, middleware: null);
+            ThrowIfNull(app);
+            //  中间件代理
+            _sendMiddlewares = app.ResolveRequired<IMiddlewareProxy<SendDelegate>>();
+            _receiveMiddlewares = app.ResolveRequired<IMiddlewareProxy<ReceiveDelegate>>();
+            //  执行初始化器逻辑
+            app.Resolve<IInitializer<IMessageManager>>()?.Initialize(this);
         }
         #endregion
 

@@ -1,10 +1,11 @@
 ﻿namespace Snail.WebApp.Components;
 /// <summary>
-/// 上下文中间件
-/// <para>1、为每个请求构建全新的运行时上下文，互不干扰</para>
+/// 遥测中间件
+/// <para>1、读取http的header、cookie等信息，分析出标准化的遥测数据</para>
+/// <para>2、这里不做日志写入，在<see cref="ActionBaseFilter"/>组件中进行日志详细写入</para>
 /// </summary>
-[Component<RunContextMiddleware>]
-public class RunContextMiddleware : IMiddleware
+[Component<TelemetryMiddleware>]
+public class TelemetryMiddleware : IMiddleware
 {
     #region IMiddleware
     /// <summary>
@@ -15,10 +16,7 @@ public class RunContextMiddleware : IMiddleware
     /// <returns>A <see cref="Task"/> that represents the execution of this middleware.</returns>
     Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        //  构建全新的运行时上下文
-        RunContext rt = RunContext.New();
-        Initialize(rt, context);
-        //  进入下一个操作
+        Initialize(RunContext.Current, context);
         return next.Invoke(context);
     }
     #endregion
@@ -31,7 +29,12 @@ public class RunContextMiddleware : IMiddleware
     /// <param name="context"></param>
     protected virtual void Initialize(RunContext context, HttpContext http)
     {
-        //  目前不做任何操作，后期考虑从cookie中获取共享数据写入运行时上下文
+        //  分析请求中的 标准化参数，构建 trace-id和parent-span-id
+        context.InitTelemetry
+        (
+            traceId: http.Request.Headers[CONTEXT_TraceId],
+            parentSpanId: http.Request.Headers[CONTEXT_ParentSpanId]
+        );
     }
     #endregion
 }

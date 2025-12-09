@@ -31,10 +31,8 @@ namespace Snail.Web
             : base(app, rsCode: "server")
         {
             ThrowIfNull(app);
-            //  强制内置中间件顺序
             _proxy = app.ResolveRequired<IMiddlewareProxy<HttpDelegate>>();
-            _proxy.Use(name: MIDDLEWARE_ShareKeyChain, middleware: null)
-                  .Use(name: MIDDLEWARE_Logging, middleware: null);
+            app.Resolve<IInitializer<IHttpManager>>()?.Initialize(this);
         }
         #endregion
 

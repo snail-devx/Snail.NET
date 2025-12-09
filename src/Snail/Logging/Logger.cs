@@ -95,12 +95,9 @@ namespace Snail.Logging
         public bool IsEnable(LogLevel level, bool forceLog = false)
         {
             /*  强制日志，不管级别是啥都记录；非强制日志：1、日志等级匹配，2、未全局禁用日志 */
-            if (forceLog != true)
-            {
-                return level >= _level
-                    && STR_True.IsEqual(RunContext.Current.Get<string>(CONTEXT_DisableLog), ignoreCase: true) == false;
-            }
-            return true;
+            return forceLog == true
+                ? true
+                : (RunContext.Current.DisableLog == false && level >= _level);
         }
 
         /// <summary>
@@ -158,7 +155,7 @@ namespace Snail.Logging
             ScopeDescriptor scope = logger._scope ?? new ScopeDescriptor()
             {
                 ContextId = RunContext.Current.ContextId,
-                ParentId = RunContext.Current.Get<string>(CONTEXT_ParentActionId)
+                ParentId = RunContext.Current.Get<string>(CONTEXT_ParentSpanId)
             };
             return scope;
         }

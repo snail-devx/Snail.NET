@@ -9,10 +9,10 @@ namespace Snail.Message.Components
     /// <summary>
     /// 【运行时上下文】中间件
     /// </summary>
-    [Component<IMessageMiddleware>(Key = MIDDLEWARE_RunContext, Lifetime = LifetimeType.Singleton)]
-    public sealed class RunContextMiddleware : IMessageMiddleware
+    [Component<IMessageMiddleware>(Key = MIDDLEWARE_RunContext)]
+    public class RunContextMiddleware : IMessageMiddleware
     {
-        #region 公共方法
+        #region IMessageMiddleware
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -24,7 +24,7 @@ namespace Snail.Message.Components
         /// <returns></returns>
         Task<bool> ISendMiddleware.Send(MessageType type, MessageData message, IMessageOptions options, IServerOptions server, SendDelegate next)
         {
-            //  发送消息时，不做任何处理
+            InitializeSend(message, RunContext.Current);
             return next(type, message, options, server);
         }
 
@@ -39,19 +39,34 @@ namespace Snail.Message.Components
         /// <returns></returns>
         Task<bool> IReceiveMiddleware.Receive(MessageType type, MessageData message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next)
         {
-            //  启用全新的RunContext对象
+            /* 启用全新的RunContext对象 */
             RunContext context = RunContext.New();
-            //  一些特定的长下文信息初始化过来
-            string? tmpString = null;
-            //      父级操作Id
-            message.Context?.Remove(CONTEXT_ParentActionId, out tmpString);
-            if (string.IsNullOrEmpty(tmpString) == false)
-            {
-                context.Add(CONTEXT_ParentActionId, tmpString);
-            }
-            //  进入下一个操作
+            InitializeReceive(message, context);
+
             return next(type, message, options, server);
         }
         #endregion
+
+        #region 继承方法
+        /// <summary>
+        /// 【发送消息】初始化上下文信息
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="context"></param>
+        protected virtual void InitializeSend(MessageData message, RunContext context)
+        {
+            //  目前不做任何操作，后期考虑把上下文上的共享信息写入message中，传递到下一个请求中进行共享
+        }
+        /// <summary>
+        /// 【接收消息】初始化上下文信息
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="context"></param>
+        protected virtual void InitializeReceive(MessageData message, RunContext context)
+        {
+            //  目前不做任何操作，后期考虑从message中获取共享数据写入运行时上下文
+        }
+        #endregion
+
     }
 }

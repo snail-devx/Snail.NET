@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
-using Snail.Abstractions.Dependency.DataModels;
+﻿using Snail.Abstractions.Dependency.DataModels;
 using Snail.Abstractions.Message.Attributes;
 using Snail.Abstractions.Message.Enumerations;
 using Snail.Abstractions.Message.Interfaces;
 using Snail.Abstractions.Web.Attributes;
 using Snail.Utilities.Common.Extensions;
+using System.Diagnostics;
 
 namespace Snail.Abstractions.Message.Extensions
 {
@@ -15,14 +15,11 @@ namespace Snail.Abstractions.Message.Extensions
     {
         #region 公共方法
         /// <summary>
-        /// 添加消息服务
+        /// 
         /// </summary>
         /// <param name="app"></param>
-        /// <param name="useLogging">是否启用【日志】中间件</param>
-        /// <param name="useShareKeyChain">是否启用【共享钥匙串】中间件</param>
-        /// <param name="useRunContext">是否启用【运行时上下文】中间件</param>
         /// <returns></returns>
-        public static IApplication AddMessageService(this IApplication app, bool useLogging = true, bool useShareKeyChain = true, bool useRunContext = true)
+        public static IApplication AddMessageService(this IApplication app)
         {
             //  程序集扫描时，进行消息接收器扫描，整理出需要接收哪些消息  
             IList<ReceiverTypeDescriptor> descriptors = new List<ReceiverTypeDescriptor>();
@@ -60,7 +57,7 @@ namespace Snail.Abstractions.Message.Extensions
                 }
                 if (server == null)
                 {
-                    string msg = $"请使用[MessageServerAttribute]标签配置消息服务器，type：{type.FullName}";
+                    string msg = $"请使用[ServerAttribute]标签配置消息服务器，type：{type.FullName}";
                     throw new ApplicationException(msg);
                 }
                 //  梳理出有效值，加入注册集合中
@@ -73,23 +70,6 @@ namespace Snail.Abstractions.Message.Extensions
             //  服务注册时：进行服务注册
             app.OnRegister += () =>
             {
-                //  先进行消息中间件配置
-                IMessageManager manager = app.ResolveRequired<IMessageManager>();
-                if (useLogging == true)
-                {
-                    IMessageMiddleware middleware = app.ResolveRequired<IMessageMiddleware>(key: MIDDLEWARE_Logging);
-                    manager.Use(name: MIDDLEWARE_Logging, middleware);
-                }
-                if (useShareKeyChain == true)
-                {
-                    IMessageMiddleware middleware = app.ResolveRequired<IMessageMiddleware>(key: MIDDLEWARE_ShareKeyChain);
-                    manager.Use(name: MIDDLEWARE_ShareKeyChain, middleware);
-                }
-                if (useRunContext == true)
-                {
-                    IMessageMiddleware middleware = app.ResolveRequired<IMessageMiddleware>(key: MIDDLEWARE_RunContext);
-                    manager.Use(name: MIDDLEWARE_RunContext, middleware);
-                }
                 //  遍历消息接收器，注册依赖
                 IList<DIDescriptor> dis = descriptors
                     .Select(descriptor => new DIDescriptor(descriptor.Guid, from: typeof(IReceiver), LifetimeType.Transient, descriptor.Type))

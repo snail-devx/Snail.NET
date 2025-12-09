@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Snail.Utilities.Collections;
+﻿using Snail.Utilities.Collections;
 using Snail.Utilities.Threading.Extensions;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Common.Components
 {
@@ -35,19 +35,21 @@ namespace Snail.Common.Components
         public static RunContext Current => _context.GetOrSetValue(() => new RunContext());
         /// <summary>
         /// 空的运行时上下文
-        ///     每次调用全新构建实例
+        /// <para>每次调用全新构建实例</para>
         /// </summary>
         public static RunContext Empty => new();
         /// <summary>
-        /// 操作Id，每个上下文实例唯一
+        /// 上下文Id，每个上下文实例唯一
+        /// <para>等效于分布式系统中的 span_id </para>
         /// </summary>
         public string ContextId { private init; get; }
         #endregion
 
         #region 构造方法
         /// <summary>
-        /// 默认无参构造方法
+        /// 构造方法
         /// </summary>
+        /// <param name="parent">父级上下文对象，非null时从父级copy已有信息</param>
         public RunContext(RunContext? parent = null)
         {
             //  若无id生成器，则使用guid

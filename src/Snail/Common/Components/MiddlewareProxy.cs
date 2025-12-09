@@ -8,7 +8,7 @@ namespace Snail.Common.Components
     ///     2、支持Name命名，用于固化顺序使用
     /// </summary>
     /// <typeparam name="Middleware">中间件委托对象</typeparam>
-    [Component(From = typeof(IMiddlewareProxy<>), Lifetime = LifetimeType.Singleton)]
+    [Component(From = typeof(IMiddlewareProxy<>))]
     public class MiddlewareProxy<Middleware> : IMiddlewareProxy<Middleware> where Middleware : Delegate
     {
         #region 属性变量
