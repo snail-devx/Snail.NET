@@ -11,7 +11,7 @@ namespace Snail.RabbitMQ.Components;
 /// <summary>
 /// RabbitMQ链接代理类
 /// </summary>
-internal class ConnectionProxy : PoolObject<IConnection>, IPoolObject
+public sealed class ConnectionProxy : PoolObject<IConnection>, IPoolObject
 {
     #region 属性变量
     /// <summary>

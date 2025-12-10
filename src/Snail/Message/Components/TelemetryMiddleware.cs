@@ -55,7 +55,7 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <param name="server">消息服务器地址消息发送哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    async Task<bool> ISendMiddleware.Send(MessageType type, MessageData message, IMessageOptions options, IServerOptions server, SendDelegate next)
+    async Task<bool> ISendMiddleware.Send(MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server, SendDelegate next)
     {
         //  初始化遥测追踪数据，记录日志
         {
@@ -103,7 +103,7 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <param name="server">消息服务器地址：接收的消息来自哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    async Task<bool> IReceiveMiddleware.Receive(MessageType type, MessageData message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next)
+    async Task<bool> IReceiveMiddleware.Receive(MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next)
     {
         Exception? tmpEx = null;
         //  初始化遥测追踪数据，记录消息日志
@@ -173,10 +173,10 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <summary>
     /// 【发送消息】初始化遥测追踪信息
     /// </summary>
-    /// <param name="message"></param>
-    /// <param name="context"></param>
-    /// <param name="parentSpanId"></param>
-    protected virtual void InitializeSend(MessageData message, RunContext context, string parentSpanId)
+    /// <param name="message">要发送的消息数据</param>
+    /// <param name="context">当前运行时上下文</param>
+    /// <param name="parentSpanId">当前父级操作Id</param>
+    protected virtual void InitializeSend(in MessageDescriptor message, in RunContext context, in string parentSpanId)
     {
         message.Context ??= new Dictionary<string, string>();
         //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
@@ -187,9 +187,9 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <summary>
     /// 【接收消息】初始化遥测追踪信息
     /// </summary>
-    /// <param name="message"></param>
-    /// <param name="context"></param>
-    protected virtual void InitializeReceive(MessageData message, RunContext context)
+    /// <param name="message">接收到的消息数据</param>
+    /// <param name="context">全新的运行时上下文</param>
+    protected virtual void InitializeReceive(in MessageDescriptor message, in RunContext context)
     {
         //  分析消息中的 标准化参数，构建 trace-id和parent-span-id
         if (message.Context?.Count > 0)

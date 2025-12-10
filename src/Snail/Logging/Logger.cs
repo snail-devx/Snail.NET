@@ -154,7 +154,7 @@ public sealed class Logger : ILogger
         ScopeDescriptor scope = logger._scope ?? new ScopeDescriptor()
         {
             ContextId = RunContext.Current.ContextId,
-            ParentId = RunContext.Current.Get<string>(CONTEXT_ParentSpanId)
+            ParentId = RunContext.Current.ParentSpanId,
         };
         return scope;
     }

@@ -23,7 +23,7 @@ internal interface ITypeStorager
     /// 保存实例对象
     /// </summary>
     /// <param name="instance">DI构建的实例对象</param>
-    void SaveInstace(in Object? instance);
+    void SaveInstace(in object? instance);
 
     /// <summary>
     /// 尝试实例销毁存储器

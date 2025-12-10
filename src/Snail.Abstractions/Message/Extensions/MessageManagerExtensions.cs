@@ -59,7 +59,7 @@ public static class MessageManagerExtensions
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            SendDelegate sender = (MessageType type, MessageData message, IMessageOptions options, IServerOptions server)
+            SendDelegate sender = (MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server)
                 => middleware.Send(type, message, options, server, next);
             return sender;
         });
@@ -71,7 +71,7 @@ public static class MessageManagerExtensions
     /// <param name="manager"></param>
     /// <param name="middleware"></param>
     /// <returns></returns>
-    public static IMessageManager Use(this IMessageManager manager, Action<MessageType, MessageData, IMessageOptions, IServerOptions> middleware)
+    public static IMessageManager Use(this IMessageManager manager, Action<MessageType, MessageDescriptor, IMessageOptions, IServerOptions> middleware)
         => Use(manager, name: null, middleware);
     /// <summary>
     /// 使用【发送消息】中间件
@@ -80,12 +80,12 @@ public static class MessageManagerExtensions
     /// <param name="name">中间件名称</param>
     /// <param name="middleware"></param>
     /// <returns></returns>
-    public static IMessageManager Use(this IMessageManager manager, string? name, Action<MessageType, MessageData, IMessageOptions, IServerOptions> middleware)
+    public static IMessageManager Use(this IMessageManager manager, string? name, Action<MessageType, MessageDescriptor, IMessageOptions, IServerOptions> middleware)
     {
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            SendDelegate sender = (MessageType type, MessageData message, IMessageOptions options, IServerOptions server) =>
+            SendDelegate sender = (MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server) =>
             {
                 middleware.Invoke(type, message, options, server);
                 return next.Invoke(type, message, options, server);
@@ -125,7 +125,7 @@ public static class MessageManagerExtensions
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            ReceiveDelegate receiver = (MessageType type, MessageData message, IReceiveOptions options, IServerOptions server)
+            ReceiveDelegate receiver = (MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server)
                 => middleware.Receive(type, message, options, server, next);
             return receiver;
         });
@@ -137,7 +137,7 @@ public static class MessageManagerExtensions
     /// <param name="manager"></param>
     /// <param name="middleware"></param>
     /// <returns></returns>
-    public static IMessageManager Use(this IMessageManager manager, Action<MessageType, MessageData, IReceiveOptions, IServerOptions> middleware)
+    public static IMessageManager Use(this IMessageManager manager, Action<MessageType, MessageDescriptor, IReceiveOptions, IServerOptions> middleware)
         => Use(manager, name: null, middleware);
     /// <summary>
     /// 使用【接收消息】中间件
@@ -146,12 +146,12 @@ public static class MessageManagerExtensions
     /// <param name="name">中间件名称</param>
     /// <param name="middleware"></param>
     /// <returns></returns>
-    public static IMessageManager Use(this IMessageManager manager, string? name, Action<MessageType, MessageData, IReceiveOptions, IServerOptions> middleware)
+    public static IMessageManager Use(this IMessageManager manager, string? name, Action<MessageType, MessageDescriptor, IReceiveOptions, IServerOptions> middleware)
     {
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            ReceiveDelegate receiver = (MessageType type, MessageData message, IReceiveOptions options, IServerOptions server) =>
+            ReceiveDelegate receiver = (MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server) =>
             {
                 middleware.Invoke(type, message, options, server);
                 return next.Invoke(type, message, options, server);

@@ -3,9 +3,10 @@
 namespace Snail.Abstractions.Message.DataModels;
 
 /// <summary>
-/// 消息数据
+/// 消息描述器
+/// <para>1、描述发送和接收到的消息数据信息</para>
 /// </summary>
-public sealed class MessageData
+public class MessageDescriptor
 {
     /// <summary>
     /// 消息名称
@@ -41,7 +42,7 @@ public sealed class MessageData
     /// <summary>
     /// 默认无参构造方法
     /// </summary>
-    public MessageData() { }
+    public MessageDescriptor() { }
     /// <summary>
     /// 构造方法
     /// </summary>
@@ -49,7 +50,7 @@ public sealed class MessageData
     /// <param name="data">消息数据；内部会自动序列化成string</param>
     /// <param name="context">消息上下文附加数据</param>
 
-    public MessageData(string name, object? data, IDictionary<string, string>? context = null)
+    public MessageDescriptor(string name, object? data, IDictionary<string, string>? context = null)
     {
         Name = ThrowIfNullOrEmpty(name);
         Data = data?.AsJson();

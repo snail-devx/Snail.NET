@@ -41,8 +41,8 @@ public static class RunContextExtensions
         /// <summary>
         /// 初始化分布式追踪信息
         /// </summary>
-        /// <param name="traceId"></param>
-        /// <param name="parentSpanId"></param>
+        /// <param name="traceId">追踪id；为空将忽略</param>
+        /// <param name="parentSpanId">父级操作id；为空将忽略</param>
         /// <returns></returns>
         public RunContext InitTelemetry(string? traceId, string? parentSpanId)
         {

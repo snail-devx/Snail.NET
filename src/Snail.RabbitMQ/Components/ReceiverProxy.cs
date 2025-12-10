@@ -6,7 +6,7 @@ namespace Snail.RabbitMQ.Components;
 /// <summary>
 /// 消息接收器代理
 /// </summary>
-internal sealed class ReceiverProxy<T>
+public sealed class ReceiverProxy<T>
 {
     #region 属性变量
     /// <summary>

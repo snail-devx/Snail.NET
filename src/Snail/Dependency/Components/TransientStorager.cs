@@ -51,7 +51,7 @@ internal sealed class TransientStorager : ITypeStorager
     /// 保存实例对象
     /// </summary>
     /// <param name="instance">DI构建的实例对象</param>
-    void ITypeStorager.SaveInstace(in Object? instance)
+    void ITypeStorager.SaveInstace(in object? instance)
     {
         //  保存时暂时不做任何操作，后期看情况保存构建过的示例
         ///// <summary>

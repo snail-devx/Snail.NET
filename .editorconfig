@@ -10,8 +10,11 @@ dotnet_diagnostic.CS0649.severity = none
 #	CS1587 XML 注释没有放在有效语言元素上；有的时候在方法内部需要用到 /** */ 此时忽略此警告
 dotnet_diagnostic.CS1587.severity = none
 
+
 [*.cs]
 #### 命名样式 ####
+#		启用 文件作用域 命名空间
+csharp_style_namespace_declarations = file_scoped:silent
 
 # 命名规则
 
@@ -72,7 +75,6 @@ csharp_style_var_when_type_is_apparent = false:silent
 csharp_style_var_elsewhere = false:silent
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_prefer_braces = true:silent
-csharp_style_namespace_declarations = block_scoped:silent
 csharp_prefer_static_local_function = true:suggestion
 
 [*.vb]

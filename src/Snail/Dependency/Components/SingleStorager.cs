@@ -76,7 +76,7 @@ internal sealed class SingleStorager : ITypeStorager
     /// 保存实例对象
     /// </summary>
     /// <param name="instance">DI构建的实例对象</param>
-    void ITypeStorager.SaveInstace(in Object? instance)
+    void ITypeStorager.SaveInstace(in object? instance)
     {
         //  仅保存非null值；做一个冗余，若进入写锁后已经有值了，报错（理论上不可能存在，图个心安）
         if (instance != null)

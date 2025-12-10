@@ -60,7 +60,7 @@ public sealed class Messenger : IMessenger
     /// <param name="message">消息描述器：</param>
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机等信息</param>
     /// <returns>发送成功，返回true；否则false</returns>
-    Task<bool> IMessenger.Send(MessageType type, MessageData message, IMessageOptions options)
+    Task<bool> IMessenger.Send(MessageType type, MessageDescriptor message, IMessageOptions options)
     {
         ThrowIfNull(message);
         ThrowIfNull(options);
@@ -74,7 +74,7 @@ public sealed class Messenger : IMessenger
     /// <param name="receiver">消息接收器；用于处理具体消息</param>
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <returns>消息接收器注册成功，返回true；否则返回false</returns>
-    Task<bool> IMessenger.Receive(MessageType type, IReceiveOptions options, Func<MessageData, Task<bool>> receiver)
+    Task<bool> IMessenger.Receive(MessageType type, IReceiveOptions options, Func<MessageDescriptor, Task<bool>> receiver)
     {
         ThrowIfNull(receiver);
         receiver = BuildReceiverWithMiddleware(type, receiver, options);
@@ -90,7 +90,7 @@ public sealed class Messenger : IMessenger
     /// <param name="receiver">消息接收器；用于处理具体消息</param>
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <returns>消息接收器注册成功，返回true；否则返回false</returns>
-    private Func<MessageData, Task<bool>> BuildReceiverWithMiddleware(MessageType type, Func<MessageData, Task<bool>> receiver, IReceiveOptions options)
+    private Func<MessageDescriptor, Task<bool>> BuildReceiverWithMiddleware(MessageType type, Func<MessageDescriptor, Task<bool>> receiver, IReceiveOptions options)
     {
         ReceiveDelegate handle = async (type, message, options, server) => await receiver.Invoke(message);
         handle = _manager.Build(handle);

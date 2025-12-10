@@ -28,9 +28,9 @@ public class RunContextMiddleware : IMiddleware
     /// <summary>
     /// 请求初始化【运行时上下文】
     /// </summary>
-    /// <param name="http"></param>
-    /// <param name="context"></param>
-    protected virtual void Initialize(RunContext context, HttpContext http)
+    /// <param name="http">HTTP请求对象</param>
+    /// <param name="context">全新的运行时上下文</param>
+    protected virtual void Initialize(in RunContext context, in HttpContext http)
     {
         //  目前不做任何操作，后期考虑从cookie中获取共享数据写入运行时上下文
     }

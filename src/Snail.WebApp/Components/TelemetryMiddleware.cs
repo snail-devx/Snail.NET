@@ -27,7 +27,7 @@ public class TelemetryMiddleware : IMiddleware
     /// </summary>
     /// <param name="http"></param>
     /// <param name="context"></param>
-    protected virtual void Initialize(RunContext context, HttpContext http)
+    protected virtual void Initialize(in RunContext context, in HttpContext http)
     {
         //  分析请求中的 标准化参数，构建 trace-id和parent-span-id
         context.InitTelemetry

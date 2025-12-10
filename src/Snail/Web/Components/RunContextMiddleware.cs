@@ -26,10 +26,10 @@ public class RunContextMiddleware : IHttpMiddleware
 
     #region 继承方法
     /// <summary>
-    /// 基于【运行时上下文】初始化http请求
+    /// 基于【运行时上下文】初始化HTTP请求
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="context"></param>
+    /// <param name="request">HTTP请求消息</param>
+    /// <param name="context">当前运行时上下文</param>
     protected virtual void Initialize(in HttpRequestMessage request, in RunContext context)
     {
         //  目前不做任何操作，后期考虑把上下文上的共享信息写入cookie中，传递到下一个请求中进行共享

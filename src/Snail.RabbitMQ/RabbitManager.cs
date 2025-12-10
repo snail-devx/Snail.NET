@@ -15,14 +15,14 @@ namespace Snail.RabbitMQ;
 /// RabbitMQ管理器，管理服务器地址，进行一些基础逻辑实现
 /// </summary>
 [Component]
-internal sealed class RabbitManager : ServerManager, IServerManager
+public sealed class RabbitManager : ServerManager, IServerManager
 {
     #region 属性变量
     /// <summary>
     /// 文件日志
     /// </summary>
     [Logger(ProviderKey = DIKEY_FileLogger)]
-    internal required ILogger FileLogger { init; get; }
+    public required ILogger FileLogger { init; get; }
     #endregion
 
     #region 构造方法

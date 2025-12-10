@@ -91,7 +91,6 @@ public sealed class RunContext
     /// <returns></returns>
     public static RunContext New()
     {
-        //  这里不能直接调用Current，会死锁：两个地方都用到了lockvar；值不为空才拷贝，否则没意义
         _context.Value = new RunContext();
         return _context.Value;
     }

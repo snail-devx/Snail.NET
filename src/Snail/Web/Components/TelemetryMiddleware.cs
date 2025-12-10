@@ -126,10 +126,10 @@ public class TelemetryMiddleware : IHttpMiddleware
     /// <summary>
     /// 初始化遥测追踪信息
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="context"></param>
+    /// <param name="request">HTTP请求消息</param>
+    /// <param name="context">当前运行时上下文</param>
     /// <param name="parentSpanId">父级追踪动作Id</param>
-    protected virtual void Initialize(HttpRequestMessage request, RunContext context, string parentSpanId)
+    protected virtual void Initialize(in HttpRequestMessage request, in RunContext context, in string parentSpanId)
     {
         //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
         request.Headers.Add(CONTEXT_TraceId, context.TraceId);

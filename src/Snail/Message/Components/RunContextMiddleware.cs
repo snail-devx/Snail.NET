@@ -22,7 +22,7 @@ public class RunContextMiddleware : IMessageMiddleware
     /// <param name="server">消息服务器地址消息发送哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    Task<bool> ISendMiddleware.Send(MessageType type, MessageData message, IMessageOptions options, IServerOptions server, SendDelegate next)
+    Task<bool> ISendMiddleware.Send(MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server, SendDelegate next)
     {
         InitializeSend(message, RunContext.Current);
         return next(type, message, options, server);
@@ -37,7 +37,7 @@ public class RunContextMiddleware : IMessageMiddleware
     /// <param name="server">消息服务器地址：接收的消息来自哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    Task<bool> IReceiveMiddleware.Receive(MessageType type, MessageData message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next)
+    Task<bool> IReceiveMiddleware.Receive(MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next)
     {
         /* 启用全新的RunContext对象 */
         RunContext context = RunContext.New();
@@ -51,21 +51,20 @@ public class RunContextMiddleware : IMessageMiddleware
     /// <summary>
     /// 【发送消息】初始化上下文信息
     /// </summary>
-    /// <param name="message"></param>
-    /// <param name="context"></param>
-    protected virtual void InitializeSend(MessageData message, RunContext context)
+    /// <param name="message">要发送的消息数据</param>
+    /// <param name="context">当前运行时上下文</param>
+    protected virtual void InitializeSend(in MessageDescriptor message, in RunContext context)
     {
         //  目前不做任何操作，后期考虑把上下文上的共享信息写入message中，传递到下一个请求中进行共享
     }
     /// <summary>
     /// 【接收消息】初始化上下文信息
     /// </summary>
-    /// <param name="message"></param>
-    /// <param name="context"></param>
-    protected virtual void InitializeReceive(MessageData message, RunContext context)
+    /// <param name="message">接收到的消息数据</param>
+    /// <param name="context">全新的运行时上下文</param>
+    protected virtual void InitializeReceive(in MessageDescriptor message, in RunContext context)
     {
         //  目前不做任何操作，后期考虑从message中获取共享数据写入运行时上下文
     }
     #endregion
-
 }

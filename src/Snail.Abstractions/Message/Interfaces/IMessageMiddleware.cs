@@ -19,7 +19,7 @@ public interface ISendMiddleware
     /// <param name="server">消息服务器地址消息发送哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    Task<bool> Send(MessageType type, MessageData message, IMessageOptions options, IServerOptions server, SendDelegate next);
+    Task<bool> Send(MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server, SendDelegate next);
 }
 /// <summary>
 /// 接口约束：接收消息中间件
@@ -35,7 +35,7 @@ public interface IReceiveMiddleware
     /// <param name="server">消息服务器地址：接收的消息来自哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    Task<bool> Receive(MessageType type, MessageData message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next);
+    Task<bool> Receive(MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server, ReceiveDelegate next);
 }
 
 /// <summary>

@@ -15,7 +15,9 @@ public static class ApplicationExtensions
 {
     #region 公共方法
     /// <summary>
-    /// 
+    /// 添加消息服务
+    /// <para>1、自动扫描已有的消息接收组件，<see cref="ReceiverAttribute"/>/<see cref="MQReceiverAttribute"/>/<see cref="PubSubReceiverAttribute"/></para>
+    /// <para>2、app运行时，自动启动扫描出的消息接收组件进行消息接收</para>
     /// </summary>
     /// <param name="app"></param>
     /// <returns></returns>

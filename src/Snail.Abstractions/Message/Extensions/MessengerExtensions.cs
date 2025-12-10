@@ -49,7 +49,7 @@ public static class MessengerExtensions
             default:
                 throw new NotSupportedException($"不支持的消息类型：{type}");
         }
-        return messenger.Send(type, new MessageData() { Name = message, Data = data?.AsJson(), Context = context }, options);
+        return messenger.Send(type, new MessageDescriptor() { Name = message, Data = data?.AsJson(), Context = context }, options);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public static class MessengerExtensions
     /// <param name="message">消息名称；基于此自动构建<see cref="IMessageOptions"/></param>
     /// <param name="receiver">消息处理委托</param>
     /// <returns></returns>
-    public static Task<bool> Receive(this IMessenger messenger, MessageType type, string? name, string message, Func<MessageData, Task<bool>> receiver)
+    public static Task<bool> Receive(this IMessenger messenger, MessageType type, string? name, string message, Func<MessageDescriptor, Task<bool>> receiver)
     {
         ThrowIfNullOrEmpty(message);
         ThrowIfNull(receiver);

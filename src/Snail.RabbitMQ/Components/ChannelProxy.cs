@@ -8,7 +8,7 @@ namespace Snail.RabbitMQ.Components;
 /// <summary>
 /// RabbitMQ信道代理器
 /// </summary>
-internal sealed class ChannelProxy : PoolObject<IChannel>, IPoolObject
+public sealed class ChannelProxy : PoolObject<IChannel>, IPoolObject
 {
     #region 属性变量
     /// <summary>

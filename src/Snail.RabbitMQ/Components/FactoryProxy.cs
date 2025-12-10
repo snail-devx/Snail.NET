@@ -7,7 +7,7 @@ namespace Snail.RabbitMQ.Components;
 /// <summary>
 /// RabbitMQ链接工厂代理
 /// </summary>
-internal sealed class FactoryProxy
+public sealed class FactoryProxy
 {
     #region 属性变量
     /// <summary>
