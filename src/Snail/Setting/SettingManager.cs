@@ -57,9 +57,9 @@ public sealed class SettingManager : ISettingManager
     string ISettingManager.WorkDirectory => _root;
 
     /// <summary>
-    /// 使用用应用程序的指定配置配置 <br />
-    ///     1、监听什么配置，有变化时谁处理<br />
-    ///     2、满足程序初始化读取配置，配置变化时通知外部变化<br />
+    /// 使用用应用程序的指定配置配置 
+    /// <para>1、监听什么配置，有变化时谁处理 </para>
+    /// <para>2、满足程序初始化读取配置，配置变化时通知外部变化 </para>
     /// </summary>
     /// <param name="isProject">false读取工作空间下配置；true读取工作空间-项目下的配置</param>
     /// <param name="rsCode">配置资源的编码</param>
@@ -100,8 +100,8 @@ public sealed class SettingManager : ISettingManager
     }
 
     /// <summary>
-    /// 获取应用程序配置的环境变量值 <br />
-    /// 备注：请在<see cref="ISettingManager.Run"/>之后执行此方法
+    /// 获取应用程序配置的环境变量值
+    /// <para>备注：请在<see cref="ISettingManager.Run"/>之后执行此方法 </para>
     /// </summary>
     /// <param name="name">环境变量名称</param>
     /// <returns>配置值；若不存在返回null</returns>

@@ -10,16 +10,16 @@ public abstract class PoolObject : Disposable, IPoolObject
 {
     #region 属性变量
     /// <summary>
-    /// 闲置时间 <br />
-    ///     1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收<br />
+    /// 闲置时间 
+    /// <para>1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收 </para>
     /// </summary>
     protected DateTime IdleTime = DateTime.UtcNow;
     #endregion
 
     #region IPoolObject
     /// <summary>
-    /// 闲置时间 <br />
-    ///     1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收<br />
+    /// 闲置时间 
+    /// <para>1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收 </para>
     /// </summary>
     DateTime IPoolObject.IdleTime { set => IdleTime = value; get => IdleTime; }
     #endregion

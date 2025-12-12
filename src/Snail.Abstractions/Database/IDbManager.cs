@@ -4,9 +4,9 @@ using Snail.Abstractions.Database.Interfaces;
 namespace Snail.Abstractions.Database;
 
 /// <summary>
-/// 接口约束：数据库管理器 <br />
-///     1、管理数据库服务器地址 <br />
-///     2、规划数据中间件逻辑，支持做干涉，如api拦截基于主键id的数据请求，然后走缓存
+/// 接口约束：数据库管理器
+/// <para>1、管理数据库服务器地址 </para>
+/// <para>2、规划数据中间件逻辑，支持做干涉，如api拦截基于主键id的数据请求，然后走缓存 </para>
 /// </summary>
 public interface IDbManager
 {
@@ -26,9 +26,9 @@ public interface IDbManager
     /// <returns></returns>
     DbServerDescriptor? GetServer(IDbServerOptions options, bool isReadonly = false, bool null2Error = false);
     /// <summary>
-    /// 尝试获取服务器信息<br />
-    ///     1、在仅知道<paramref name="workspace"/>和<paramref name="dbCode"/>时<br />
-    ///     2、取服务器信息中，第一个匹配<paramref name="workspace"/>和<paramref name="dbCode"/>的服务器信息<br />
+    /// 尝试获取服务器信息
+    /// <para>1、在仅知道<paramref name="workspace"/>和<paramref name="dbCode"/>时 </para>
+    /// <para>2、取服务器信息中，第一个匹配<paramref name="workspace"/>和<paramref name="dbCode"/>的服务器信息 </para>
     /// </summary>
     /// <param name="workspace">服务器所属工作空间</param>
     /// <param name="dbCode">数据库编码</param>

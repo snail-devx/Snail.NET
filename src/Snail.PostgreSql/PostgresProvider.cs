@@ -14,8 +14,8 @@ using System.Text;
 namespace Snail.PostgreSql;
 
 /// <summary>
-/// <see cref="IDbModelProvider{DbModel}"/>的PostgreSQL实现 <br />
-///     1、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【Postgres】作为依赖注入key值
+/// <see cref="IDbModelProvider{DbModel}"/>的PostgreSQL实现
+/// <para>1、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【Postgres】作为依赖注入key值 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
 [Component(From = typeof(IDbModelProvider<>), Key = nameof(DbType.Postgres), Lifetime = LifetimeType.Transient)]

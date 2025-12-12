@@ -5,7 +5,7 @@ using Snail.Utilities.Collections;
 namespace Snail.Common.Components;
 
 /// <summary>
-/// 对象池：管理对象的构建，回收 <br />
+/// 对象池：管理对象的构建，回收 
 /// </summary>
 public sealed class ObjectPool<T> : Disposable where T : class, IPoolObject
 {

@@ -8,9 +8,9 @@ using Snail.Abstractions.Web.Interfaces;
 namespace Snail.Message;
 
 /// <summary>
-/// 消息信差、负责进行消息的投递和派送<br />
-///     1、发送消息到指定的消息服务器<br />
-///     2、从指定消息服务器接收消息
+/// 消息信差、负责进行消息的投递和派送
+/// <para>1、发送消息到指定的消息服务器 </para>
+/// <para>2、从指定消息服务器接收消息 </para>
 /// </summary>
 [Component<IMessenger>(Lifetime = LifetimeType.Transient)]
 public sealed class Messenger : IMessenger

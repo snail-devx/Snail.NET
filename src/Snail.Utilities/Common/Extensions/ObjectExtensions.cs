@@ -79,8 +79,8 @@ public static class ObjectExtensions
         return obj;
     }
     /// <summary>
-    /// 构建一个<see cref="List{T}"/>对象，并把当前obj加入集合中 <br />
-    ///     1、解决到处 new <see cref="List{String}"/> { str }的问题
+    /// 构建一个<see cref="List{T}"/>对象，并把当前obj加入集合中
+    /// <para>1、解决到处 new <see cref="List{String}"/> { str }的问题 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>

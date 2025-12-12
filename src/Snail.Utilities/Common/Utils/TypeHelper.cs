@@ -70,8 +70,8 @@ public static class TypeHelper
     }
 
     /// <summary>
-    /// 将源对象的属性值拷贝给指定的目标对象<br />
-    ///     1、属性名相同；对象Type一样时
+    /// 将源对象的属性值拷贝给指定的目标对象
+    /// <para>1、属性名相同；对象Type一样时 </para>
     /// </summary>
     /// <param name="source"></param>
     /// <param name="target"></param>

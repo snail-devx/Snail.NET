@@ -19,8 +19,8 @@ public static class ErrorCodeExtensions
         => manager.Register(culture: null, errors);
 
     /// <summary>
-    /// 根据错误编码信息，获取具体的错误信息对象 <br />
-    ///     1、从zh-CN查找
+    /// 根据错误编码信息，获取具体的错误信息对象
+    /// <para>1、从zh-CN查找 </para>
     /// </summary>
     /// <param name="manager"></param>
     /// <param name="code">错误编码</param>
@@ -28,9 +28,9 @@ public static class ErrorCodeExtensions
     public static IErrorCode? Get(this IErrorCodeManager manager, string code)
         => manager.Get(culture: null, code);
     /// <summary>
-    /// 根据错误编码信息，获取具体的错误信息对象 <br />
-    ///     1、从zh-CN查找 <br />
-    ///     2、找不到报错
+    /// 根据错误编码信息，获取具体的错误信息对象
+    /// <para>1、从zh-CN查找 </para>
+    /// <para>2、找不到报错 </para>
     /// </summary>
     /// <param name="manager"></param>
     /// <param name="code">错误编码</param>
@@ -39,9 +39,9 @@ public static class ErrorCodeExtensions
     public static IErrorCode GetRequired(this IErrorCodeManager manager, string code)
         => GetRequired(manager, culture: null, code);
     /// <summary>
-    /// 根据错误编码信息，获取具体的错误信息对象 <br />
-    ///     1、若自身<paramref name="culture"/>找不到，则尝试从zh-CN查找 <br />
-    ///     2、找不到报错
+    /// 根据错误编码信息，获取具体的错误信息对象
+    /// <para>1、若自身<paramref name="culture"/>找不到，则尝试从zh-CN查找 </para>
+    /// <para>2、找不到报错 </para>
     /// </summary>
     /// <param name="manager"></param>
     /// <param name="culture">语言环境；传null则走默认zh-CN</param>

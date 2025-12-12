@@ -1,17 +1,17 @@
 ﻿namespace Snail.Identity.Components;
 
 /// <summary>
-/// Id生成器 <br />
-///     1、参照自工作代码：LeadingCloud.Framework.Id.IdWorker <br />
-///     2、后期支持外部指定<see cref="_twEpoch"/>值
+/// Id生成器
+/// <para>1、参照自工作代码：LeadingCloud.Framework.Id.IdWorker </para>
+/// <para>2、后期支持外部指定<see cref="_twEpoch"/>值 </para>
 /// </summary>
 public sealed class SnowFlakeIdWorker
 {
     #region 属性变量
     /// <summary>
-    /// 开始时间 <br />
-    ///     2016,1,1 <br />
-    ///     2016,1,1 Ticks 635872032000000000/10000=63587203200000
+    /// 开始时间 
+    /// <para>2016,1,1 </para>
+    /// <para>2016,1,1 Ticks 635872032000000000/10000=63587203200000 </para>
     /// </summary>
     private readonly long _twEpoch = 635872032000000000L;
 
@@ -25,13 +25,13 @@ public sealed class SnowFlakeIdWorker
     private readonly int _workerIdBits = 5;
 
     /// <summary>
-    /// 数据中心ID最大值 <br />
-    ///     -1L ^ (-1L &lt;&lt; <see cref="_datacenterIdBits"/>)
+    /// 数据中心ID最大值
+    /// <para>-1L ^ (-1L &lt;&lt; <see cref="_datacenterIdBits"/>) </para>
     /// </summary>
     private readonly long _maxDatacenterId = 0; //-1L ^ (-1L << 5);
     /// <summary>
-    /// 机器ID最大值 <br />
-    ///     -1L ^ (-1L &lt;&lt; <see cref="_workerIdBits"/> )
+    /// 机器ID最大值
+    /// <para>-1L ^ (-1L &lt;&lt; <see cref="_workerIdBits"/> ) </para>
     /// </summary>
     private readonly long _maxWorkerId = 0;// -1L ^ (-1L << 5);
 
@@ -40,27 +40,27 @@ public sealed class SnowFlakeIdWorker
     /// </summary>
     private readonly int _sequenceBits = 12;
     /// <summary>
-    /// 机器ID偏左移12位 <br />
-    ///     workerIdShift = _sequenceBits
+    /// 机器ID偏左移12位
+    /// <para>workerIdShift = _sequenceBits </para>
     /// </summary>
     private readonly int _workerIdShift = 0;
     /// <summary>
-    ///  数据中心ID左移17位<br />
-    ///      _datacenterIdShift = _sequenceBits + _workerIdShift <br />
-    ///      12 + 5;
+    /// 数据中心ID左移17位
+    /// <para>_datacenterIdShift = _sequenceBits + _workerIdShift </para>
+    /// <para>12 + 5 </para>
     /// </summary>
     private readonly int _datacenterIdShift = 0;
 
     /// <summary>
-    /// 时间毫秒左移22位<br />
-    ///     _timestampLeftShift = _sequenceBits + _workerIdShift + _datacenterIdShift<br />
-    ///     12 + 5 + 5;
+    /// 时间毫秒左移22位
+    /// <para>_timestampLeftShift = _sequenceBits + _workerIdShift + _datacenterIdShift </para>
+    /// <para>12 + 5 + 5 </para>
     /// </summary>
     private readonly int _timestampLeftShift = 0;
 
     /// <summary>
-    /// sequenceMask <br />
-    ///  sequenceMask = -1L ^ (-1L &lt;&lt; sequenceBits)
+    /// sequenceMask
+    /// <para>sequenceMask = -1L ^ (-1L &lt;&lt; sequenceBits) </para>
     /// </summary>
     private readonly long _sequenceMask = 0;//-1L ^ (-1L << 12);
 

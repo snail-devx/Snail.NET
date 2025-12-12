@@ -15,15 +15,15 @@ public sealed class DbTableAttribute : Attribute
     public string? Name { get; init; }
 
     ///// <summary>
-    ///// 数据表字段映射时，是否考虑继承的属性<br />
-    /////     暂时不对外开放，始终考虑继承的属性
+    ///// 数据表字段映射时，是否考虑继承的属性
+    ///// <para>暂时不对外开放，始终考虑继承的属性 </para>
     ///// </summary>
     //public bool Inherited { get; init; } = true;
 
     /// <summary>
-    /// 是否启用数据路由分片存储 <br />
-    ///     1、为true时，实体必须实现<see cref="IDbRouting.GetRouting"/>接口方法，且值不能为空 <br />
-    ///     2、具体能否实现分片存储，还得看数据库和具体<see cref="IDbModelProvider{DbModel}"/>实现类是否是否支持 <br />
+    /// 是否启用数据路由分片存储
+    /// <para>1、为true时，实体必须实现<see cref="IDbRouting.GetRouting"/>接口方法，且值不能为空 </para>
+    /// <para>2、具体能否实现分片存储，还得看数据库和具体<see cref="IDbModelProvider{DbModel}"/>实现类是否是否支持 </para>
     /// </summary>
     public bool Routing { init; get; }
 }

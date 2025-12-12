@@ -1,8 +1,8 @@
 namespace Snail.Abstractions.Common.Interfaces;
 
 /// <summary>
-/// 接口：标记实现类可进行验证操作 <br />
-///     1、具体验证逻辑由实现类自定义完成
+/// 接口：标记实现类可进行验证操作
+/// <para>1、具体验证逻辑由实现类自定义完成 </para>
 /// </summary>
 public interface IValidatable
 {

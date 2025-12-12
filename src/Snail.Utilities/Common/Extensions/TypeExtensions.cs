@@ -2,7 +2,7 @@
 
 namespace Snail.Utilities.Common.Extensions;
 /// <summary>
-///     <see cref="Type"/>扩展方法 <br />
+/// <see cref="Type"/>扩展方法 
 /// </summary>
 public static class TypeExtensions
 {
@@ -44,9 +44,9 @@ public static class TypeExtensions
     public static bool IsString(this Type type) => type == _stringType;
 
     /// <summary>
-    /// <paramref name="type"/>是否是泛型类型创建<br />
-    /// 1、即<paramref name="type"/>是通过<see cref="Type.MakeGenericType(Type[])"/>指定泛型参数构建出来的新类型<br />
-    /// 2、举例List&lt;String&gt;就是基于<see cref="List{T}"/>构建的
+    /// <paramref name="type"/>是否是泛型类型创建
+    /// <para>1、即<paramref name="type"/>是通过<see cref="Type.MakeGenericType(Type[])"/>指定泛型参数构建出来的新类型 </para>
+    /// <para>2、举例List&lt;String&gt;就是基于<see cref="List{T}"/>构建的 </para>
     /// </summary>
     /// <param name="type"></param>
     /// <param name="definitionType">out参数：泛型定义类型，如<see cref="List{String}"/>，则definitiontype=typeof <see cref="List{T}"/></param>
@@ -59,9 +59,9 @@ public static class TypeExtensions
         return definitionType != null;
     }
     /// <summary>
-    /// <paramref name="type"/>是否是<paramref name="definitionType"/>泛型创建的类型<br />
-    ///     1、即<paramref name="type"/>是通过<see cref="Type.MakeGenericType(Type[])"/>指定泛型参数构建出来的新类型<br />
-    ///     2、举例List&lt;String&gt;就是基于<see cref="List{T}"/>构建的
+    /// <paramref name="type"/>是否是<paramref name="definitionType"/>泛型创建的类型
+    /// <para>1、即<paramref name="type"/>是通过<see cref="Type.MakeGenericType(Type[])"/>指定泛型参数构建出来的新类型 </para>
+    /// <para>2、举例List&lt;String&gt;就是基于<see cref="List{T}"/>构建的 </para>
     /// </summary>
     /// <param name="type"></param>
     /// <param name="definitionType">泛型类型，如 typeof(<see cref="List{T}"/>)</param>

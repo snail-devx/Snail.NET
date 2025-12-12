@@ -4,9 +4,9 @@ using System.Timers;
 namespace Snail.Common.Utils;
 
 /// <summary>
-/// 内部的定时器；每个1s运行一次 <br />
-///     1、提供一个固定的定时器实例，然后做事件分发 <br />
-///     2、避免内置功能用到定时器时，定义大量定时器实例，反而浪费<br />
+/// 内部的定时器；每个1s运行一次 
+/// <para>1、提供一个固定的定时器实例，然后做事件分发 </para>
+/// <para>2、避免内置功能用到定时器时，定义大量定时器实例，反而浪费</para>
 /// </summary>
 internal sealed class InternalTimer
 {

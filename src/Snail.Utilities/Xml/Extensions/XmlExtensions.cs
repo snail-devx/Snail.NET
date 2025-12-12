@@ -123,9 +123,9 @@ public static class XmlExtensions
         return dict;
     }
     /// <summary>
-    /// 将XmlNodeList转成String的字典对象 <br />
-    ///     1、xmlnode节点的key属性作为字典key；value属性作为字典value值 <br />
-    ///     2、确保xml节点的key、value属性存在，且值不为空，为空会报错 <br />
+    /// 将XmlNodeList转成String的字典对象 
+    /// <para>1、xmlnode节点的key属性作为字典key；value属性作为字典value值 </para>
+    /// <para>2、确保xml节点的key、value属性存在，且值不为空，为空会报错 </para>
     /// </summary>
     /// <param name="nodes">xml节点</param>
     /// <param name="title">操作失败时的提示语</param>

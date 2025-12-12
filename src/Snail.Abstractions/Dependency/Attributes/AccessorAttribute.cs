@@ -10,9 +10,9 @@ namespace Snail.Abstractions.Dependency.Attributes;
 /// </summary>
 /// <typeparam name="IAccessor">访问器，如日志记录器，负责对外提供服务，内部调用日志提供程序完成日志记录</typeparam>
 /// <typeparam name="IProvider">访问器提供程序，如日志提供程序负责具体日志记录</typeparam>
-/// <remarks>无实际意义<br />
-///     1、可通过<see cref="InjectAttribute"/>和<see cref="ParameterAttribute{Provider}"/>组装完成相同功能<br />
-///     2、方便Loging、Http、Message等这类访问器+提供程序架构模式，做依赖注入，在这里抽取的简化版注入标签<br />
+/// <remarks>无实际意义
+/// <para>1、可通过<see cref="InjectAttribute"/>和<see cref="ParameterAttribute{Provider}"/>组装完成相同功能 </para>
+/// <para>2、方便Loging、Http、Message等这类访问器+提供程序架构模式，做依赖注入，在这里抽取的简化版注入标签 </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
 public class AccessorAttribute<IAccessor, IProvider> : Attribute, IInject, IParameter<IProvider>

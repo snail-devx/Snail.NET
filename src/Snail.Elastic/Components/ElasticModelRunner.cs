@@ -18,10 +18,10 @@ using static Snail.Elastic.Utils.ElasticHelper;
 namespace Snail.Elastic.Components;
 
 /// <summary>
-/// Elastic的数据实体执行器；负责执行具体的Elastic操作 <br />
-///     1、封装Elastic部分操作，供其他组件调用： <br />
-///         <see cref="ElasticProvider{DbModel}"/> <br />
-///         <see cref="ElasticDeletable{DbModel}"/>、<see cref="ElasticUpdatable{DbModel}"/>、<see cref="ElasticQueryable{DbModel}"/>公共调用
+/// Elastic的数据实体执行器；负责执行具体的Elastic操作 
+/// <para>1、封装Elastic部分操作，供其他组件调用：  </para>
+/// <para>- <see cref="ElasticProvider{DbModel}"/> </para>
+/// <para>- <see cref="ElasticDeletable{DbModel}"/>、<see cref="ElasticUpdatable{DbModel}"/>、<see cref="ElasticQueryable{DbModel}"/>公共调用 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
 /// <remarks>后期考虑写得更规范一些，抽取出接口出来</remarks>

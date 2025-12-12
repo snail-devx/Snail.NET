@@ -1,8 +1,8 @@
 ﻿namespace Snail.Abstractions.Identity.Interfaces;
 
 /// <summary>
-/// 接口约束：身份信息，主键Id <br />
-///     1、约束必须有Id值，用于唯一标记 <br />
+/// 接口约束：身份信息，主键Id
+/// <para>1、约束必须有Id值，用于唯一标记 </para>
 /// </summary>
 public interface IIdentity
 {

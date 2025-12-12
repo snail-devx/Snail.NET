@@ -41,8 +41,8 @@ public abstract class DbUpdatable<DbModel> : IDbUpdatable<DbModel> where DbModel
 
     #region 当前类直接实现的
     /// <summary>
-    /// 查询条件<br />
-    ///     1、多次调用时内部进行and合并
+    /// 查询条件
+    /// <para>1、多次调用时内部进行and合并 </para>
     /// </summary>
     /// <param name="predicate">where条件lambda表达式。lambda表达式目前不支持子文档、子表查询。示例:item=>item.Name=="Test"</param>
     /// <returns>数据库查询对象，方便链式调用</returns>
@@ -55,9 +55,9 @@ public abstract class DbUpdatable<DbModel> : IDbUpdatable<DbModel> where DbModel
     }
 
     /// <summary>
-    /// 设置字段值<br />
-    ///     1、多次调用按顺序合并<br />
-    ///     2、仅针对更新操作生效<br />
+    /// 设置字段值
+    /// <para>1、多次调用按顺序合并 </para>
+    /// <para>2、仅针对更新操作生效 </para>
     /// </summary>
     /// <typeparam name="TField">返回字段类型</typeparam>
     /// <param name="fieldLambda">字段lambda表达式。示例:item=>item.Name。不支持非成员字段</param>
@@ -70,9 +70,9 @@ public abstract class DbUpdatable<DbModel> : IDbUpdatable<DbModel> where DbModel
         return this;
     }
     /// <summary>
-    /// 批量设置字段值<br />
-    ///     1、多次调用按顺序合并<br />
-    ///     2、仅针对更新操作生效<br />
+    /// 批量设置字段值
+    /// <para>1、多次调用按顺序合并 </para>
+    /// <para>2、仅针对更新操作生效 </para>
     /// </summary>
     /// <param name="data">字段值字典。key为DbModel属性名，vlaue为字段值</param>
     /// <returns>数据库查询对象，方便链式调用</returns>

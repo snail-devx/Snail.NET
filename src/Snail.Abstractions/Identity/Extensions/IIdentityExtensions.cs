@@ -9,9 +9,9 @@ public static class IIdentityExtensions
 {
     #region 公共方法
     /// <summary>
-    /// 将<paramref name="data"/>添加到字典中 <br />
-    ///     1、<see cref="IIdentity.Id"/>作为字典的Key值 <br />
-    ///     2、若key值为null，则忽略添加；若<paramref name="map"/>为null，则忽略
+    /// 将<paramref name="data"/>添加到字典中
+    /// <para>1、<see cref="IIdentity.Id"/>作为字典的Key值 </para>
+    /// <para>2、若key值为null，则忽略添加；若<paramref name="map"/>为null，则忽略 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="data"></param>
@@ -27,9 +27,9 @@ public static class IIdentityExtensions
         return data;
     }
     /// <summary>
-    /// 将<paramref name="datas"/>数据添加到字典中 <br />
-    ///     1、<see cref="IIdentity.Id"/>作为字典的Key值 <br />
-    ///     2、若key值为null，则忽略添加；若<paramref name="map"/>为null，则忽略
+    /// 将<paramref name="datas"/>数据添加到字典中
+    /// <para>1、<see cref="IIdentity.Id"/>作为字典的Key值 </para>
+    /// <para>2、若key值为null，则忽略添加；若<paramref name="map"/>为null，则忽略 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="datas"></param>

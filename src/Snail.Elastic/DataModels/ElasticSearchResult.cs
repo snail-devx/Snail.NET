@@ -4,8 +4,8 @@ using Newtonsoft.Json.Linq;
 namespace Snail.Elastic.DataModels;
 
 /// <summary>
-/// ElasticSearch数据搜索结果 <br />
-///     不用完全把结果属性整理出来，仅限实际需要的
+/// ElasticSearch数据搜索结果
+/// <para>不用完全把结果属性整理出来，仅限实际需要的 </para>
 /// </summary>
 /// <typeparam name="SourceModel">索引数据的Source实体类型</typeparam>
 public sealed class ElasticSearchResult<SourceModel> where SourceModel : class

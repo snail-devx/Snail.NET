@@ -4,9 +4,9 @@ using Snail.Aspect.Distribution.Interfaces;
 namespace Snail.Distribution.Components;
 
 /// <summary>
-/// 默认的<see cref="ILockAnalyzer"/>分析器实现<br />
-///     1、处理并发锁操作时的Key上的动态参数信息<br />
-///     2、配合<see cref="LockAspectAttribute"/>在进行并发锁操作干预<br />
+/// 默认的<see cref="ILockAnalyzer"/>分析器实现
+/// <para>1、处理并发锁操作时的Key上的动态参数信息 </para>
+/// <para>2、配合<see cref="LockAspectAttribute"/>在进行并发锁操作干预 </para>
 /// </summary>
 [Component<ILockAnalyzer>]
 public class LockAnalyzer : ILockAnalyzer

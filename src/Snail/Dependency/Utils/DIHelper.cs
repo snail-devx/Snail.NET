@@ -16,11 +16,11 @@ public static class DIHelper
 
     #region 依赖注入信息管理
     /// <summary>
-    /// 从XML文件构建【依赖注入】信息<br />
-    ///     1、读取xml的[/configuration/container/register] 节点作为依赖注册信息描述 <br />
-    ///     2、从register、container分析name属性，拼接为Key值；若传入了<paramref name="keyPrefix"/>，一并拼接，连接符为<see cref="STR_Separator"/> <br />
-    ///     3、从register的lifetime、from、to分析依赖注入的其他信息，其中from、to可以在[/configuration/aliases/add]下配置别名，方便重用 <br />
-    ///     4、xml配置[/configuration/aliases/add]示例：&lt;add key="别名" value="Type.FullName值" /&gt;
+    /// 从XML文件构建【依赖注入】信息
+    /// <para>1、读取xml的[/configuration/container/register] 节点作为依赖注册信息描述 </para>
+    /// <para>2、从register、container分析name属性，拼接为Key值；若传入了<paramref name="keyPrefix"/>，一并拼接，连接符为<see cref="STR_Separator"/> </para>
+    /// <para>3、从register的lifetime、from、to分析依赖注入的其他信息，其中from、to可以在[/configuration/aliases/add]下配置别名，方便重用 </para>
+    /// <para>4、xml配置[/configuration/aliases/add]示例：&lt;add key="别名" value="Type.FullName值" /&gt; </para>
     /// </summary>
     /// <param name="file">xml文件全路径</param>
     /// <param name="keyPrefix">依赖注入信息的<see cref="DIDescriptor.Key"/>前缀；无则不传入</param>

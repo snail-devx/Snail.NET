@@ -85,8 +85,8 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
         return ret?.Hits?.Hits?.FirstOrDefault()?.Source;
     }
     /// <summary>
-    /// 获取符合筛选条件+分页的所有数据<br />
-    ///     1、禁止无条件查询
+    /// 获取符合筛选条件+分页的所有数据
+    /// <para>1、禁止无条件查询 </para>
     /// </summary>
     /// <remarks>Where、Order、Take、Skip都生效</remarks>
     /// <returns>数据库实体集合</returns>
@@ -99,8 +99,8 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
         return ret?.ToSource()?.ToList() ?? [];
     }
     /// <summary>
-    /// 获取符合筛选条件+分页的查询结果<br />
-    ///     1、支持LastSortKey逻辑
+    /// 获取符合筛选条件+分页的查询结果
+    /// <para>1、支持LastSortKey逻辑 </para>
     /// </summary>
     /// <remarks>Where、Order、Take、Skip都生效</remarks>
     /// <returns></returns>
@@ -119,8 +119,8 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
 
     #region 继承方法
     /// <summary>
-    /// 构建Elastic查询过滤条件 <br />
-    ///     1、仅使用<see cref="IDbQueryable{DbModel}.Where" />方法传入条件构建
+    /// 构建Elastic查询过滤条件
+    /// <para>1、仅使用<see cref="IDbQueryable{DbModel}.Where" />方法传入条件构建 </para>
     /// </summary>
     /// <returns></returns>
     protected ElasticSearchModel BuildFilter()

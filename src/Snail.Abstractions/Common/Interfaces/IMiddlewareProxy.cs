@@ -1,9 +1,9 @@
 ﻿namespace Snail.Abstractions.Common.Interfaces;
 
 /// <summary>
-/// 接口约束：中间件代理器 <br />
-///     1、实现洋葱模型，管道式编程 <br />
-///     2、支持Name命名，用于固话顺序使用
+/// 接口约束：中间件代理器 
+/// <para>1、实现洋葱模型，管道式编程 </para>
+/// <para>2、支持Name命名，用于固话顺序使用 </para>
 /// </summary>
 /// <typeparam name="Middleware">中间件委托对象</typeparam>
 public interface IMiddlewareProxy<Middleware> where Middleware : Delegate

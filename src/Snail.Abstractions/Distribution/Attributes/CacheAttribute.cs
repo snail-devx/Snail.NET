@@ -7,8 +7,8 @@
 public sealed class CacheAttribute : Attribute
 {
     /// <summary>
-    /// 缓存自定义类型；构建缓存时的类型名称<br />
-    ///     1、用于优化缓存，多个类型公用一个缓存<br />
+    /// 缓存自定义类型；构建缓存时的类型名称 
+    /// <para>1、用于优化缓存，多个类型公用一个缓存 </para>
     /// </summary>
     public Type? Type { init; get; }
 }

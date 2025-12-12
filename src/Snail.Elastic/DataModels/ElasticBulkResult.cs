@@ -3,8 +3,8 @@
 namespace Snail.Elastic.DataModels;
 
 /// <summary>
-/// ElasticSearch索引批量请求操作结果 <br />
-///     不用完全把结果属性整理出来，仅限实际需要的
+/// ElasticSearch索引批量请求操作结果
+/// <para>不用完全把结果属性整理出来，仅限实际需要的 </para>
 /// </summary>
 public sealed class ElasticBulkResult
 {

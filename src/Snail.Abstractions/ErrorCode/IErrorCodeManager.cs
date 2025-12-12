@@ -16,8 +16,8 @@ public interface IErrorCodeManager
     IErrorCodeManager Register(string? culture, params IList<IErrorCode> errors);
 
     /// <summary>
-    /// 根据错误编码信息，获取具体的错误信息对象 <br />
-    ///     1、若自身<paramref name="culture"/>找不到，则尝试从zh-CN查找
+    /// 根据错误编码信息，获取具体的错误信息对象
+    /// <para>1、若自身<paramref name="culture"/>找不到，则尝试从zh-CN查找 </para>
     /// </summary>
     /// <param name="culture">语言环境；传null则走默认zh-CN</param>
     /// <param name="code">错误编码</param>

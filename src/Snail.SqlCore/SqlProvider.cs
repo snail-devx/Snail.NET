@@ -34,9 +34,9 @@ public abstract class SqlProvider<DbModel> : DbProvider, IDbModelProvider<DbMode
     /// </summary>
     protected readonly string InsertSql;
     /// <summary>
-    /// 获取数据的sql语句。示例：‘select id,name from tablename’ <br />
-    ///     1、提前把【select 字段名 from 表名 】利索 <br />
-    ///     2、避免 select * 和字段名、属性名对不上的情况 <br />
+    /// 获取数据的sql语句。示例：‘select id,name from tablename’ 
+    /// <para>1、提前把【select 字段名 from 表名 】利索 </para>
+    /// <para>2、避免 select * 和字段名、属性名对不上的情况 </para>
     /// </summary>
     protected readonly string SelectSql;
 

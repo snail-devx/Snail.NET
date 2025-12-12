@@ -7,7 +7,7 @@ namespace Snail.Elastic.Extensions;
 /// <summary>
 /// Elastic相关扩展
 /// </summary>
-internal static class ElasticExtensions
+public static class ElasticExtensions
 {
     #region 属性变量
     /// <summary>

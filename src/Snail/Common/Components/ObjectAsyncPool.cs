@@ -5,9 +5,9 @@ using Snail.Utilities.Threading;
 namespace Snail.Common.Components;
 
 /// <summary>
-/// 对象异步池：管理对象的构建，回收 <br />
-///     1、对象的复用条件支持异步断言 <br />
-///     2、对象的创建支持异步 <br />
+/// 对象异步池：管理对象的构建，回收 
+/// <para>1、对象的复用条件支持异步断言 </para>
+/// <para>2、对象的创建支持异步 </para>
 /// </summary>
 /// <remarks>和<see cref="ObjectPool{T}"/>功能相似，加锁机制不通用</remarks>
 public sealed class ObjectAsyncPool<T> : Disposable where T : class, IPoolObject

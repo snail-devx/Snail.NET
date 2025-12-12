@@ -6,9 +6,9 @@ using Snail.Abstractions.Dependency.Interfaces;
 namespace Snail.Abstractions.Database.Attributes;
 
 /// <summary>
-/// 特性标签：数据库提供程序实现类依赖注入<br />
-///     1、使用<see cref="DbType"/>作为依赖注入的Key值<br />
-///     2、生命周期<see cref="Lifetime"/>默认单例<br />
+/// 特性标签：数据库提供程序实现类依赖注入
+/// <para>1、使用<see cref="DbType"/>作为依赖注入的Key值 </para>
+/// <para>2、生命周期<see cref="Lifetime"/>默认单例 </para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class DbProviderAttribute<Provider> : Attribute, IComponent
@@ -22,15 +22,15 @@ public sealed class DbProviderAttribute<Provider> : Attribute, IComponent
 
     #region IComponent
     /// <summary>
-    /// 依赖注入Key值，用于DI动态构建实例 <br />
-    ///     1、用于区分同一个源（From）多个实现（to）的情况 <br />
+    /// 依赖注入Key值，用于DI动态构建实例
+    /// <para>1、用于区分同一个源（From）多个实现（to）的情况 </para>
     /// </summary>
     /// <remarks>虽然和<see cref="IInject"/>中Key值意义一样，也不继承，避免接口串了</remarks>
     string? IComponent.Key => DbType.ToString();
 
     /// <summary>
-    /// 源类型：当前组件实现哪个类型 <br />
-    ///     1、为null时取自身作为From；不分析接口、基类等，如实现了IDisposable等系统接口，分析了占地方 <br />
+    /// 源类型：当前组件实现哪个类型 
+    /// <para>1、为null时取自身作为From；不分析接口、基类等，如实现了IDisposable等系统接口，分析了占地方  </para>
     /// </summary>
     Type? IComponent.From => typeof(Provider);
 
@@ -42,9 +42,9 @@ public sealed class DbProviderAttribute<Provider> : Attribute, IComponent
 }
 
 /// <summary>
-/// 特性标签：数据库提供程序的注入配置 <br />
-///     1、基于workspace、dbcode自动查找服务器地址信息，生成注入Key，<see cref="IInject.GetKey(IDIManager)"/> <br />
-///     2、基于worksapce、dbcode自动生成注入参数<see cref="IDbServerOptions"/>，<see cref="IParameter{IDbServerOptions}.GetParameter(in IDIManager)"/><br />
+/// 特性标签：数据库提供程序的注入配置 
+/// <para>1、基于workspace、dbcode自动查找服务器地址信息，生成注入Key，<see cref="IInject.GetKey(IDIManager)"/></para>
+/// <para>2、基于worksapce、dbcode自动生成注入参数<see cref="IDbServerOptions"/>，<see cref="IParameter{IDbServerOptions}.GetParameter(in IDIManager)"/></para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
 public sealed class DbProviderAttribute : Attribute, IInject, IParameter<IDbServerOptions>
@@ -82,9 +82,9 @@ public sealed class DbProviderAttribute : Attribute, IInject, IParameter<IDbServ
 
     #region IInject
     /// <summary>
-    /// 依赖注入Key值，用于DI动态构建实例 <br />
-    ///     1、用于区分同一个源（From）多个实现（to）的情况 <br />
-    ///     2、默认值为null
+    /// 依赖注入Key值，用于DI动态构建实例
+    /// <para>1、用于区分同一个源（From）多个实现（to）的情况 </para>
+    /// <para>2、默认值为null </para>
     /// </summary>
     /// <param name="manager"></param>
     /// <returns></returns>

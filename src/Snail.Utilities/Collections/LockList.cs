@@ -5,14 +5,14 @@ using System.Diagnostics;
 
 namespace Snail.Utilities.Collections;
 /// <summary>
-/// 加锁列表 <br />
-///     1、线程安全，支持多线程读写 <br />
-///     2、提供简单的读取和写入、遍历逻辑。仅满足自身业务需求，不建议对外大量使用 <br />
+/// 加锁列表
+/// <para>1、线程安全，支持多线程读写 </para>
+/// <para>2、提供简单的读取和写入、遍历逻辑。仅满足自身业务需求，不建议对外大量使用 </para>
 /// </summary>
 /// <typeparam name="T">列表数据类型，仅支持引用数据类型</typeparam>
 /// <remarks>
-/// 注意事项： <br />
-///     1、 内部使用<see cref="List{T}"/>完成数据存储<br />
+/// 注意事项：
+/// <para>1、 内部使用<see cref="List{T}"/>完成数据存储 </para>
 /// </remarks>
 public sealed class LockList<T> : Disposable, IDisposable where T : notnull
 {

@@ -10,9 +10,9 @@ public static class SerializationInfoExtensions
 
     #region AddValue：尝试添加序列化；null或者空数据不加入
     /// <summary>
-    /// 添加有效数据进行JSON序列化<br />
-    ///     1、==null 不加入json序列化<br />
-    ///     2、空字符串不加入JSON序列化<br />
+    /// 添加有效数据进行JSON序列化
+    /// <para>1、==null 不加入json序列化 </para>
+    /// <para>2、空字符串不加入JSON序列化 </para>
     /// </summary>
     /// <param name="info">JSON序列化信息对象；存储对对象进行序列化或反序列化所需的全部数据</param>
     /// <param name="key">JSON的Key值</param>
@@ -30,8 +30,8 @@ public static class SerializationInfoExtensions
     }
 
     /// <summary>
-    /// 添加有效<see cref="string"/>进行JSON序列化<br />
-    ///     1、null、空字符串不进行JSON序列化<br />
+    /// 添加有效<see cref="string"/>进行JSON序列化
+    /// <para>1、null、空字符串不进行JSON序列化 </para>
     /// </summary>
     /// <param name="info">JSON序列化信息对象；存储对对象进行序列化或反序列化所需的全部数据</param>
     /// <param name="key">JSON的Key值</param>
@@ -46,8 +46,8 @@ public static class SerializationInfoExtensions
         return info;
     }
     /// <summary>
-    /// 添加有效数据<see cref="IList{T}"/>进行JSON序列化<br />
-    ///     1、==null、空集合 不加入JSON序列化<br />
+    /// 添加有效数据<see cref="IList{T}"/>进行JSON序列化
+    /// <para>1、==null、空集合 不加入JSON序列化 </para>
     /// </summary>
     /// <param name="info">JSON序列化信息对象；存储对对象进行序列化或反序列化所需的全部数据</param>
     /// <param name="key">JSON的Key值</param>
@@ -62,8 +62,8 @@ public static class SerializationInfoExtensions
         return info;
     }
     /// <summary>
-    /// 添加有效数据<typeparamref name="T"/>[]进行JSON序列化<br />
-    ///     1、==null、空数组 不加入JSON序列化<br />
+    /// 添加有效数据<typeparamref name="T"/>[]进行JSON序列化
+    /// <para>1、==null、空数组 不加入JSON序列化 </para>
     /// </summary>
     /// <param name="info">JSON序列化信息对象；存储对对象进行序列化或反序列化所需的全部数据</param>
     /// <param name="key">JSON的Key值</param>

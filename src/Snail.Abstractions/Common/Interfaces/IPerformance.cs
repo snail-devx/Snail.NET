@@ -1,8 +1,8 @@
 ﻿namespace Snail.Abstractions.Common.Interfaces;
 
 /// <summary>
-/// 接口约束：性能指标 <br />
-///     1|约束必须有耗时指标 <br />
+/// 接口约束：性能指标
+/// <para>1、约束必须有耗时指标 </para>
 /// </summary>
 public interface IPerformance
 {

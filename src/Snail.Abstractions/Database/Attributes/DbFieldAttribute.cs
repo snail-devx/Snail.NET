@@ -11,8 +11,8 @@ public sealed class DbFieldAttribute : Attribute
     /// </summary>
     public string? Name { get; init; }
     /// <summary>
-    /// 字段数据类型；为空使用属性类型 <br />
-    ///     此值在不同类型数据库下支持情况不一样，慎用
+    /// 字段数据类型；为空使用属性类型
+    /// <para>1、此值在不同类型数据库下支持情况不一样，慎用 </para>
     /// </summary>
     public Type? Type { get; init; }
     /// <summary>

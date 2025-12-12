@@ -70,8 +70,8 @@ public class MongoQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMode
         return fluent.FirstOrDefaultAsync()!;
     }
     /// <summary>
-    /// 获取符合筛选条件+分页的所有数据<br />
-    ///     1、禁止无条件查询
+    /// 获取符合筛选条件+分页的所有数据
+    /// <para>1、禁止无条件查询 </para>
     /// </summary>
     /// <remarks>Where、Order、Take、Skip都生效</remarks>
     /// <returns>数据库实体集合</returns>
@@ -82,8 +82,8 @@ public class MongoQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMode
         return list ?? [];
     }
     /// <summary>
-    /// 获取符合筛选条件+分页的查询结果<br />
-    ///     1、支持LastSortKey逻辑
+    /// 获取符合筛选条件+分页的查询结果
+    /// <para>1、支持LastSortKey逻辑 </para>
     /// </summary>
     /// <remarks>Where、Order、Take、Skip都生效</remarks>
     /// <returns></returns>

@@ -10,8 +10,8 @@ namespace Snail.Abstractions.Database.Interfaces;
 public interface IDbUpdatable<DbModel> where DbModel : class
 {
     /// <summary>
-    /// 查询条件<br />
-    ///     1、多次调用时内部进行and合并
+    /// 查询条件
+    /// <para>1、多次调用时内部进行and合并 </para>
     /// </summary>
     /// <param name="predicate">where条件lambda表达式。lambda表达式目前不支持子文档、子表查询。示例:item=>item.Name=="Test"</param>
     /// <returns>数据库查询对象，方便链式调用</returns>
@@ -19,9 +19,9 @@ public interface IDbUpdatable<DbModel> where DbModel : class
     IDbUpdatable<DbModel> Where(Expression<Func<DbModel, bool>> predicate);
 
     /// <summary>
-    /// 设置字段值<br />
-    ///     1、多次调用按顺序合并<br />
-    ///     2、仅针对更新操作生效<br />
+    /// 设置字段值
+    /// <para>1、多次调用按顺序合并 </para>
+    /// <para>2、仅针对更新操作生效 </para>
     /// </summary>
     /// <typeparam name="TField">返回字段类型</typeparam>
     /// <param name="fieldLambda">字段lambda表达式。示例:item=>item.Name。不支持非成员字段</param>
@@ -29,9 +29,9 @@ public interface IDbUpdatable<DbModel> where DbModel : class
     /// <returns>数据库查询对象，方便链式调用</returns>
     IDbUpdatable<DbModel> Set<TField>(Expression<Func<DbModel, TField>> fieldLambda, TField value);
     /// <summary>
-    /// 批量设置字段值<br />
-    ///     1、多次调用按顺序合并<br />
-    ///     2、仅针对更新操作生效<br />
+    /// 批量设置字段值
+    /// <para>1、多次调用按顺序合并 </para>
+    /// <para>2、仅针对更新操作生效 </para>
     /// </summary>
     /// <param name="data">字段值字典。key为DbModel属性名，vlaue为字段值</param>
     /// <returns>数据库查询对象，方便链式调用</returns>

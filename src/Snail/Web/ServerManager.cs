@@ -10,9 +10,9 @@ using System.Xml;
 namespace Snail.Web;
 
 /// <summary>
-/// 服务器管理器 <br />
-///     1、注册管理服务器配置 <br />
-///     2、自动读取应用程序指定资源配置作为初始服务器配置 <br />
+/// 服务器管理器 
+/// <para>1、注册管理服务器配置 </para>
+/// <para>2、自动读取应用程序指定资源配置作为初始服务器配置 </para>
 /// </summary>
 /// <remarks>可继承此类做扩展，完成自定义功能，如Http、Redis、Rabbitmq等服务器地址管理</remarks>
 [Component<IServerManager>]
@@ -79,9 +79,9 @@ public class ServerManager : IServerManager
     /// <param name="project">配置所属项目；为null表示工作空间下的资源，如服务器地址配置等</param>
     /// <param name="rsCode">配置资源的编码，唯一</param>
     /// <param name="type">配置类型，配置文件，后续支持</param>
-    /// <param name="content">配置内容，根据<paramref name="type"/>类型不一样，这里值不同<br />
-    ///     1、<see cref="SettingType.File"/>：<paramref name="content"/>为文件的绝对路径<br />
-    ///     2、<see cref="SettingType.Xml"/>：<paramref name="content"/>为xml内容字符串
+    /// <param name="content">配置内容，根据<paramref name="type"/>类型不一样，这里值不同
+    /// <para>1、<see cref="SettingType.File"/>：<paramref name="content"/>为文件的绝对路径 </para>
+    /// <para>2、<see cref="SettingType.Xml"/>：<paramref name="content"/>为xml内容字符串 </para>
     /// </param>
     private void WatchServerSetting(string workspace, string? project, string rsCode, SettingType type, string content)
     {

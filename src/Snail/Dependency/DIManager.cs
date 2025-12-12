@@ -7,10 +7,10 @@ using Snail.Utilities.Collections;
 namespace Snail.Dependency;
 
 /// <summary>
-/// 依赖注入管理器 <br />
-///     1、负责进行依赖管理 <br />
-///     2、实现依赖反射，实例动态创建等功能 <br />
-///     3、对象属性销毁+对象回收功能
+/// 依赖注入管理器
+/// <para>1、负责进行依赖管理 </para>
+/// <para>2、实现依赖反射，实例动态创建等功能 </para>
+/// <para>3、对象属性销毁+对象回收功能 </para>
 /// </summary>
 public sealed class DIManager : Disposable, IDIManager
 {
@@ -19,9 +19,9 @@ public sealed class DIManager : Disposable, IDIManager
     #region 静态属性变量
     /** 暂时不对外提供，DI实例管理，交给<see cref="Application"/>完成
     /// <summary>
-    /// 依赖注入管理器根实例；<br />
-    ///     1、程序启动时，自动将依赖注入信息注册到此实例下<br />
-    ///     2、如webapi站点，在程序启动时自动赋值
+    /// 依赖注入管理器根实例
+    /// <para>1、程序启动时，自动将依赖注入信息注册到此实例下 </para>
+    /// <para>2、如webapi站点，在程序启动时自动赋值 </para>
     /// </summary>
     public static readonly IDIManager Root;*/
     /// <summary>
@@ -34,9 +34,9 @@ public sealed class DIManager : Disposable, IDIManager
     /// </summary>
     private static readonly AsyncLocal<IDIManager> _current = new();
     /// <summary>
-    /// 当前线程上管理器实例；创建一份<br />
-    ///     1、不存在自动基于<see cref="Empty"/>创建一份新的<br />
-    ///     2、内部使用<see cref="AsyncLocal{T}"/>做管理，子线程会自动继承父线程值
+    /// 当前线程上管理器实例；创建一份
+    /// <para>1、不存在自动基于<see cref="Empty"/>创建一份新的 </para>
+    /// <para>2、内部使用<see cref="AsyncLocal{T}"/>做管理，子线程会自动继承父线程值 </para>
     /// </summary>
     public static IDIManager Current
     {
@@ -52,15 +52,15 @@ public sealed class DIManager : Disposable, IDIManager
     /// </summary>
     private readonly LockList<DIDescriptor> _registers = new LockList<DIDescriptor>();
     /// <summary>
-    /// 动态注册的依赖注册信息 <br />
-    ///     1、基于泛型动态构建 <br />
-    ///     2、基于List动态构建
+    /// 动态注册的依赖注册信息 
+    /// <para>1、基于泛型动态构建 </para>
+    /// <para>2、基于List动态构建 </para>
     /// </summary>
     private readonly LockList<DIDescriptor> _dynamicRegister = new LockList<DIDescriptor>();
     /// <summary>
-    /// 依赖注入实例存储器字典 <br />
-    ///     1、key为依赖信息对象 <br />
-    ///     2、value为实例存储器，用于生命周期管理对象
+    /// 依赖注入实例存储器字典
+    /// <para>1、key为依赖信息对象 </para>
+    /// <para>2、value为实例存储器，用于生命周期管理对象 </para>
     /// </summary>
     private readonly LockMap<DIDescriptor, ITypeStorager> _storagerMap = new LockMap<DIDescriptor, ITypeStorager>();
     #endregion
@@ -111,9 +111,9 @@ public sealed class DIManager : Disposable, IDIManager
     public event Action? OnDestroy;
 
     /// <summary>
-    /// 基于当前管理器构建新管理实例 <br />
-    ///     1、继承当前管理器中已注册的依赖注入信息 <br />
-    ///     2、相当于继承当前管理器，创建一个全新的子管理器实例
+    /// 基于当前管理器构建新管理实例
+    /// <para>1、继承当前管理器中已注册的依赖注入信息 </para>
+    /// <para>2、相当于继承当前管理器，创建一个全新的子管理器实例 </para>
     /// </summary>
     /// <returns></returns>
     IDIManager IDIManager.New()
@@ -495,17 +495,17 @@ public sealed class DIManager : Disposable, IDIManager
 
     #region 私有类型
     /// <summary>
-    /// 私有类：动态List集合类 <br />
-    ///     配合<see cref="CreateDynamicEnumerableToFunc"/>使用 <br />
-    ///     动态构建实例添加到集合中时，也可以反射List的Add方法，但容易受List对象变化影响；这里直接封装一个类，搞一个唯一方法 <br />
+    /// 私有类：动态List集合类
+    /// <para>配合<see cref="CreateDynamicEnumerableToFunc"/>使用 </para>
+    /// <para>动态构建实例添加到集合中时，也可以反射List的Add方法，但容易受List对象变化影响；这里直接封装一个类，搞一个唯一方法 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     private class _DynamicEnumerableList<T> : List<T>
     {
         /// <summary>
-        /// 添加动态实例  <br />
-        ///     1、内部中转List的Add方法 <br />
-        ///     2、为null的数据，自动忽略不添加
+        /// 添加动态实例
+        /// <para>1、内部中转List的Add方法 </para>
+        /// <para>2、为null的数据，自动忽略不添加 </para>
         /// </summary>
         /// <param name="value"></param>
         public void AddDynamicInstance(in T value) => value?.AddTo(this);

@@ -41,8 +41,8 @@ public static class ExpressionExtensions
         };
 
     /// <summary>
-    /// 获取<typeparamref name="DbModel"/>属性、字段等成员表达式的具体成员信息<br />
-    ///     1、如表达式为OrderBy(item=>item.Name) 则返回的是 Name 属性信息
+    /// 获取<typeparamref name="DbModel"/>属性、字段等成员表达式的具体成员信息
+    /// <para>1、如表达式为OrderBy(item=>item.Name) 则返回的是 Name 属性信息 </para>
     /// </summary>
     /// <typeparam name="DbModel">数据实体</typeparam>
     /// <typeparam name="TField">字段数据类型</typeparam>

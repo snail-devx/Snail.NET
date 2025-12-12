@@ -6,10 +6,10 @@ using System.Diagnostics;
 namespace Snail.Dependency.Components;
 
 /// <summary>
-/// 类型代理器 <br />
-///     1、代理类型构建实例逻辑 <br />
-///     2、将<see cref="Type"/>用于实例构建的相关信息缓存起来，加快后续构建性能 <br />
-///     3、代理器基于对象池，针对长时间不使用的<see cref="Type"/>类型，做自动清理
+/// 类型代理器 
+/// <para>1、代理类型构建实例逻辑  </para>
+/// <para>2、将<see cref="Type"/>用于实例构建的相关信息缓存起来，加快后续构建性能 </para>
+/// <para>3、代理器基于对象池，针对长时间不使用的<see cref="Type"/>类型，做自动清理 </para>
 /// </summary>
 public sealed class TypeProxy : PoolObject<Type>
 {
@@ -20,9 +20,9 @@ public sealed class TypeProxy : PoolObject<Type>
     private const BindingFlags BINDINGFLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
     /// <summary>
-    /// 类型代理池 <br />
-    ///     1、超过5分钟不用自动清理掉 <br />
-    ///     2、【全局单例】生命周期依赖注入，类型代理只会分析一次，以后就不会再用，始终占着没有意义
+    /// 类型代理池
+    /// <para>1、超过5分钟不用自动清理掉 </para>
+    /// <para>2、【全局单例】生命周期依赖注入，类型代理只会分析一次，以后就不会再用，始终占着没有意义 </para>
     /// </summary>
     private static readonly ObjectPool<TypeProxy> _typePool = new ObjectPool<TypeProxy>(TimeSpan.FromMinutes(1));
 

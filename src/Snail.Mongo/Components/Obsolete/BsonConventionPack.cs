@@ -8,9 +8,9 @@ using System.Reflection;
 namespace Snail.Mongo.Components.Obsolete;
 
 /// <summary>
-/// 自定义的Bson处理配置 <br />
-///     1、主要对实体字段的映射做处理； <br />
-///     2、具体处理逻辑还是交给【IConvention】接口实现类，这里只做注册 <br />
+/// 自定义的Bson处理配置 
+/// <para>1、主要对实体字段的映射做处理； </para>
+/// <para>2、具体处理逻辑还是交给【IConvention】接口实现类，这里只做注册 </para>
 /// </summary>
 internal sealed class BsonConventionPack : IConventionPack
 {

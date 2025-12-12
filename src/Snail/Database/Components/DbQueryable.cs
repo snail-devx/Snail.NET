@@ -8,8 +8,8 @@ using System.Linq.Expressions;
 namespace Snail.Database.Components;
 
 /// <summary>
-/// 数据库查询接口基类 <br />
-///     1、将可查询接口中的查询条件部分，做集中实现
+/// 数据库查询接口基类
+/// <para>1、将可查询接口中的查询条件部分，做集中实现 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
 public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel : class
@@ -70,36 +70,36 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
 
     #region 当前类直接实现的
     /// <summary>
-    /// 查询条件<br />
-    ///     1、多次调用时内部进行and合并<br />
-    ///     2、Where条件使用备注：<br />
-    ///         ⚠️ 不同数据库之间的 > >= = != &lt;&lt;=、in、like查询规则统一，但和数据库原生语法可能有差异；<br />
-    ///         ⚠️ 若数据库自身默认忽略字段值大小写，则Where条件中指定无效，此差异无法屏蔽<br />
-    ///         ⚠️ 约束：无效字段（值为null，或者字段不存在）；有效字段（值非null）<br/>
-    ///     3、Where条件具体规则如下：<br />
-    ///     ----- 【值比较】大于、小于、等于、大于等于、小于等于、不等于】-------------------<br/>
-    ///         👉 ==  ：为null时，【无效字段】数据；非null时，【有效字段】正常比较<br/>
-    ///         👉 !=  ：为null时，所有【有效字段】数据；非null时，【有效字段】且不等、或者【无效字段】<br/>
-    ///         👉 >   ：为null时，恒false，不会命中任何数据；非null时，【有效字段】正常比较<br/>
-    ///         👉 >=  ：为null时，恒false，不会命中任何数据；非null时，【有效字段】正常比较<br/>
-    ///         👉 &lt; ：为null时，恒false，不会命中任何数据；非null时，【有效字段】且小于<br/>
-    ///         👉 &lt;= ：为null时，恒false，不会命中任何数据；非null时，【有效字段】且小于等于<br/>
-    ///     ----- 【in查询】new List{T}.Contains(item=>item.Name)、new String[]{}.Contains(item=>item.Name)  -------------------<br/>
-    ///         👉 in []：恒false，不会命中任何数据<br/>
-    ///         👉 not in []：恒true，命中所有数据<br/>
-    ///         👉 in [null]：等效 =null<br/>
-    ///         👉 not in [null]：等效 !=null<br/>
-    ///         👉 in [null,...有效值]：=null 或者in有效值<br/>
-    ///         👉 not in [in,...有效值]：!=null 且 not in有效值<br/>
-    ///         👉 in [...有效值]：in有效值<br/>
-    ///         👉 not in [...有效值]：=null 或 not in 有效值<br/>
-    ///     ----- 【like查询】"".Contains(item=>item.Name);item=>item.Name.StartWith；item=>item.Name.EndWith-------------------<br/>
-    ///         👉 like null ：恒false；不会命中任何数据<br/>
-    ///         👉 not like null：恒false；不会命中任何数据<br/>
-    ///         👉 like ''：非null的所有数据<br/>
-    ///         👉 not like ''：为null的所有数据<br/>
-    ///         👉 like '1'：包含1的所有数据<br/>
-    ///         👉 not like '1'：为null、或者不包含1的所有数据<br/>
+    /// 查询条件
+    /// <para>1、多次调用时内部进行and合并 </para>
+    /// <para>2、Where条件使用备注： </para>
+    /// <para>    ⚠️ 不同数据库之间的 > >= = != &lt;&lt;=、in、like查询规则统一，但和数据库原生语法可能有差异； </para>
+    /// <para>    ⚠️ 若数据库自身默认忽略字段值大小写，则Where条件中指定无效，此差异无法屏蔽 </para>
+    /// <para>    ⚠️ 约束：无效字段（值为null，或者字段不存在）；有效字段（值非null） </para>
+    /// <para>3、Where条件具体规则如下： </para>
+    /// <para>----- 【值比较】大于、小于、等于、大于等于、小于等于、不等于】------------------- </para>
+    /// <para>    👉 ==  ：为null时，【无效字段】数据；非null时，【有效字段】正常比较 </para>
+    /// <para>    👉 !=  ：为null时，所有【有效字段】数据；非null时，【有效字段】且不等、或者【无效字段】 </para>
+    /// <para>    👉 >   ：为null时，恒false，不会命中任何数据；非null时，【有效字段】正常比较 </para>
+    /// <para>    👉 >=  ：为null时，恒false，不会命中任何数据；非null时，【有效字段】正常比较 </para>
+    /// <para>    👉 &lt; ：为null时，恒false，不会命中任何数据；非null时，【有效字段】且小于 </para>
+    /// <para>    👉 &lt;= ：为null时，恒false，不会命中任何数据；非null时，【有效字段】且小于等于 </para>
+    /// <para>----- 【in查询】new List{T}.Contains(item=>item.Name)、new String[]{}.Contains(item=>item.Name)  ------------------- </para>
+    /// <para>    👉 in []：恒false，不会命中任何数据 </para>
+    /// <para>    👉 not in []：恒true，命中所有数据 </para>
+    /// <para>    👉 in [null]：等效 =null </para>
+    /// <para>    👉 not in [null]：等效 !=null </para>
+    /// <para>    👉 in [null,...有效值]：=null 或者in有效值 </para>
+    /// <para>    👉 not in [in,...有效值]：!=null 且 not in有效值 </para>
+    /// <para>    👉 in [...有效值]：in有效值 </para>
+    /// <para>    👉 not in [...有效值]：=null 或 not in 有效值 </para>
+    /// <para>----- 【like查询】"".Contains(item=>item.Name);item=>item.Name.StartWith；item=>item.Name.EndWith------------------- </para>
+    /// <para>    👉 like null ：恒false；不会命中任何数据 </para>
+    /// <para>    👉 not like null：恒false；不会命中任何数据 </para>
+    /// <para>    👉 like ''：非null的所有数据 </para>
+    /// <para>    👉 not like ''：为null的所有数据 </para>
+    /// <para>    👉 like '1'：包含1的所有数据 </para>
+    /// <para>    👉 not like '1'：为null、或者不包含1的所有数据 </para>
     /// </summary>
     /// <param name="predicate">where条件lambda表达式。lambda表达式目前不支持子文档、子表查询。示例:item=>item.Name=="Test"</param>
     /// <returns>数据库查询对象，方便链式调用</returns>
@@ -112,7 +112,7 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
 
     /// <summary>
     /// 数据升序
-    ///     1、多次调用按顺序合并
+    /// <para>1、多次调用按顺序合并 </para>
     /// </summary>
     /// <typeparam name="TField">排序字段类型</typeparam>
     /// <param name="fieldLambda">排序字段lambda表达式。示例:item=>item.Name。不支持非成员字段</param>
@@ -125,7 +125,7 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     }
     /// <summary>
     /// 数据降序
-    ///     1、多次调用按顺序合并
+    /// <para>1、多次调用按顺序合并</para>
     /// </summary>
     /// <typeparam name="TField">排序字段类型</typeparam>
     /// <param name="fieldLambda">排序字段lambda表达式。示例:item=>item.Name。不支持非成员字段</param>
@@ -139,8 +139,8 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
 
     /// <summary>
     /// 查询时，返回的字段信息
-    ///     1、多次调用按顺序合并
-    ///     2、不调用此方法，则默认返回所有字段
+    /// <para>1、多次调用按顺序合并 </para>
+    /// <para>2、不调用此方法，则默认返回所有字段 </para>
     /// </summary>
     /// <typeparam name="TField">返回字段类型</typeparam>
     /// <param name="fieldLambda">返回字段lambda表达式。示例:item=>item.Name。不支持非成员字段</param>
@@ -158,9 +158,9 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     }
     /// <summary>
     /// 查询时，不返回的字段信息
-    ///     1、多次调用按顺序合并
-    ///     2、不调用此方法，则默认返回所有字段
-    ///     3、若设置成了全部字段都不返回，则默认返回所有字段
+    /// <para>1、多次调用按顺序合并 </para>
+    /// <para>2、不调用此方法，则默认返回所有字段 </para>
+    /// <para>3、若设置成了全部字段都不返回，则默认返回所有字段 </para>
     /// </summary>
     /// <typeparam name="TField"></typeparam>
     /// <param name="fieldLambda"></param>
@@ -178,7 +178,7 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
 
     /// <summary>
     /// 分页时忽略的数据量
-    ///     1、多次调用以最后一次调用为准
+    /// <para>1、多次调用以最后一次调用为准 </para>
     /// </summary>
     /// <param name="skip">分页忽略的数据量</param>
     /// <returns>数据库查询对象，方便链式调用</returns>
@@ -197,8 +197,8 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     }
     /// <summary>
     /// 分页时，上一条数据的排序Key
-    ///     1、解决skip传入数值大时，查询性能慢的问题
-    ///     2、多次传入，以最后一次为准；skip数值互斥
+    /// <para>1、解决skip传入数值大时，查询性能慢的问题 </para>
+    /// <para>2、多次传入，以最后一次为准；skip数值互斥 </para>
     /// </summary>
     /// <param name="lastSortKey"></param>
     /// <returns></returns>
@@ -211,7 +211,7 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     }
     /// <summary>
     /// 分页时取多少条数据
-    ///     1、多次调用以最后一次调用为准
+    /// <para>1、多次调用以最后一次调用为准 </para>
     /// </summary>
     /// <param name="count">当前页取的数据条数</param>
     /// <returns>数据库查询对象，方便链式调用</returns>
@@ -248,15 +248,15 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     /// <returns>数据实体；无则返回默认值</returns>
     public abstract Task<DbModel?> FirstOrDefault();
     /// <summary>
-    /// 获取符合筛选条件+分页的所有数据<br />
-    ///     1、禁止无条件查询
+    /// 获取符合筛选条件+分页的所有数据
+    /// <para>1、禁止无条件查询 </para>
     /// </summary>
     /// <remarks>Where、Order、Take、Skip都生效</remarks>
     /// <returns>数据库实体集合</returns>
     public abstract Task<IList<DbModel>> ToList();
     /// <summary>
-    /// 获取符合筛选条件+分页的查询结果<br />
-    ///     1、支持LastSortKey逻辑
+    /// 获取符合筛选条件+分页的查询结果
+    /// <para>1、支持LastSortKey逻辑 </para>
     /// </summary>
     /// <remarks>Where、Order、Take、Skip都生效</remarks>
     /// <returns></returns>

@@ -60,9 +60,9 @@ public static class ArrayExtensions
 
     #region Any、ForEach
     /// <summary>
-    /// 数组是否有值 <br />
-    ///     1、不是null、不是空数组 <br />
-    ///     2、直接使用自身类型属性判断；不用.Any <br />
+    /// 数组是否有值
+    /// <para>1、不是null、不是空数组 </para>
+    /// <para>2、直接使用自身类型属性判断；不用.Any </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="array"></param>
@@ -90,8 +90,8 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// 遍历数据 <br />
-    ///     1、不能终止循环遍历
+    /// 遍历数据
+    /// <para>1、不能终止循环遍历 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="array"></param>

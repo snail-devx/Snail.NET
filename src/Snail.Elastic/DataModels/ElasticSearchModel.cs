@@ -35,10 +35,10 @@ public sealed class ElasticSearchModel : ISerializable
     /// </summary>
     public List<object>? SearchAfter { set; get; }
     /// <summary>
-    /// 从第几条开始取数据 <br />
-    ///     1、等效于老系统的StartIndex值； <br />
-    ///     2、有性能问题：不推荐使用，仅为了兼容老系统而存在；新系统使用<see cref="SearchAfter"/>替代 <br />
-    ///     3、当传入了<see cref="SearchAfter"/>后，此值强制无效 <br />
+    /// 从第几条开始取数据
+    /// <para>1、等效于老系统的StartIndex值； </para>
+    /// <para>2、有性能问题：不推荐使用，仅为了兼容老系统而存在；新系统使用<see cref="SearchAfter"/>替代 </para>
+    /// <para>3、当传入了<see cref="SearchAfter"/>后，此值强制无效 </para>
     /// </summary>
     [Obsolete("仅为兼容老系统存在，新系统请使用“SearchAfter”")]
     public int? From { set; get; }

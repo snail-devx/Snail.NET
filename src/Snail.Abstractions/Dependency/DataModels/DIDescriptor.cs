@@ -79,9 +79,9 @@ public class DIDescriptor
 
     #region 私有方法：不再检查类型；否则【Microsoft.Extensions.DependencyInjection】对接时，会报错
     ///// <summary>
-    ///// 检测依赖注入的From和To类型，确保To能实例化From类型 <br />
-    /////     1、这里面规则会比较多，需要充分考虑泛型、继承等情况 <br />
-    /////     2、若to无法作为from的实例化，则抛出异常
+    ///// 检测依赖注入的From和To类型，确保To能实例化From类型
+    ///// <para>1、这里面规则会比较多，需要充分考虑泛型、继承等情况 </para>
+    ///// <para>2、若to无法作为from的实例化，则抛出异常 </para>
     ///// </summary>
     ///// <param name="from"></param>
     ///// <param name="to"></param>
@@ -246,8 +246,8 @@ public class DIDescriptor<FromType, ToType> : DIDescriptor where ToType : class,
     /// </summary>
     /// <param name="key">依赖注入Key值；唯一</param>
     /// <param name="lifetime">依赖注入实现类生命周期</param>
-    /// <remarks>执行【 base(key, typeof(T), lifetime, typeof(T), checkType: false)】不检查类型，有弊端<br />
-    /// 1、如直接from来个静态方法、抽象方法，这种情况完全外部自己负责
+    /// <remarks>执行【 base(key, typeof(T), lifetime, typeof(T), checkType: false)】不检查类型，有弊端
+    /// <para>1、如直接from来个静态方法、抽象方法，这种情况完全外部自己负责 </para>
     /// </remarks>
     public DIDescriptor(in string? key, in LifetimeType lifetime) : base(key, typeof(FromType), lifetime, typeof(ToType))
     { }

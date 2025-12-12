@@ -33,9 +33,9 @@ public static class StringExtensions
 
     #region Any、ForEach
     /// <summary>
-    /// 字符串是否有值 <br />
-    ///     1、不是null、不是空字符串 <br />
-    ///     2、直接使用自身类型属性判断；不用.Any <br />
+    /// 字符串是否有值
+    /// <para>1、不是null、不是空字符串 </para>
+    /// <para>2、直接使用自身类型属性判断；不用.Any </para>
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>

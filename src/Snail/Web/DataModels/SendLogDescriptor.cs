@@ -3,8 +3,8 @@
 namespace Snail.Web.DataModels;
 
 /// <summary>
-/// HTTP请求发送日志描述器 <br /> 
-///     在启用网络追踪时；强制给日志加上日志Id值
+/// HTTP请求发送日志描述器 
+/// <para>在启用网络追踪时；强制给日志加上日志Id值 </para>
 /// </summary>
 public sealed class SendLogDescriptor : IdLogDescriptor
 {

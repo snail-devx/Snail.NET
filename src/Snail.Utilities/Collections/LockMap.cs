@@ -5,13 +5,13 @@ using System.Diagnostics;
 
 namespace Snail.Utilities.Collections;
 /// <summary>
-/// 加锁键值字典类 <br />
-///     1、线程安全，优化ConcurrentDictionary.GetOrAdd委托多次调用的问题 <br />
-///     2、提供简单的读取和写入、遍历逻辑。仅满足自身业务需求，不建议对外大量使用 <br />
+/// 加锁键值字典类
+/// <para>1、线程安全，优化ConcurrentDictionary.GetOrAdd委托多次调用的问题 </para>
+/// <para>2、提供简单的读取和写入、遍历逻辑。仅满足自身业务需求，不建议对外大量使用 </para>
 /// </summary>
 /// <remarks>
-/// 注意事项： <br />
-///     1、使用<see cref="Dictionary{TKey, TValue}"/>做数据存储，Key无序；后续考虑优化数据结构，实现Key有序 <br />
+/// 注意事项
+/// <para>1、使用<see cref="Dictionary{TKey, TValue}"/>做数据存储，Key无序；后续考虑优化数据结构，实现Key有序 </para>
 /// </remarks>
 public sealed class LockMap<TKey, TValue> : Disposable, IDisposable where TKey : notnull
 {

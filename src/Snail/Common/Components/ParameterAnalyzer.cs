@@ -3,10 +3,10 @@
 namespace Snail.Common.Components;
 
 /// <summary>
-/// 参数分析器 <br />
-///     1、分析字符串中的动态参数，进行参数替换；从而生成实际字符串数据 <br />
-///     2、如 {name} 将被识别为name参数；然后从传入的name参数值替换字符串中的{name}<br />
-///     3、支持外部指定 参数识别 规则，默认为 {parameter}<br />
+/// 参数分析器
+/// <para>1、分析字符串中的动态参数，进行参数替换；从而生成实际字符串数据  </para>
+/// <para>2、如 {name} 将被识别为name参数；然后从传入的name参数值替换字符串中的{name} </para>
+/// <para>3、支持外部指定 参数识别 规则，默认为 {parameter} </para>
 /// </summary>
 public class ParameterAnalyzer
 {

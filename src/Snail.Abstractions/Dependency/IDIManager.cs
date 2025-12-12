@@ -14,9 +14,9 @@ public interface IDIManager : IDisposable
     event Action OnDestroy;
 
     /// <summary>
-    /// 基于当前管理器构建新管理实例 <br />
-    ///     1、继承当前管理器中已注册的依赖注入信息 <br />
-    ///     2、相当于继承当前管理器，创建一个全新的子管理器实例
+    /// 基于当前管理器构建新管理实例
+    /// <para>1、继承当前管理器中已注册的依赖注入信息 </para>
+    /// <para>2、相当于继承当前管理器，创建一个全新的子管理器实例 </para>
     /// </summary>
     /// <returns></returns>
     IDIManager New();

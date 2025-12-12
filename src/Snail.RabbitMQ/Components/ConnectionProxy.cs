@@ -72,8 +72,8 @@ public sealed class ConnectionProxy : PoolObject<IConnection>, IPoolObject
 
     #region IPoolObject
     /// <summary>
-    /// 闲置时间 <br />
-    ///     1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收<br />
+    /// 闲置时间
+    /// <para>1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收 </para>
     /// </summary>
     DateTime IPoolObject.IdleTime
     {

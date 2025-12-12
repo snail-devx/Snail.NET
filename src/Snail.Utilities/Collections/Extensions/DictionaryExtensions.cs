@@ -9,9 +9,9 @@ public static class DictionaryExtensions
     {
         #region Any、ForEach
         /// <summary>
-        /// 字典是否有值 <br />
-        ///     1、不是null、不是空字典 <br />
-        ///     2、直接使用自身类型属性判断；不用.Any <br />
+        /// 字典是否有值
+        /// <para>1、不是null、不是空字典 </para>
+        /// <para>2、直接使用自身类型属性判断；不用.Any </para>
         /// </summary>
         /// <returns></returns>
         public bool Any() => dictionary.Count != 0;
@@ -32,10 +32,10 @@ public static class DictionaryExtensions
 
         #region GetOrAdd、Set、Combine、Remove
         /// <summary>
-        /// 从字典中获取值；取不到则添加 <br />
-        ///     1、线程安全；唯一性；使用 字典实例 做lock <br />
-        ///     2、确保addFunc只会被调用一次；解决ConcurrentDictionary中委托调用多次的问题<br />
-        ///     3、确保写入的同步，不会对字典数据进行遍历读取，否则会报错<br />
+        /// 从字典中获取值；取不到则添加
+        /// <para>1、线程安全；唯一性；使用 字典实例 做lock  </para>
+        /// <para>2、确保addFunc只会被调用一次；解决ConcurrentDictionary中委托调用多次的问题 </para>
+        /// <para>3、确保写入的同步，不会对字典数据进行遍历读取，否则会报错 </para>
         /// </summary>
         /// <param name="key">取值key</param>
         /// <param name="addFunc">key不存在时，用于取值添加的委托</param>
@@ -73,9 +73,9 @@ public static class DictionaryExtensions
             return dictionary;
         }
         /// <summary>
-        /// 字典合并 <br />
-        ///     1、将指定的多个字典对象合并给当前字典。 <br />
-        ///     2、key存在则覆盖，不存在添加 <br />
+        /// 字典合并
+        /// <para>1、将指定的多个字典对象合并给当前字典 </para>
+        /// <para>2、key存在则覆盖，不存在添 </para>
         /// </summary>
         /// <param name="dicts">要合并给当前字典的对象数据</param>
         /// <returns>字典本身；方便实现链式调用</returns>

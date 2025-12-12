@@ -1,7 +1,7 @@
 ﻿namespace Snail.Utilities.Common.Utils;
 /// <summary>
-/// 委托助手类 <br />
-///     1、支持运行Action和Func：Run、RunIf、RunAsync、RunIfAsync
+/// 委托助手类
+/// <para>1、支持运行Action和Func：Run、RunIf、RunAsync、RunIfAsync </para>
 /// </summary>
 public static class DelegateHelper
 {

@@ -10,9 +10,9 @@ using static Snail.Elastic.Utils.ElasticHelper;
 namespace Snail.Elastic;
 
 /// <summary>
-/// <see cref="IDbModelProvider{DbModel}"/>的Elastic实现 <br />
-///     1、前期先使用HTTP发送，后续看情况引入Elastic官方组件 <br />
-///     2、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【ElasticSearch】作为依赖注入key值
+/// <see cref="IDbModelProvider{DbModel}"/>的Elastic实现 
+/// <para>1、前期先使用HTTP发送，后续看情况引入Elastic官方组件 </para>
+/// <para>2、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【ElasticSearch】作为依赖注入key值 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
 [Component(From = typeof(IDbModelProvider<>), Key = nameof(DbType.ElasticSearch), Lifetime = LifetimeType.Transient)]

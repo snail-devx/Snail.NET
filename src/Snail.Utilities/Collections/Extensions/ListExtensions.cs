@@ -46,8 +46,8 @@ public static class ListExtensions
     }
 
     /// <summary>
-    /// 尝试将<paramref name="data"/>插入到<paramref name="lst"/>中<br />
-    ///     1、插入到索引0位置
+    /// 尝试将<paramref name="data"/>插入到<paramref name="lst"/>中
+    /// <para>1、插入到索引0位置 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lst"></param>
@@ -62,8 +62,8 @@ public static class ListExtensions
         return lst;
     }
     /// <summary>
-    /// 尝试将<paramref name="datas"/>插入到<paramref name="lst"/>中 <br />
-    ///     1、插入到索引0位置<br />
+    /// 尝试将<paramref name="datas"/>插入到<paramref name="lst"/>中
+    /// <para>1、插入到索引0位置 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lst"></param>
@@ -81,8 +81,8 @@ public static class ListExtensions
         return lst;
     }
     /// <summary>
-    /// 将<paramref name="lst"/>插入到<paramref name="target"/>列表集合中<br />
-    ///     1、插入到索引0位置<br />
+    /// 将<paramref name="lst"/>插入到<paramref name="target"/>列表集合中
+    /// <para>1、插入到索引0位置 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lst"></param>
@@ -94,8 +94,8 @@ public static class ListExtensions
         return lst;
     }
     /// <summary>
-    /// 将<paramref name="lst"/>插入到<paramref name="target"/>列表集合中<br />
-    ///     1、插入到索引0位置<br />
+    /// 将<paramref name="lst"/>插入到<paramref name="target"/>列表集合中
+    /// <para>1、插入到索引0位置 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lst"></param>
@@ -190,9 +190,9 @@ public static class ListExtensions
 
     #region Any、ForEach
     /// <summary>
-    /// 列表是否有值 <br />
-    ///     1、不是null、不是空列表 <br />
-    ///     2、直接使用自身类型属性判断；不用.Any <br />
+    /// 列表是否有值
+    /// <para>1、不是null、不是空列表 </para>
+    /// <para>2、直接使用自身类型属性判断；不用.Any </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="list"></param>
@@ -201,8 +201,8 @@ public static class ListExtensions
         => list.Count != 0;
 
     /// <summary>
-    /// 遍历列表 <br />
-    ///     1、不能终止循环遍历 <br />
+    /// 遍历列表
+    /// <para>1、不能终止循环遍历 </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lst"></param>

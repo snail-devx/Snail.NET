@@ -12,9 +12,9 @@ public static class CustomAttributeExtensions
 {
     #region IInject和、IParameter配合使用
     /// <summary>
-    /// 是否有实现<see cref="IInject"/>接口的特性标签 <br />
-    ///     1、内部判断传入type的GetCustomAttributes方法判断特性标签是否实现了<see cref="IInject"/>接口 <br />
-    ///     2、只找第一个；若有多个实现<see cref="IInject"/>的特性，注意明确 <br />
+    /// 是否有实现<see cref="IInject"/>接口的特性标签
+    /// <para>1、内部判断传入type的GetCustomAttributes方法判断特性标签是否实现了<see cref="IInject"/>接口 </para>
+    /// <para>2、只找第一个；若有多个实现<see cref="IInject"/>的特性，注意明确 </para>
     /// </summary>
     /// <param name="provider">要判断的成员</param>
     /// <param name="inject">inject示例</param>
@@ -35,7 +35,7 @@ public static class CustomAttributeExtensions
     }
 
     /// <summary>
-    /// 获取指定成员的实现<see cref="IParameter"/>接口的标签信息 <br />
+    /// 获取指定成员的实现<see cref="IParameter"/>接口的标签信息
     /// </summary>
     /// <param name="provider"></param>
     /// <param name="inject">输出参数：打在<paramref name="provider"/>上的第一个<see cref="IInject"/>接口实例</param>

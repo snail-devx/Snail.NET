@@ -30,9 +30,9 @@ public static class DbManagerExtensions
         => manager.GetServer(new DbServerOptions() { Workspace = workspace, DbCode = dbCode, DbType = dbType });
 
     /// <summary>
-    /// 尝试获取服务器信息：workspace为null<br />
-    ///     1、在仅知道<paramref name="dbCode"/>时<br />
-    ///     2、取服务器信息中，第一个匹配workspace为null，<paramref name="dbCode"/>的服务器信息<br />
+    /// 尝试获取服务器信息：workspace为null
+    /// <para>1、在仅知道<paramref name="dbCode"/>时 </para>
+    /// <para>2、取服务器信息中，第一个匹配workspace为null，<paramref name="dbCode"/>的服务器信息 </para>
     /// </summary>
     /// <param name="manager"></param>
     /// <param name="dbCode"></param>

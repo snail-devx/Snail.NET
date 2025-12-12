@@ -57,8 +57,8 @@ public sealed class ErrorCodeManager : IErrorCodeManager
     }
 
     /// <summary>
-    /// 根据错误编码信息，获取具体的错误信息对象 <br />
-    ///     1、若自身<paramref name="culture"/>找不到，则尝试从zh-CN查找
+    /// 根据错误编码信息，获取具体的错误信息对象
+    /// <para>1、若自身<paramref name="culture"/>找不到，则尝试从zh-CN查找 </para>
     /// </summary>
     /// <param name="culture">语言环境；传null则走默认zh-CN</param>
     /// <param name="code">错误编码</param>
@@ -88,9 +88,9 @@ public sealed class ErrorCodeManager : IErrorCodeManager
     /// <param name="project">配置所属项目；为null表示工作空间下的资源，如服务器地址配置等</param>
     /// <param name="rsCode">配置资源的编码，唯一</param>
     /// <param name="type">配置类型，配置文件，后续支持</param>
-    /// <param name="content">配置内容，根据<paramref name="type"/>类型不一样，这里值不同<br />
-    ///     1、<see cref="SettingType.File"/>：<paramref name="content"/>为文件的绝对路径<br />
-    ///     2、<see cref="SettingType.Xml"/>：<paramref name="content"/>为xml内容字符串
+    /// <param name="content">配置内容，根据<paramref name="type"/>类型不一样，这里值不同
+    /// <para>1、<see cref="SettingType.File"/>：<paramref name="content"/>为文件的绝对路径 </para>
+    /// <para>2、<see cref="SettingType.Xml"/>：<paramref name="content"/>为xml内容字符串 </para>
     /// </param>
     private void WatchErrorCodeSetting(string workspace, string? project, string rsCode, SettingType type, string content)
     {

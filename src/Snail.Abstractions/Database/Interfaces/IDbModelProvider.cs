@@ -3,8 +3,8 @@
 namespace Snail.Abstractions.Database.Interfaces;
 
 /// <summary>
-/// 数据库实体操作访问层接口 <br />
-///     1、约束基于数据实体的CRUD操作
+/// 数据库实体操作访问层接口
+/// <para>1、约束基于数据实体的CRUD操作 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
 public interface IDbModelProvider<DbModel> : IDbProvider where DbModel : class

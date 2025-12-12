@@ -52,8 +52,8 @@ public static class ApplicationBuilderExtensions
         return builder;
     }
     /// <summary>
-    /// 启用 请求提交数据 重复读取功能 <br />
-    ///     1、解决actionfilter取不到request.Body数据的问题
+    /// 启用 请求提交数据 重复读取功能 
+    /// <para>1、解决actionfilter取不到request.Body数据的问题 </para>
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>

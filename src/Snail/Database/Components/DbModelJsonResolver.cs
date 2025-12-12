@@ -7,9 +7,9 @@ using Snail.Database.Utils;
 namespace Snail.Database.Components;
 
 /// <summary>
-/// 数据库实体JSON数据解析器 <br />
-///     1、进行JSON序列化和反序列化时，把DbModel的属性名映射为<see cref="DbFieldAttribute.Name"/>值 <br />
-///     2、剔除掉<see cref="DbFieldAttribute.Ignored"/>为true的属性映射 <br />
+/// 数据库实体JSON数据解析器 
+/// <para>1、进行JSON序列化和反序列化时，把DbModel的属性名映射为<see cref="DbFieldAttribute.Name"/>值 </para>
+/// <para>2、剔除掉<see cref="DbFieldAttribute.Ignored"/>为true的属性映射 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
 public sealed class DbModelJsonResolver<DbModel> : DefaultContractResolver where DbModel : class

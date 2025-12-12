@@ -6,9 +6,9 @@ using Snail.Logger.Utils;
 namespace Snail.Logger;
 
 /// <summary>
-/// Log4Net实现的日志提供程序 <br />
-///     1、从Default工作空间下读取log4net配置，若不存在则采用程序内置的 <br />
-///     2、记录日志
+/// Log4Net实现的日志提供程序
+/// <para>1、从Default工作空间下读取log4net配置，若不存在则采用程序内置的 </para>
+/// <para>2、记录日志</para>
 /// </summary>
 [Component<ILogProvider>]
 [Component<ILogProvider>(Key = DIKEY_FileLogger)]
@@ -41,9 +41,9 @@ public sealed class Log4NetProvider : ILogProvider
     /// </summary>
     /// <param name="descriptor">要记录的日志信息</param>
     /// <param name="scope">日志作用域描述器；用于区分日志组等情况</param>
-    /// <param name="server">服务器配置选项；为null提供程序自身做默认值处理，或者报错 <br />
-    ///     1、记录器为网络日志时，日志要记录到哪个服务器下，如哪个数据库服务器 <br />
-    ///     2、记录器为本地日志时，采用哪个工作组下的配置，如log4net配置；此时仅<see cref="IServerOptions.Workspace"/>生效 <br />
+    /// <param name="server">服务器配置选项；为null提供程序自身做默认值处理，或者报错
+    /// <para>1、记录器为网络日志时，日志要记录到哪个服务器下，如哪个数据库服务器 </para>
+    /// <para>2、记录器为本地日志时，采用哪个工作组下的配置，如log4net配置；此时仅<see cref="IServerOptions.Workspace"/>生效 </para>
     /// </param>
     /// <returns>记录成功；返回true</returns>
     /// <remarks>针对log4net来说,<paramref name="server"/>无任何意义，不会使用</remarks>

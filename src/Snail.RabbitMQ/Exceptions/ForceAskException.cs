@@ -1,9 +1,9 @@
 ﻿namespace Snail.RabbitMQ.Exceptions;
 
 /// <summary>
-/// 强制应答异常<br />
-///     1、消息接收次数超过最大次数<br />
-///     2、消息接收客户端出错等情况<br />
+/// 强制应答异常
+/// <para>1、消息接收次数超过最大次数 </para>
+/// <para>2、消息接收客户端出错等情况 </para>
 /// </summary>
 public class ForceAskException : Exception
 {

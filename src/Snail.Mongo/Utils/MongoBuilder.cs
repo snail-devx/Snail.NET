@@ -3,9 +3,9 @@
 namespace Snail.Mongo.Utils;
 
 /// <summary>
-/// Mongo数据库构建器<br />
-///     1、构建mongo查询条件；强制使用<see cref="BsonDocumentFilterDefinition{T}"/>构建查询条件<br />
-///         解决泛型构建时，builder.Eq("propertyName",BsonNull.Value)最终翻译为 {dbField:"BsonNull"}的问题<br />
+/// Mongo数据库构建器
+/// <para>1、构建mongo查询条件；强制使用<see cref="BsonDocumentFilterDefinition{T}"/>构建查询条件 </para>
+/// <para>- 解决泛型构建时，builder.Eq("propertyName",BsonNull.Value)最终翻译为 {dbField:"BsonNull"}的问题 </para>
 /// </summary>
 public sealed class MongoBuilder
 {

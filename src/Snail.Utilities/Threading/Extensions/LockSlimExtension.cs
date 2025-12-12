@@ -6,8 +6,8 @@ public static class LockSlimExtension
 {
     #region 读操作
     /// <summary>
-    /// 在“读锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是读；多线程并发读取
+    /// 在“读锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是读；多线程并发读取 </para>
     /// </summary>
     /// <param name="lockSlim">读写锁</param>
     /// <param name="action">要执行的动作</param>
@@ -19,9 +19,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitReadLock(); }
     }
     /// <summary>
-    /// 在“读锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是读；多线程并发读取<br />
-    ///     2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“读锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是读；多线程并发读取 </para>
+    /// <para>2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lockSlim">读写锁</param>
@@ -35,9 +35,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitReadLock(); }
     }
     /// <summary>
-    /// 在“读锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是读；多线程并发读取<br />
-    ///     2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“读锁”环境下运行委
+    /// <para>1、使用场景：所有action操作都是读；多线程并发读取 </para>
+    /// <para>2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -54,8 +54,8 @@ public static class LockSlimExtension
     }
 
     /// <summary>
-    /// 在“读锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是读，但有返回值；多线程并发读取
+    /// 在“读锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是读，但有返回值；多线程并发读取 </para>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="lockSlim">读写锁</param>
@@ -69,9 +69,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitReadLock(); }
     }
     /// <summary>
-    /// 在“读锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是读，但有返回值；多线程并发读取<br />
-    ///     2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“读锁”环境下运行委
+    /// <para>1、使用场景：所有action操作都是读，但有返回值；多线程并发读取 </para>
+    /// <para>2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="TResult"></typeparam>
@@ -87,9 +87,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitReadLock(); }
     }
     /// <summary>
-    /// 在“读锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是读，但有返回值；多线程并发读取<br />
-    ///     2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“读锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是读，但有返回值；多线程并发读取 </para>
+    /// <para>2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -110,8 +110,8 @@ public static class LockSlimExtension
 
     #region 写操作
     /// <summary>
-    /// 在“写锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是写；多线程并发读取
+    /// 在“写锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是写；多线程并发读取 </para>
     /// </summary>
     /// <param name="lockSlim">读写锁</param>
     /// <param name="action">要执行的动作</param>
@@ -123,9 +123,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitWriteLock(); }
     }
     /// <summary>
-    /// 在“写锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是写；多线程并发读取<br />
-    ///     2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“写锁”环境下运行委
+    /// <para>1、使用场景：所有action操作都是写；多线程并发读取 </para>
+    /// <para>2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lockSlim">读写锁</param>
@@ -139,9 +139,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitWriteLock(); }
     }
     /// <summary>
-    /// 在“写锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是写；多线程并发读取<br />
-    ///     2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“写锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是写；多线程并发读取 </para>
+    /// <para>2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -158,8 +158,8 @@ public static class LockSlimExtension
     }
 
     /// <summary>
-    /// 在“写锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是写，但有返回值；多线程并发读取
+    /// 在“写锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是写，但有返回值；多线程并发读取 </para>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="lockSlim">读写锁</param>
@@ -173,9 +173,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitWriteLock(); }
     }
     /// <summary>
-    /// 在“写锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是写，但有返回值；多线程并发读取<br />
-    ///     2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“写锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是写，但有返回值；多线程并发读取 </para>
+    /// <para>2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="TResult"></typeparam>
@@ -191,9 +191,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitWriteLock(); }
     }
     /// <summary>
-    /// 在“写锁”环境下运行委托<br/>
-    ///     1、使用场景：所有action操作都是写，但有返回值；多线程并发读取<br />
-    ///     2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“写锁”环境下运行委托
+    /// <para>1、使用场景：所有action操作都是写，但有返回值；多线程并发读取 </para>
+    /// <para>2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -214,8 +214,8 @@ public static class LockSlimExtension
 
     #region 升级锁操作
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取
+    /// 在“可升级为写锁”环境下运行委托
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取 </para>
     /// </summary>
     /// <param name="lockSlim">读写锁</param>
     /// <param name="action">要执行的动作</param>
@@ -227,9 +227,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitUpgradeableReadLock(); }
     }
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取<br />
-    ///     2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“可升级为写锁”环境下运行委托
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取 </para>
+    /// <para>2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="lockSlim">读写锁</param>
@@ -243,9 +243,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitUpgradeableReadLock(); }
     }
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取<br />
-    ///     2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“可升级为写锁”环境下运行委托
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取 </para>
+    /// <para>2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -261,9 +261,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitUpgradeableReadLock(); }
     }
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取<br />
-    ///     2、action可带三个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“可升级为写锁”环境下运行委
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁；多线程并发读取 </para>
+    /// <para>2、action可带三个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -282,8 +282,8 @@ public static class LockSlimExtension
     }
 
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁，但有返回值；多线程并发读取
+    /// 在“可升级为写锁”环境下运行委托
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁，但有返回值；多线程并发读取 </para>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="lockSlim">读写锁</param>
@@ -297,9 +297,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitUpgradeableReadLock(); }
     }
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁，但有返回值；多线程并发读取<br />
-    ///     2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“可升级为写锁”环境下运行委托
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁，但有返回值；多线程并发读取 </para>
+    /// <para>2、action可带一个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="TResult"></typeparam>
@@ -315,9 +315,9 @@ public static class LockSlimExtension
         finally { lockSlim.ExitUpgradeableReadLock(); }
     }
     /// <summary>
-    /// 在“可升级为写锁”环境下运行委托<br/>
-    ///     1、使用场景：action操作默认读，可再升级为写锁，但有返回值；多线程并发读取<br />
-    ///     2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{}
+    /// 在“可升级为写锁”环境下运行委托
+    /// <para>1、使用场景：action操作默认读，可再升级为写锁，但有返回值；多线程并发读取 </para>
+    /// <para>2、action可带两个参数，简化方法执行操作，不用专门启一个无参数动作()=>{} </para>
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>

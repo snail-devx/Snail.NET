@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 namespace Snail.Database.Components;
 
 /// <summary>
-/// 数据库过滤表达式格式化程序 <br />
-///     1、Where条件表达式做计算，如将new <see cref="List{String}"/>(){}等变量计算出来 <br />
-///     2、对Where条件表达式做验证，不支持的表达式梳理提示出来 <br />
+/// 数据库过滤表达式格式化程序 
+/// <para>1、Where条件表达式做计算，如将new <see cref="List{String}"/>(){}等变量计算出来 </para>
+/// <para>2、对Where条件表达式做验证，不支持的表达式梳理提示出来 </para>
 /// </summary>
 public sealed class DbFilterFormatter : ExpressionVisitor
 {
@@ -1014,9 +1014,9 @@ public sealed class DbFilterFormatter : ExpressionVisitor
         return null;
     }
     /// <summary>
-    /// 验证cotnains方法的成员节点 <br />
-    /// 1、验证成员节点是否合法，是否支持 <br />
-    /// 2、如 new ExpressionType?[] { ExpressionType.Add, null }.Contains(item.NodeTypeNull) 的 item.NodeTypeNull 节点
+    /// 验证cotnains方法的成员节点 
+    /// <para>1、验证成员节点是否合法，是否支持  </para>
+    /// <para>2、如 new ExpressionType?[] { ExpressionType.Add, null }.Contains(item.NodeTypeNull) 的 item.NodeTypeNull 节点 </para>
     /// </summary>
     /// <param name="node"></param>
     /// <param name="memberNode"></param>

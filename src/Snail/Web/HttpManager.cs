@@ -5,11 +5,11 @@ using Snail.Abstractions.Web.Delegates;
 namespace Snail.Web;
 
 /// <summary>
-///HTTP管理器，负责管理HTTP服务器、HTTP中间件管理 <br />
-///     1、实现<see cref="IServerManager"/>进行服务器管理；读取应用程序配置下直属工作空间的server资源初始化服务器 <br />
-///         继承<see cref="ServerManager"/>，自动实现<see cref="IServerManager"/>接口所有功能<br />
-///     2、实现<see cref="IMiddlewareProxy{HttpDelegate}"/>实现中间件管理；支持中间件干涉http请求发送 <br />
-///         内部构建使用<see cref="MiddlewareProxy{HttpDelegate}"/>中转实现
+/// HTTP管理器，负责管理HTTP服务器、HTTP中间件管理
+/// <para>1、实现<see cref="IServerManager"/>进行服务器管理；读取应用程序配置下直属工作空间的server资源初始化服务器 </para>
+/// <para>- 继承<see cref="ServerManager"/>，自动实现<see cref="IServerManager"/>接口所有功能 </para>
+/// <para>2、实现<see cref="IMiddlewareProxy{HttpDelegate}"/>实现中间件管理；支持中间件干涉http请求发送 </para>
+/// <para>- 内部构建使用<see cref="MiddlewareProxy{HttpDelegate}"/>中转实现 </para>
 /// </summary>
 /// <remarks>无法多继承，否则可直接</remarks>
 [Component<IHttpManager>]

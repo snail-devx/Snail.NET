@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 namespace Snail.Common.Components;
 
 /// <summary>
-/// 运行时上下文；用于跨方法、类共享数据 <br />
-///     1、使用RunContext.Current逻辑；实现主子线程上下文共享机制；多线程操作时线程安全 <br />
-///     2、整体框架运行中，需要动态获取运行时上下文时，会强制始终此对象 <br />
-///     3、提供可脱离线程共享机制下的上下文对象，RunContext.New、、 <br />
+/// 运行时上下文；用于跨方法、类共享数据
+/// <para>1、使用RunContext.Current逻辑；实现主子线程上下文共享机制；多线程操作时线程安全 </para>
+/// <para>2、整体框架运行中，需要动态获取运行时上下文时，会强制始终此对象 </para>
+/// <para>3、提供可脱离线程共享机制下的上下文对象，RunContext.New、、 </para>
 /// </summary>
 public sealed class RunContext
 {
@@ -68,9 +68,9 @@ public sealed class RunContext
 
     #region RunContext 自身
     /// <summary>
-    /// 配置 运行时上下文 <br />
-    ///     1、确保在程序启动时做好配置 <br />
-    ///     2、确保不重复调用 <br />
+    /// 配置 运行时上下文 
+    /// <para>1、确保在程序启动时做好配置 </para>
+    /// <para>2、确保不重复调用 </para>
     /// </summary>
     /// <param name="idGenerator">主键生成器；不能为null</param>
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -85,8 +85,8 @@ public sealed class RunContext
         _idGenerator = idGenerator;
     }
     /// <summary>
-    /// 构建新的运行时上下文 <br />
-    ///     1、构建一个空的运行时上下文设置给<see cref="Current"/>
+    /// 构建新的运行时上下文
+    /// <para>1、构建一个空的运行时上下文设置给<see cref="Current"/> </para>
     /// </summary>
     /// <returns></returns>
     public static RunContext New()

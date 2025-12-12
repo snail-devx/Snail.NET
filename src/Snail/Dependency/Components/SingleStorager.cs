@@ -4,9 +4,9 @@ using Snail.Utilities.Threading.Extensions;
 namespace Snail.Dependency.Components;
 
 /// <summary>
-/// 单例生命周期示例保存器；支持全局单例和实例单例<br />
-///     1、全局单例，生命周期<see cref="LifetimeType.Singleton"/> <br />
-///     2、容器单例，生命周期<see cref="LifetimeType.Scope"/> 
+/// 单例生命周期示例保存器；支持全局单例和实例单例
+/// <para>1、全局单例，生命周期<see cref="LifetimeType.Singleton"/> </para>
+/// <para>2、容器单例，生命周期<see cref="LifetimeType.Scope"/>  </para>
 /// </summary>
 internal sealed class SingleStorager : ITypeStorager
 {
@@ -40,8 +40,8 @@ internal sealed class SingleStorager : ITypeStorager
 
     #region IInstaceStorager
     /// <summary>
-    /// 基于当前存储器，构建新的存储器实例<br />
-    ///     1、在<see cref="IDIManager.New"/>执行时，会依赖注入的实例存储器做继承处理，从而维护完整的生命周期
+    /// 基于当前存储器，构建新的存储器实例
+    /// <para>1、在<see cref="IDIManager.New"/>执行时，会依赖注入的实例存储器做继承处理，从而维护完整的生命周期 </para>
     /// </summary>
     /// <returns>新的存储器实例，若无需继承，则返回null即可</returns>
     /// <remarks>容器单例不继承，否则继承</remarks>

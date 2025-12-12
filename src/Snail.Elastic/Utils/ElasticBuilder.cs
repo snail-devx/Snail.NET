@@ -4,9 +4,9 @@ using Snail.Elastic.Extensions;
 namespace Snail.Elastic.Utils;
 
 /// <summary>
-/// ElasticSearch构建器 <br />
-///     1、完成查询、聚合相关快捷构建 <br />
-///     2、参照Mongo的Builder.Filter快捷方法 <br />
+/// ElasticSearch构建器 
+/// <para>1、完成查询、聚合相关快捷构建 </para>
+/// <para>2、参照Mongo的Builder.Filter快捷方法 </para>
 /// </summary>
 public static class ElasticBuilder
 {

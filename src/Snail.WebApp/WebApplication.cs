@@ -11,9 +11,9 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
 {
     #region 事件、属性变量
     /// <summary>
-    /// 事件：配置Web应用控制器 <br />
-    ///     1、触发时机：<see cref="IApplication.Run"/> AddControllers添加控制器后 <br />
-    ///     2、用途说明：对配置好的控制器增加功能，如自定义序列化和反序列化
+    /// 事件：配置Web应用控制器
+    /// <para>1、触发时机：<see cref="IApplication.Run"/> AddControllers添加控制器后 </para>
+    /// <para>2、用途说明：对配置好的控制器增加功能，如自定义序列化和反序列化 </para>
     /// </summary>
     public event Action<IMvcBuilder>? OnController;
 
