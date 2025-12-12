@@ -13,7 +13,7 @@ public static class RunContextExtensions
         /// </summary>
         public bool DisableLog
         {
-            get => STR_True.IsEqual(context.Get<string>(CONTEXT_DisableLog), ignoreCase: true) == false;
+            get => STR_True.IsEqual(context.Get<string>(CONTEXT_DisableLog), ignoreCase: true);
             set => context.Add<string>(CONTEXT_DisableLog, value.ToString());
         }
 

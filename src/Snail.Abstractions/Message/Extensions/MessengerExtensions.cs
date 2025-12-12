@@ -12,10 +12,10 @@ public static class MessengerExtensions
 {
     #region 公共方法
     /// <summary>
-    /// 发送消息：<see cref="IMessageOptions"/>基于<paramref name="message"/>做默认构建 <br />
-    ///     1、简化操作逻辑，贴合我之前的使用习惯 <br />
-    ///     2、MQ消息：发送到默认交换机，路由为<paramref name="message"/> <br />
-    ///     3、PubSub消息：发送到<paramref name="message"/>交换机，路由为空 <br />
+    /// 发送消息：<see cref="IMessageOptions"/>基于<paramref name="message"/>做默认构建
+    /// <para>1、简化操作逻辑，贴合我之前的使用习惯</para>
+    /// <para>2、MQ消息：发送到默认交换机，路由为<paramref name="message"/></para>
+    /// <para>3、PubSub消息：发送到<paramref name="message"/>交换机，路由为空</para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="messenger"></param>
@@ -53,10 +53,10 @@ public static class MessengerExtensions
     }
 
     /// <summary>
-    /// 接收消息：<see cref="IReceiveOptions"/>基于<paramref name="message"/>和<paramref name="name"/>做默认构建 <br />
-    ///     1、简化操作逻辑，贴合我之前的使用习惯；自动重视3次，并发1 <br />
-    ///     2、MQ消息：从到默认交换机接收数据，路由为<paramref name="message"/>，队列名<paramref name="message"/><br />
-    ///     3、PubSub消息：从<paramref name="message"/>交换机接收数据，路由为空,队列名<paramref name="message"/>+<paramref name="name"/>组合，确保唯一；<br />
+    /// 接收消息：<see cref="IReceiveOptions"/>基于<paramref name="message"/>和<paramref name="name"/>做默认构建
+    /// <para>1、简化操作逻辑，贴合我之前的使用习惯；自动重视3次，并发1 </para>
+    /// <para>2、MQ消息：从到默认交换机接收数据，路由为<paramref name="message"/>，队列名<paramref name="message"/></para>
+    /// <para>3、PubSub消息：从<paramref name="message"/>交换机接收数据，路由为空,队列名<paramref name="message"/>+<paramref name="name"/>组合，确保唯一；</para>
     /// </summary>
     /// <param name="messenger"></param>
     /// <param name="type">消息类型</param>
@@ -97,7 +97,7 @@ public static class MessengerExtensions
             default:
                 throw new NotSupportedException($"为支持的消息类型：{type}");
         }
-        return messenger.Receive(type, options, receiver);
+        return messenger.Receive(type, receiver, options);
     }
     #endregion
 }

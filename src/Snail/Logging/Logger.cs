@@ -57,7 +57,7 @@ public sealed class Logger : ILogger
         {
             string? logLevel = Default(app.GetEnv("LogLevel"), null);
             _level = logLevel == null
-                ? app.IsProduction() ? LogLevel.Info : LogLevel.Trace
+                ? app.IsProduction ? LogLevel.Info : LogLevel.Trace
                 : logLevel.AsEnum<LogLevel>();
         }
         catch

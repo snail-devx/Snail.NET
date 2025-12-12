@@ -27,6 +27,11 @@ public sealed class ReceiverProxy<T>
     /// <summary>
     /// 构造方法
     /// </summary>
+    /// <param name="attempt">接收消息的尝试次数
+    /// <para>1、接收方发生异常后，尝试多少次后仍失败，则强制确认，避免消息堆积 </para>
+    /// <para>2、&lt;= 0 不自动确认；直到处理成功 </para>
+    /// </param>
+    /// <param name="receiver"></param>
     public ReceiverProxy(int attempt, Func<T, Task<bool>> receiver)
     {
         _attempt = attempt;
@@ -53,17 +58,20 @@ public sealed class ReceiverProxy<T>
         {
             tmpEx = ex.Optimize();
         }
-        //  进行尝试次数判断
-        if (isSuccess != true)
+        //  进行消息接收结果处理：成功时，重置计数器；失败时，进行尝试次数判断（ _attempt <= 0 表示一直尝试）
+        if (isSuccess == false)
         {
-            _counter += 1;
-            //  超过重视次数，强制清除
-            if (_counter >= _attempt)
+            if (_attempt > 0)
             {
-                tmpEx = tmpEx != null
-                    ? new ForceAskException($"消息已经连续{_counter}次处理失败，发生异常", tmpEx)
-                   : new ForceAskException($"消息已经连续{_counter}次处理失败，接收方返回false；");
-                _counter = 0;
+                _counter += 1;
+                //  超过重视次数，强制清除
+                if (_counter >= _attempt)
+                {
+                    tmpEx = tmpEx != null
+                        ? new ForceAskException($"消息已经连续{_counter}次处理失败，发生异常", tmpEx)
+                        : new ForceAskException($"消息已经连续{_counter}次处理失败，接收方返回false；");
+                    _counter = 0;
+                }
             }
             if (tmpEx != null)
             {
@@ -74,7 +82,6 @@ public sealed class ReceiverProxy<T>
         {
             _counter = 0;
         }
-
         return isSuccess;
     }
     #endregion

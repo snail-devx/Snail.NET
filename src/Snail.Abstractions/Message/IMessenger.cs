@@ -24,8 +24,8 @@ public interface IMessenger
     /// 接收消息
     /// </summary>
     /// <param name="type">消息类型：如mq、pubsub</param>
-    /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <param name="receiver">消息接收器；用于处理具体消息</param>
+    /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <returns>消息接收器注册成功，返回true；否则返回false</returns>
-    Task<bool> Receive(MessageType type, IReceiveOptions options, Func<MessageDescriptor, Task<bool>> receiver);
+    Task<bool> Receive(MessageType type, Func<MessageDescriptor, Task<bool>> receiver, IReceiveOptions options);
 }

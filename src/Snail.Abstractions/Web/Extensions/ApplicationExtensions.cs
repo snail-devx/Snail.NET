@@ -1,7 +1,7 @@
 ﻿namespace Snail.Abstractions.Web.Extensions;
 
 /// <summary>
-/// <see cref="IApplication"/>针对<see cref="Web"/>下的相关扩展
+/// <see cref="Web"/>针对<see cref="IApplication"/>的相关扩展
 /// </summary>
 public static class ApplicationExtensions
 {
@@ -14,7 +14,7 @@ public static class ApplicationExtensions
         public IApplication AddHttpService()
         {
             //  服务注册完成后，对Http请求相关对象做一下预热操作
-            app.OnRegister += () =>
+            app.OnRegistered += () =>
             {
                 app.ResolveRequired<IHttpManager>();
             };

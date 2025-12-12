@@ -3,10 +3,10 @@
 namespace Snail.Abstractions.Dependency.Attributes;
 
 /// <summary>
-/// 特性标签：访问器依赖注入 <br />
-///     1、用于依赖注入自动构建<typeparamref name="IAccessor"/>实例<br />
-///     2、配置<typeparamref name="IProvider"/>参数注入Key，动态构建实例作为<typeparamref name="IAccessor"/>构造方法参数值传入 <br />
-///     3、暂时不集成服务器地址配置选项参数注入
+/// 特性标签：访问器依赖注入
+/// <para>1、用于依赖注入自动构建<typeparamref name="IAccessor"/>实例 </para>
+/// <para>2、配置<typeparamref name="IProvider"/>参数注入Key，动态构建实例作为<typeparamref name="IAccessor"/>构造方法参数值传入  </para>
+/// <para>3、暂时不集成服务器地址配置选项参数注入 </para>
 /// </summary>
 /// <typeparam name="IAccessor">访问器，如日志记录器，负责对外提供服务，内部调用日志提供程序完成日志记录</typeparam>
 /// <typeparam name="IProvider">访问器提供程序，如日志提供程序负责具体日志记录</typeparam>
@@ -31,9 +31,9 @@ public class AccessorAttribute<IAccessor, IProvider> : Attribute, IInject, IPara
 
     #region IInject
     /// <summary>
-    /// 依赖注入Key值，用于DI动态构建实例 <br />
-    ///     1、用于区分同一个源（From）多个实现（to）的情况 <br />
-    ///     2、默认值为null
+    /// 依赖注入Key值，用于DI动态构建实例
+    /// <para>1、用于区分同一个源（From）多个实现（to）的情况 </para>
+    /// <para>2、默认值为null </para>
     /// </summary>
     /// <param name="manager"></param>
     /// <returns></returns>

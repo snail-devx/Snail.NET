@@ -39,7 +39,7 @@ internal sealed class TransientStorager : ITypeStorager
     /// 获取依赖实例对象
     /// </summary>
     /// <returns>若返回null，则DI需要全新构建</returns>
-    Object? ITypeStorager.GetInstace()
+    object? ITypeStorager.GetInstace()
     {
         //  加读锁，避免同一个线程递归进入
         _lock.EnterReadLock();

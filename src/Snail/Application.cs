@@ -1,6 +1,8 @@
 ﻿using Snail.Abstractions.Common.Delegates;
+using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting;
 using Snail.Abstractions.Setting.Delegates;
+using Snail.Abstractions.Web.Extensions;
 using Snail.Aspect.Common.Attributes;
 using Snail.Dependency;
 using Snail.Setting;
@@ -17,16 +19,16 @@ public abstract class Application<App> : IApplication where App : class
 {
     #region 事件、属性变量
     /// <summary>
-    /// 事件：配置Web应用时； <br />
-    ///     1、触发时机：<see cref="OnRun"/>之前执行 <br />
-    ///     2、用途说明：区别于OnRun，暴露构建完的app实例做一些专有配置，如WebApi配置app中间件等 
+    /// 事件：配置Web应用时；
+    /// <para>1、触发时机：<see cref="OnRun"/>之前执行</para>
+    /// <para>2、用途说明：区别于OnRun，暴露构建完的app实例做一些专有配置，如WebApi配置app中间件等 </para>
     /// </summary>
     public event Action<App>? OnBuild;
 
     /// <summary>
     /// 应用程序配置管理器
     /// </summary>
-    protected ISettingManager Setting => DI.ResolveRequired<ISettingManager>();
+    protected readonly ISettingManager Setting;
     #endregion
 
     #region 构造方法
@@ -36,41 +38,52 @@ public abstract class Application<App> : IApplication where App : class
     public Application()
     {
         //  1、内置配置、实例 初始化
-        //      依赖注入管理器 
         DI = DIManager.Empty;
         DIManager.Current = DI;
-        //      【应用程序配置】管理器配置
-        SettingFactory.Config(() => new SettingManager());
+        Setting = SettingFactory.Create();
         //  2、内置依赖注入实例
         DI.Register<IApplication>(LifetimeType.Singleton, this);
-        DI.Register<ISettingManager>(LifetimeType.Singleton, manager => SettingFactory.Create());
         //      依赖注入管理器，作为scope构建
         DI.Register<IDIManager>(LifetimeType.Scope, manager => DIManager.Current);
         //  3、强制内置服务初始化
-        this.AddDIService();
+        this.AddDIService();/*                  依赖注入服务：进行IoC相关功能实现*/
+        this.AddLogServices();/*                日志服务：检测必备组件完整性*/
+
         RunContext.New();
     }
     #endregion
 
     #region IApplication
     /// <summary>
-    /// 事件：应用扫描时 <br />
-    ///     1、触发时机：<see cref="IApplication.Run"/>时，首先执行程序扫描 <br />
-    /// 注意事项： <br />
-    ///     1、只有打上<see cref="AppScanAttribute"/>标签的<see cref="Assembly"/>才会被扫描 <br />
-    ///     2、只有有<see cref="Attribute"/>标签的<see cref="Type"/>才会被扫描 <br />
+    /// 事件：应用扫描时
+    /// <para>1、触发时机：<see cref="Run"/>时，首先执行程序扫描</para>
     /// </summary>
+    /// <remarks>
+    /// 注意事项：
+    /// <para>1、只有打上<see cref="AppScanAttribute"/>标签的<see cref="Assembly"/>才会被扫描</para>
+    /// <para>2、只有有<see cref="Attribute"/>标签的<see cref="Type"/>才会被扫描</para>
+    /// </remarks>
     public event AppScanDelegate? OnScan;
     /// <summary>
-    /// 事件：服务注册时 <br />
-    ///     1、触发时机：系统内置依赖注入注册完成后 <br />
-    ///     2、用于外部覆盖内置依赖注入配置完成个性化配置 <br />
+    /// 事件：服务注册时
+    /// <para>1、触发时机：系统内置依赖注入注册完成后</para>
+    /// <para>2、用于外部覆盖内置依赖注入配置完成个性化配置</para>
     /// </summary>
+    /// <remarks>
+    /// 注意事项：
+    /// <para>1、不要在此事件中进行对象构建，否则可能导致依赖注入关系错误</para>
+    /// </remarks>
     public event Action? OnRegister;
     /// <summary>
-    /// 事件：程序运行时触发 <br />
-    ///     1、触发时机：app配置完成，准备启动前触发 <br />
-    ///     2、用于启动依赖的相关服务，如启动mq接收消息
+    /// 事件：服务注册完成时
+    /// <para>1、触发实际：事件<see cref="OnRegister"/>之后执行</para>
+    /// <para>2、用于进行一些服务预热处理，如提前构建实例</para>
+    /// </summary>
+    public event Action? OnRegistered;
+    /// <summary>
+    /// 事件：程序运行时触发
+    /// <para>1、触发时机：app配置完成，准备启动前触发</para>
+    /// <para>2、用于启动依赖的相关服务，如启动mq接收消息</para>
     /// </summary>
     public event Action? OnRun;
 
@@ -88,8 +101,9 @@ public abstract class Application<App> : IApplication where App : class
     /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
     /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
     /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
-    /// <para>5、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
-    /// <para>6、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
+    /// <para>5、自定义服务注册完成；触发<see cref="OnRegistered"/>事件，用于进行一些服务、组件预热</para>
+    /// <para>6、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
+    /// <para>7、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
     /// </summary>
     void IApplication.Run() => Run(appBuilder: null);
     #endregion
@@ -109,25 +123,24 @@ public abstract class Application<App> : IApplication where App : class
         }
         ((IApplication)this).Setting.Run();
         OnRegister?.Invoke();
+        OnRegistered?.Invoke();
         //  2、程序启动；启动自定义服务，触发【OnRun】事件，交给外部进行自定义服务启动
-        if (appBuilder != null && OnBuild != null)
+        if (appBuilder != null)
         {
             var app = appBuilder.Invoke();
             ThrowIfNull(app, $"{nameof(appBuilder)}委托返回的App对象为null");
-            OnBuild.Invoke(app);
+            OnBuild?.Invoke(app);
         }
         OnRun?.Invoke();
     }
-    #endregion
 
-    #region 继承方法
     /// <summary>
     /// 启动应用扫描
-    /// 备注：  <br />
-    ///     1、不会执行<see cref="Assembly.LoadFile(string)"/>加载程序集，只会读取<see cref="AssemblyLoadContext.Default"/>已经加载好的程序集  <br />
-    ///     2、已加载程序集，需要和<see cref="AppContext.BaseDirectory"/>同目录；否则不会识别（如微软自带的一些依赖程序集，扫描没有意义）  <br />
-    ///     3、只扫描<see cref="AppScanAttribute"/>标记的程序集，只扫描有<see cref="Attribute"/>标记的<see cref="Type"/>
-    ///     4、按照<see cref="AppScanAttribute.Order"/>、<see cref="Assembly.FullName"/>升序扫描后，逐个进行type扫描，回调callback委托方法
+    /// <para>注意事项： </para>
+    /// <para>1、不会执行<see cref="Assembly.LoadFile(string)"/>加载程序集，只会读取<see cref="AssemblyLoadContext.Default"/>已经加载好的程序集   </para>
+    /// <para>2、已加载程序集，需要和<see cref="AppContext.BaseDirectory"/>同目录；否则不会识别（如微软自带的一些依赖程序集，扫描没有意义）   </para>
+    /// <para>3、只扫描<see cref="AppScanAttribute"/>标记的程序集，只扫描有<see cref="Attribute"/>标记的<see cref="Type"/> </para>
+    /// <para>4、按照<see cref="AppScanAttribute.Order"/>、<see cref="Assembly.FullName"/>升序扫描后，逐个进行type扫描，回调callback委托方法 </para>
     /// </summary>
     /// <param name="app">应用程序实例，会自动扫描对应的<see cref="IApplication.RootDirectory"/>目录下程序集做补偿</param>
     /// <param name="callback">扫描程序集后，遍历<see cref="Type"/>的回调方法</param>
@@ -178,9 +191,9 @@ public abstract class Application<App> : IApplication where App : class
 
     #region 私有方法
     /// <summary>
-    /// 获取需要扫描的程序集 <br />
-    ///     1、仅返回打了<see cref="AppScanAttribute"/>标签的程序集 <br />
-    ///     2、<paramref name="extScanDir"/>下需扫描程序集，未在当前<paramref name="context"/>下加载时，自动加载进来
+    /// 获取需要扫描的程序集 
+    /// <para>1、仅返回打了<see cref="AppScanAttribute"/>标签的程序集  </para>
+    /// <para>2、<paramref name="extScanDir"/>下需扫描程序集，未在当前<paramref name="context"/>下加载时，自动加载进来 </para>
     /// </summary>
     /// <param name="context">程序集加载上下文</param>
     /// <param name="extScanDir">扩展扫描目录（存在才会扫描）；分析此目录直属dll，不会递归查找；传null则不额外扫描指定目录下的程序集</param>
@@ -375,8 +388,9 @@ public class Application : Application<Application>, IApplication
     /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
     /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
     /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
-    /// <para>5、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
-    /// <para>6、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
+    /// <para>5、自定义服务注册完成；触发<see cref="IApplication.OnRegistered"/>事件，用于进行一些服务、组件预热</para>
+    /// <para>6、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
+    /// <para>7、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
     /// </summary>
     public void Run() => Run(appBuilder: () => this);
     #endregion

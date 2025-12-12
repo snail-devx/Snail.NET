@@ -67,8 +67,8 @@ public sealed class SnowFlakeIdProvider : IIdProvider
     {
         /*后期支持配置开始时间 _twepoch*/
 
-        int datacenterId = app.GetEnv("DatacenterId")?.AsInt32() ?? 0;
-        int workerId = app.GetEnv("WorkerId")?.AsInt32() ?? 0;
+        int datacenterId = app.DatacenterId?.AsInt32() ?? 0;
+        int workerId = app.WorkerId?.AsInt32() ?? 0;
         return _idWorkers.GetOrAdd(
             $"{datacenterId}:{workerId}",
             key => new SnowFlakeIdWorker(datacenterId, workerId)

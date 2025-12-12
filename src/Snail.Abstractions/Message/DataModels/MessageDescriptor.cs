@@ -17,7 +17,7 @@ public class MessageDescriptor
     /// <summary>
     /// JSON序列化后消息数据
     /// </summary>
-    public string? Data { set; get; }
+    public string? Data { init; get; }
 
     /// <summary>
     /// 消息上下文附加的上下文数据
@@ -43,18 +43,5 @@ public class MessageDescriptor
     /// 默认无参构造方法
     /// </summary>
     public MessageDescriptor() { }
-    /// <summary>
-    /// 构造方法
-    /// </summary>
-    /// <param name="name">消息名</param>
-    /// <param name="data">消息数据；内部会自动序列化成string</param>
-    /// <param name="context">消息上下文附加数据</param>
-
-    public MessageDescriptor(string name, object? data, IDictionary<string, string>? context = null)
-    {
-        Name = ThrowIfNullOrEmpty(name);
-        Data = data?.AsJson();
-        Context = context;
-    }
     #endregion
 }

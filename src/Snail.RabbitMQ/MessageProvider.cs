@@ -9,7 +9,6 @@ using Snail.Abstractions.Web.Interfaces;
 using Snail.RabbitMQ.Components;
 using Snail.RabbitMQ.Exceptions;
 using Snail.Utilities.Common.Extensions;
-using System.Net;
 
 namespace Snail.RabbitMQ;
 
@@ -25,7 +24,7 @@ public class MessageProvider : IMessageProvider
     /// <summary>
     /// 应用程序实例
     /// </summary>
-    private readonly IApplication _app;
+    protected readonly IApplication App;
     /// <summary>
     /// RabbitMQ管理器
     /// </summary>
@@ -38,7 +37,7 @@ public class MessageProvider : IMessageProvider
     /// </summary>
     public MessageProvider(IApplication app)
     {
-        _app = ThrowIfNull(app);
+        App = ThrowIfNull(app);
         _manager = app.ResolveRequired<RabbitManager>();
     }
     #endregion
@@ -64,7 +63,7 @@ public class MessageProvider : IMessageProvider
             channel.OnError += (title, reason) =>
             {
                 title = $"发送[{type.ToString()}]消息:{title}";
-                _manager.FileLogger.Error(title, $"{reason}{Environment.NewLine}\t{options.AsJson()}{Environment.NewLine}\t{server.ToString()}");
+                App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{options.AsJson()}{Environment.NewLine}\t{server.ToString()}");
             };
             //  定义交换机，初始化路由
             string exchange = await DeclareExchange(channel.Object, type, options);
@@ -97,11 +96,11 @@ public class MessageProvider : IMessageProvider
     /// 接收消息
     /// </summary>
     /// <param name="type">消息类型：如mq、pubsub</param>
-    /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <param name="receiver">消息接收器；用于处理具体消息；接收到消息后，执行此委托</param>
+    /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <param name="server">消息服务器地址：接收的消息来自哪里</param>
     /// <returns>消息接收器注册成功，返回true；否则返回false</returns>
-    async Task<bool> IMessageProvider.Receive<T>(MessageType type, IReceiveOptions options, Func<T, Task<bool>> receiver, IServerOptions server)
+    async Task<bool> IMessageProvider.Receive<T>(MessageType type, Func<T, Task<bool>> receiver, IReceiveOptions options, IServerOptions server)
     {
         /*  基本处理逻辑：
          *      1、接收消息时信道和链接出现错误，记录到本地文件中；
@@ -118,7 +117,7 @@ public class MessageProvider : IMessageProvider
         Action<string, string> onChannelError = (title, reason) =>
         {
             title = $"接收[{type.ToString()}]消息:{title}";
-            _manager.FileLogger.Error(title, $"{reason}{Environment.NewLine}\t{opName}{Environment.NewLine}\t{server.ToString()}");
+            App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{opName}{Environment.NewLine}\t{server.ToString()}");
         };
         ChannelProxy? channel = null;
         string queue;
@@ -131,7 +130,7 @@ public class MessageProvider : IMessageProvider
         }
         catch (Exception ex)
         {
-            _manager.FileLogger.Error(logTitle, opName, ex);
+            App.LogErrorFile(logTitle, opName, ex);
             throw;
         }
         //  2、构建消息接收处理器
@@ -159,7 +158,7 @@ public class MessageProvider : IMessageProvider
             //  若是转换消息数据失败，则强制成功
             if (dataConverted == false)
             {
-                _manager.FileLogger.Error(opName, $"转换数据失败，消息强制成功。目标类型：{typeof(T).FullName}。数据：{dataStr}");
+                App.LogErrorFile(opName, $"转换数据失败，消息强制成功。目标类型：{typeof(T).FullName}。数据：{dataStr}");
                 isSuccess = true;
             }
             //  消息处理是否成功
@@ -193,7 +192,7 @@ public class MessageProvider : IMessageProvider
         }
         catch (Exception ex)
         {
-            _manager.FileLogger.Error(logTitle, opName, ex);
+            App.LogErrorFile(logTitle, opName, ex);
             throw;
         }
         //  无错误返回true，表示接收逻辑执行成功
@@ -209,7 +208,7 @@ public class MessageProvider : IMessageProvider
     /// <remarks>开发环境下，加【机器名】后缀，做到区分分发</remarks>
     /// <returns></returns>
     protected virtual string GetExchange(IMessageOptions options)
-        => ReBuildNameByEnvironment(options.Exchange);
+        => _manager.ReBuildNameByEnvironment(options.Exchange);
     /// <summary>
     /// 获取路由名称
     /// </summary>
@@ -217,7 +216,7 @@ public class MessageProvider : IMessageProvider
     /// <remarks>开发环境下，加【机器名】后缀，做到区分分发</remarks>
     /// <returns></returns>
     protected virtual string GetRouting(IMessageOptions options)
-        => ReBuildNameByEnvironment(options.Routing);
+        => _manager.ReBuildNameByEnvironment(options.Routing);
     /// <summary>
     /// 获取队列名称
     /// </summary>
@@ -225,7 +224,7 @@ public class MessageProvider : IMessageProvider
     /// <remarks>开发环境下，加【机器名】后缀，做到区分分发</remarks>
     /// <returns></returns>
     protected virtual string GetQueue(IReceiveOptions options)
-        => ReBuildNameByEnvironment(options.Queue);
+        => _manager.ReBuildNameByEnvironment(options.Queue);
 
     /// <summary>
     /// 定义交换机
@@ -289,24 +288,6 @@ public class MessageProvider : IMessageProvider
         return string.IsNullOrEmpty(messageBody)
             ? default!
             : messageBody.As<T>();
-    }
-    #endregion
-
-    #region 私有方法
-    /// <summary>
-    /// 基于环境信息重构名称；若为开发环境，自动追加机器名称
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns>若name为空，则返回string.Empty；否则返回基于环境构建的name新值</returns>
-    private string ReBuildNameByEnvironment(string? name)
-    {
-        if (string.IsNullOrEmpty(name) == false)
-        {
-            name = _app.IsProduction()
-                ? name
-                : $"{name}:{Dns.GetHostName()}";
-        }
-        return name ?? string.Empty;
     }
     #endregion
 }

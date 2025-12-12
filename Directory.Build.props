@@ -20,9 +20,14 @@
 		<!-- 特定警告忽略：
 				1587为在代码内使用/***/注释时的警告
 				RS1041，分析器项目，仅在net平台下使用，不考虑Framework平台，忽略此井盖不应在具有目标框架“.NET 8.0”的程序集中实现此编译器扩展
-				NU1903，nuget包的警告，忽略此警告，不影响项目构建
+				IDE0290，推荐使用 主函数 ，在某些情况下不是特别适合，先忽略掉
 		-->
-		<NoWarn>1587;RS1041</NoWarn>
+		<NoWarn>
+			1587;
+			RS1041;
+			NU1903;
+			IDE0290;
+		</NoWarn>
 		<!-- 许可授权等信息 -->
     	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>snail_dev@163.com</Authors>

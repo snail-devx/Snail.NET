@@ -62,9 +62,12 @@ public sealed class Messenger : IMessenger
     /// <returns>发送成功，返回true；否则false</returns>
     Task<bool> IMessenger.Send(MessageType type, MessageDescriptor message, IMessageOptions options)
     {
+        //  若消息配置显示指定了不启用中间件，则直接发送
         ThrowIfNull(message);
         ThrowIfNull(options);
-        return _sender.Invoke(type, message, options, _server);
+        return options.DisableMiddleware
+            ? _provider.Send(type, message, options, _server)
+            : _sender.Invoke(type, message, options, _server);
     }
 
     /// <summary>
@@ -74,11 +77,16 @@ public sealed class Messenger : IMessenger
     /// <param name="receiver">消息接收器；用于处理具体消息</param>
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <returns>消息接收器注册成功，返回true；否则返回false</returns>
-    Task<bool> IMessenger.Receive(MessageType type, IReceiveOptions options, Func<MessageDescriptor, Task<bool>> receiver)
+    Task<bool> IMessenger.Receive(MessageType type, Func<MessageDescriptor, Task<bool>> receiver, IReceiveOptions options)
     {
+        //  若消息配置显示指定了不启用中间件，则直接接收
         ThrowIfNull(receiver);
-        receiver = BuildReceiverWithMiddleware(type, receiver, options);
-        return _provider.Receive(type, options, receiver, _server);
+        ThrowIfNull(options);
+        if (options.DisableMiddleware != true)
+        {
+            receiver = BuildReceiverWithMiddleware(type, receiver, options);
+        }
+        return _provider.Receive(type, receiver, options, _server);
     }
     #endregion
 

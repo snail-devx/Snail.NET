@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Snail.Abstractions.Dependency.Extensions;
 
 /// <summary>
-/// <see cref="IApplication"/>相关扩展方法
+/// <see cref="Dependency"/>针对<see cref="IApplication"/>的扩展方法
 /// </summary>
 public static class ApplicationExtensions
 {

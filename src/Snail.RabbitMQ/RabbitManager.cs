@@ -1,13 +1,13 @@
 ﻿using Snail.Abstractions;
 using Snail.Abstractions.Dependency.Attributes;
-using Snail.Abstractions.Logging;
-using Snail.Abstractions.Logging.Attributes;
 using Snail.Abstractions.Logging.Extensions;
+using Snail.Abstractions.Setting.Extensions;
 using Snail.Abstractions.Web;
 using Snail.Abstractions.Web.DataModels;
 using Snail.Abstractions.Web.Interfaces;
 using Snail.RabbitMQ.Components;
 using Snail.Web;
+using System.Net;
 
 namespace Snail.RabbitMQ;
 
@@ -15,14 +15,17 @@ namespace Snail.RabbitMQ;
 /// RabbitMQ管理器，管理服务器地址，进行一些基础逻辑实现
 /// </summary>
 [Component]
-public sealed class RabbitManager : ServerManager, IServerManager
+public class RabbitManager : ServerManager, IServerManager
 {
     #region 属性变量
     /// <summary>
-    /// 文件日志
+    /// 应用程序实例
     /// </summary>
-    [Logger(ProviderKey = DIKEY_FileLogger)]
-    public required ILogger FileLogger { init; get; }
+    protected readonly IApplication App;
+    /// <summary>
+    /// 是否是生产环境
+    /// </summary>
+    protected readonly bool IsProduction;
     #endregion
 
     #region 构造方法
@@ -31,7 +34,10 @@ public sealed class RabbitManager : ServerManager, IServerManager
     /// </summary>
     /// <param name="app">应用程序实例</param>
     public RabbitManager(IApplication app) : base(app, rsCode: "rabbitmq")
-    { }
+    {
+        App = ThrowIfNull(app);
+        IsProduction = app.IsProduction;
+    }
     #endregion
 
     #region 公共方法
@@ -49,16 +55,31 @@ public sealed class RabbitManager : ServerManager, IServerManager
         ThrowIfNull(descriptor);
         Action<string, string> connError = (title, reason) =>
         {
-            FileLogger.Error($"RabbitMQ链接异常:{title}", $"{reason}{Environment.NewLine}\t{server.ToString()}");
+            App.LogErrorFile($"RabbitMQ链接异常:{title}", $"{reason}{Environment.NewLine}\t{server.ToString()}");
         };
         //  先获取链接对象，基于链接对象；再构建信道对象
         FactoryProxy factory = FactoryProxy.GetFactory(descriptor!.Server);
         ChannelProxy channel = await factory.GetChanel(isSend, connError: (string title, string reason) =>
         {
             title = isSend ? $"发送消息:{title}" : $"接收消息:{title}";
-            FileLogger.Error(title, $"{reason}{Environment.NewLine}\t{server.ToString()}");
+            App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{server.ToString()}");
         });
         return channel;
+    }
+    /// <summary>
+    /// 基于环境信息重构名称；若为开发环境，自动追加机器名称
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns>若name为空，则返回string.Empty；否则返回基于环境构建的name新值</returns>
+    public string ReBuildNameByEnvironment(string? name)
+    {
+        if (string.IsNullOrEmpty(name) == false)
+        {
+            name = IsProduction
+                ? name
+                : $"{name}:{Dns.GetHostName()}";
+        }
+        return name ?? string.Empty;
     }
     #endregion
 }

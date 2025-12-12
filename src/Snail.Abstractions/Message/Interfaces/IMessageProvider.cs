@@ -22,9 +22,9 @@ public interface IMessageProvider
     /// 接收消息
     /// </summary>
     /// <param name="type">消息类型：如mq、pubsub</param>
-    /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <param name="receiver">消息接收器；用于处理具体消息；接收到消息后，执行此委托</param>
+    /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机、重视次数等信息</param>
     /// <param name="server">消息服务器地址：接收的消息来自哪里</param>
     /// <returns>消息接收器注册成功，返回true；否则返回false</returns>
-    Task<bool> Receive<T>(MessageType type, IReceiveOptions options, Func<T, Task<bool>> receiver, IServerOptions server);
+    Task<bool> Receive<T>(MessageType type, Func<T, Task<bool>> receiver, IReceiveOptions options, IServerOptions server);
 }

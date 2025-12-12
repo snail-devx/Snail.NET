@@ -29,12 +29,9 @@ public static class SettingFactory
 
     /// <summary>
     /// 创建一个配置管理器
+    /// <para>1、若为进行<see cref="Config"/>配置，则使用默认的配置管理器<see cref="SettingManager"/></para>
     /// </summary>
     /// <returns></returns>
-    public static ISettingManager Create()
-    {
-        ThrowIfNull(_managerCreator, "构建器未配置，无法创建配置管理器");
-        return _managerCreator!.Invoke();
-    }
+    public static ISettingManager Create() => _managerCreator?.Invoke() ?? new SettingManager();
     #endregion
 }

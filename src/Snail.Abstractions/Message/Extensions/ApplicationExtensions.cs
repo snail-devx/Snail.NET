@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace Snail.Abstractions.Message.Extensions;
 
 /// <summary>
-/// 针对<see cref="IApplication"/>的扩展方法
+/// <see cref="Message"/>针对<see cref="IApplication"/>>的扩展方法
 /// </summary>
 public static class ApplicationExtensions
 {
@@ -78,6 +78,10 @@ public static class ApplicationExtensions
                 .ToList();
             app.DI.Register(dis);
         };
+        //  服务注册完成后：进行一些依赖组件预热
+        //app.OnRegistered += () =>
+        //{
+        //};
         //  运行时，启动消息接收
         app.OnRun += () =>
         {
@@ -92,7 +96,7 @@ public static class ApplicationExtensions
 #endif
                 foreach (var item in descriptor.Receivers)
                 {
-                    Task<bool> task = messenger!.Receive(item.MessageType, item.Options, receiver.OnReceive);
+                    Task<bool> task = messenger!.Receive(item.MessageType, receiver.OnReceive, item.Options);
                     task.Wait();
                 }
                 //  用完以后，从依赖注入中移除掉，不再管理

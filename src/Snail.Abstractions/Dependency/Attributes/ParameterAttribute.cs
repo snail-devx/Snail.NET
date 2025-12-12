@@ -3,9 +3,9 @@
 namespace Snail.Abstractions.Dependency.Attributes;
 
 /// <summary>
-/// 特性标签：【依赖注入】构建实例时的构造方法注入参数值 <br />
-///     1、基于DI构建<typeparamref name="T"/>类型参数值 <br />
-///     2、仅在【属性、字段、方法参数】的标签上生效
+/// 特性标签：【依赖注入】构建实例时的构造方法注入参数值
+/// <para>1、基于DI构建<typeparamref name="T"/>类型参数值 </para>
+/// <para>2、仅在【属性、字段、方法参数】的标签上生效 </para>
 /// </summary>
 /// <typeparam name="T">源类型</typeparam>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true, Inherited = false)]
@@ -20,14 +20,14 @@ public class ParameterAttribute<T> : Attribute, IParameter
 
     #region IParameter
     /// <summary>
-    /// 参数类型：和<see cref="Name"/>配合时用，选举要传递信息的目标参数 <br />
+    /// 参数类型：和<see cref="Name"/>配合时用，选举要传递信息的目标参数
     /// </summary>
     Type IParameter.Type => typeof(T);
 
     /// <summary>
-    /// 参数名称：和<see cref="IParameter.Type"/>配合使用，选举要传递信息的目标参数 <br />
-    /// 1、Name为空时，则选举第一个类型为Type的参数
-    /// 2、Name非空时，则选举类型为Type、且参数名为Name的参数
+    /// 参数名称：和<see cref="IParameter.Type"/>配合使用，选举要传递信息的目标参数
+    /// <para>1、Name为空时，则选举第一个类型为Type的参数 </para>
+    /// <para>2、Name非空时，则选举类型为Type、且参数名为Name的参数 </para>
     /// </summary>
     public string? Name { init; get; }
 

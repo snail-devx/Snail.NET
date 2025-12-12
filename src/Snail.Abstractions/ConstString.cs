@@ -24,6 +24,25 @@ public static class ConstString
     public const string STR_Separator = ":";
     #endregion
 
+    #region 环境变量
+    /// <summary>
+    /// 环境变量：应用名称
+    /// </summary>
+    public const string ENV_AppName = "AppName";
+    /// <summary>
+    /// 环境变量：运行环境类型
+    /// </summary>
+    public const string ENV_RunType = "RunType";
+    /// <summary>
+    /// 环境变量：数据中心ID
+    /// </summary>
+    public const string Env_DatacenterId = "DatacenterId";
+    /// <summary>
+    /// 环境变量：工作节点ID
+    /// </summary>
+    public const string Env_WorkerId = "WorkerId";
+    #endregion
+
     #region 中间件名称
     /// <summary>
     /// 中间件名称：遥测追踪

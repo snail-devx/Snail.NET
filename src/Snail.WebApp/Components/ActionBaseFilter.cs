@@ -430,7 +430,7 @@ public abstract class ActionBaseFilter : IAsyncActionFilter
         error = new ErrorCodeDetailDescriptor(error)
         {
             Type = ex.GetType().Name,
-            Detail = App.IsProduction() ? ex.Message : ex.ToString()
+            Detail = App.IsProduction ? ex.Message : ex.ToString()
         };
         SetResponse(request, response, new ObjectResult(error));
         return null;

@@ -18,13 +18,13 @@ public sealed class PubSubReceiverAttribute : Attribute, IReceiveOptions
 {
     #region 属性变量
     /// <summary>
-    /// 接受器名称<br />
-    ///     1、确保<see cref="_name"/>+<see cref="_message"/>组合唯一；二者合并构建<see cref="IReceiveOptions.Queue"/>
+    /// 接受器名称
+    /// <para>1、确保<see cref="_name"/>+<see cref="_message"/>组合唯一；二者合并构建<see cref="IReceiveOptions.Queue"/></para>
     /// </summary>
     private string _name { init; get; }
     /// <summary>
-    /// 接收消息名称<br />
-    ///     1、确保<see cref="_name"/>+<see cref="_message"/>组合唯一；二者合并构建<see cref="IReceiveOptions.Queue"/>
+    /// 接收消息名
+    /// <para>1、确保<see cref="_name"/>+<see cref="_message"/>组合唯一；二者合并构建<see cref="IReceiveOptions.Queue"/></para>
     /// </summary>
     private string _message { init; get; }
     #endregion
@@ -47,32 +47,33 @@ public sealed class PubSubReceiverAttribute : Attribute, IReceiveOptions
     /// 消息交换机名称；强制采用消息名称
     /// </summary>
     string? IMessageOptions.Exchange => _message;
-
     /// <summary>
     /// 消息交换机和队列之间的路由
     /// </summary>
     string? IMessageOptions.Routing => null;
-
     /// <summary>
-    /// 消息队列名称；<br />
-    ///     1、接收消息必传<br />
-    ///     2、发送消息选填，根据情况做一些默认行为，如绑定队列，避免接收程序还没启动，导致消息丢失<br />
+    /// 接收消息的队列名称
     /// </summary>
     string IReceiveOptions.Queue => $"{_name}:{_message}";
 
     /// <summary>
-    /// 接收消息的尝试次数 <br />
-    ///     1、接收方发生异常后，尝试多少次后仍失败，则强制确认，避免消息堆积 <br />
-    ///     2、== 0 失败则自动确认消费 <br />
-    ///     3、&lt;0 不自动确认 <br />
+    /// 接收消息的尝试次数
+    /// <para>1、接收方发生异常后，尝试多少次后仍失败，则强制确认，避免消息堆积 </para>
+    /// <para>2、&lt;= 0 不自动确认；直到处理成功 </para>
     /// </summary>
     public int Attempt { init; get; } = 3;
-
     /// <summary>
     /// 消息接收器并发数量 <br />
-    ///     1、当前接收器从<see cref="IReceiveOptions.Queue"/>接收消息的并发量 <br />
-    ///     2、大于1时生效，合理设置，提高消息消费效率
+    /// <para>1、当前接收器从<see cref="IReceiveOptions.Queue"/>接收消息的并发量 </para>
+    /// <para>2、大于1时生效，合理设置，提高消息消费效率 </para>
     /// </summary>
     public int Concurrent { init; get; } = 1;
+
+    /// <summary>
+    ///  进行消息处理时，禁用消息中间件
+    /// <para>1、为true时，发送/接收消息时不执行配置好的消息中间件</para>
+    /// <para>2、满足在一些特定业务场景下，无需中间件处理消息，直接原生对接消息服务器</para>
+    /// </summary>
+    public bool DisableMiddleware { init; get; }
     #endregion
 }
