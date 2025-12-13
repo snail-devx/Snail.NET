@@ -24,9 +24,9 @@ public interface ILogger
     bool Log(LogDescriptor descriptor);
 
     /// <summary>
-    /// 创建新作用域日志记录器 <br />
-    ///     1、基于<paramref name="title"/>创建一条唯一主键Id标记日志，后续日志将归属于此Id组，和其他日志区分开<br />
-    ///     2、一般在进行多线程操作时，子线程之间日志做归组使用，方便查看日志层级<br />
+    /// 创建新作用域日志记录器 
+    /// <para>1、基于<paramref name="title"/>创建一条唯一主键Id标记日志，后续日志将归属于此Id组，和其他日志区分开 </para>
+    /// <para>2、一般在进行多线程操作时，子线程之间日志做归组使用，方便查看日志层级 </para>
     /// </summary>
     /// <param name="title">日志标题；将作为后续日志组的组名</param>
     /// <param name="content">日志内容；日志组日志的内容信息</param>

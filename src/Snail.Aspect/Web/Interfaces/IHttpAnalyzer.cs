@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 namespace Snail.Aspect.Web.Interfaces;
 
 /// <summary>
-/// 接口约束：Http请求分析器 <br />
-///     1、处理http请求url上的动态参数信息<br />
-///     2、配合<see cref="HttpAspectAttribute"/>在进行自动生成HTTP请求接口实现类时，可干预url、body、header等参数值
+/// 接口约束：Http请求分析器
+/// <para>1、处理http请求url上的动态参数信息 </para>
+/// <para>2、配合<see cref="HttpAspectAttribute"/>在进行自动生成HTTP请求接口实现类时，可干预url、body、header等参数值 </para>
 /// </summary>
 public interface IHttpAnalyzer
 {

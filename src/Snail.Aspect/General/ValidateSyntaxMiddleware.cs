@@ -14,9 +14,9 @@ using System.Text;
 namespace Snail.Aspect.General;
 
 /// <summary>
-/// 【Validate】语法中间件 <br />
-///     1、侦测打了<see cref="ValidateAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 <br />
-///     2、自动为方法加入【验证逻辑】，如验证方法参数有效性，字段属性有效性
+/// 【Validate】语法中间
+/// <para>1、侦测打了<see cref="ValidateAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组 </para>
+/// <para>2、自动为方法加入【验证逻辑】，如验证方法参数有效性，字段属性有效性 </para>
 /// </summary>
 internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
 {
@@ -37,8 +37,8 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
-    protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
-    {
+    protected static readonly IReadOnlyList<string> FixedNamespaces =
+    [
         //  全局依赖的
         //       这几个为了方便内部判断，如IsNullOrEmpty
         "static Snail.Utilities.Common.Utils.ArrayHelper",
@@ -50,7 +50,7 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Abstractions.Common.Interfaces",
         typeof(ValidateAspectAttribute).Namespace,
         typeof(RequiredAttribute).Namespace,
-    };
+    ];
 
     /// <summary>
     /// 是否需要【辅助】代码
@@ -167,9 +167,9 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     }
 
     /// <summary>
-    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助 <br />
-    ///     1、多个方法用到的通用逻辑，抽取成辅助方法 
-    ///     2、方法实现所需的依赖注入变量 <br />
+    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助
+    /// <para>1、多个方法用到的通用逻辑，抽取成辅助方法  </para>
+    /// <para>2、方法实现所需的依赖注入变量 </para>
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>

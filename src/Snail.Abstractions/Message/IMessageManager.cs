@@ -3,9 +3,9 @@
 namespace Snail.Abstractions.Message;
 
 /// <summary>
-/// 接口约束：消息管理器 <br />
-///     1、维护消息中间件 <br />
-///     2、消息管理：能够发送、接收哪些消息；后期再提供，前期不做管控 <br />
+/// 接口约束：消息管理器
+/// <para>1、维护消息中间件 </para>
+/// <para>2、消息管理：能够发送、接收哪些消息；后期再提供，前期不做管控 </para>
 /// </summary>
 public interface IMessageManager
 {

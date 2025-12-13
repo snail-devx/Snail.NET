@@ -8,7 +8,7 @@ namespace Snail.Aspect.Common.Interfaces;
 internal interface ISyntaxProxy
 {
     /// <summary>
-    /// 唯一Key值，将作为生成的源码cs文件名称 <br />
+    /// 唯一Key值，将作为生成的源码cs文件名称
     /// </summary>
     /// <remarks>若返回null，则不会生成cs文件</remarks>
     string Key { get; }

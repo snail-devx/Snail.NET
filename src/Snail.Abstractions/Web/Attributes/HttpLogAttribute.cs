@@ -1,9 +1,9 @@
 ﻿namespace Snail.Abstractions.Web.Attributes;
 
 /// <summary>
-/// 特性标签；HTTP请求日志特性标签<br />
-///     1、调用方需要特定控制日志记录数据时，在Func、Action、Method上加上此标签<br />
-///     2、使用此标签前，需要先启用日志中间件<br />
+/// 特性标签；HTTP请求日志特性标签
+/// <para>1、调用方需要特定控制日志记录数据时，在Func、Action、Method上加上此标签 </para>
+/// <para>2、使用此标签前，需要先启用日志中间件 </para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
 public sealed class HttpLogAttribute : Attribute

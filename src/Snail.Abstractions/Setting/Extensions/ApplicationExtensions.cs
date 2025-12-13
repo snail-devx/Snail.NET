@@ -51,9 +51,9 @@ public static class ApplicationExtensions
             return app;
         }
         /// <summary>
-        /// 获取应用程序配置的环境变量值 <br />
-        ///     1、内置使用<see cref="ISettingManager.GetEnv(in string)"/>方法完成取值 <br />
-        ///     2、请在<see cref="IApplication.Run"/>之后执行此方法
+        /// 获取应用程序配置的环境变量值
+        /// <para>1、内置使用<see cref="ISettingManager.GetEnv(in string)"/>方法完成取值 </para>
+        /// <para>2、请在<see cref="IApplication.Run"/>之后执行此方法 </para>
         /// </summary>
         /// <param name="name">环境变量名称</param>
         /// <returns>配置值；若不存在返回null</returns>

@@ -3,9 +3,9 @@
 namespace Snail.Aspect.Web.Attributes;
 
 /// <summary>
-/// 特性标签：HTTP请求方法 <br />
-///     1、标记此方法是发送Http请求，标注出具体的url地址和 <br />
-///     2、配合<see cref="HttpAspectAttribute"/>使用 <br />
+/// 特性标签：HTTP请求方法
+/// <para>1、标记此方法是发送Http请求，标注出具体的url地址和 </para>
+/// <para>2、配合<see cref="HttpAspectAttribute"/>使用 </para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class HttpMethodAttribute : Attribute

@@ -28,9 +28,9 @@ internal interface ITypeDeclarationMiddleware
     string GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next);
 
     /// <summary>
-    /// 生成<see cref="GenerateMethodCode"/>的辅助 <br />
-    ///     1、多个方法用到的通用逻辑，抽取成辅助方法 
-    ///     2、方法实现所需的依赖注入变量 <br />
+    /// 生成<see cref="GenerateMethodCode"/>的辅助
+    /// <para>1、多个方法用到的通用逻辑，抽取成辅助方法  </para>
+    /// <para>2、方法实现所需的依赖注入变量 </para>
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>

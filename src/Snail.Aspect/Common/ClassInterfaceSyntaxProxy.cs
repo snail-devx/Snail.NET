@@ -17,9 +17,9 @@ using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 namespace Snail.Aspect.Common;
 
 /// <summary>
-/// 【类型定义】语法节点代理器 <br />
-///     1、包含语法节点：ClassDeclarationSyntax、InterfaceDeclarationSyntax、RecordDeclarationSyntax、StructDeclarationSyntax <br />
-///     2、本代理器仅针对class和interface做代理，为其实现相关功能切面编程；如Http接口自动实现、缓存管理等等<br />
+/// 【类型定义】语法节点代理器
+///  <para>1、包含语法节点：ClassDeclarationSyntax、InterfaceDeclarationSyntax、RecordDeclarationSyntax、StructDeclarationSyntax </para>
+///  <para>2、本代理器仅针对class和interface做代理，为其实现相关功能切面编程；如Http接口自动实现、缓存管理等等 </para>
 /// </summary>
 internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
 {
@@ -35,12 +35,12 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <summary>
     /// 固定需要引入的命名空间几何
     /// </summary>
-    protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
-    {
+    protected static readonly IReadOnlyList<string> FixedNamespaces =
+    [
         "Snail.Abstractions.Dependency.Attributes",
         "Snail.Abstractions.Dependency.Enumerations",
         "Snail.Aspect.Common.Attributes"
-    };
+    ];
 
     /// <summary>
     /// 类型定义语法节点
@@ -78,7 +78,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// </summary>
     static ClassInterfaceSyntaxProxy()
     {
-        _middlewareConfigs = new List<Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware>>();
+        _middlewareConfigs = [];
     }
     /// <summary>
     /// 构造方法
@@ -130,7 +130,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
                     return null;
                 }
                 //  基于中间件，构建代码分析代理器
-                List<ITypeDeclarationMiddleware> middlewares = new List<ITypeDeclarationMiddleware>();
+                List<ITypeDeclarationMiddleware> middlewares = [];
                 foreach (var item in _middlewareConfigs)
                 {
                     ITypeDeclarationMiddleware middleware = item.Invoke(tds, ctx.SemanticModel);
@@ -146,7 +146,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
 
     #region ISyntaxProxy
     /// <summary>
-    /// 唯一Key值，将作为生成的源码cs文件名称 <br />
+    /// 唯一Key值，将作为生成的源码cs文件名称
     /// </summary>
     /// <remarks>若返回null，则不会生成cs文件</remarks>
     string ISyntaxProxy.Key => Key;
@@ -158,7 +158,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <returns>生成好的代码</returns>
     string ISyntaxProxy.GenerateCode(SourceProductionContext ctx)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         SourceGenerateContext context = new SourceGenerateContext(Node, ctx, Semantic);
         //  准备生成：执行插件的PrepareGenerate方法
         foreach (var mi in Middlewares)
@@ -246,7 +246,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
                 tmpCode = string.Join(",", Node.TypeParameterList.Parameters.Select(p => string.Empty));
                 tmpCode = $"[Component(Lifetime = LifetimeType.Singleton, From = typeof({Node.Identifier}<{tmpCode}>))]";
             }
-            tmpCode = tmpCode ?? $"[Component<{baseName}>(Lifetime = LifetimeType.Singleton)]";
+            tmpCode ??= $"[Component<{baseName}>(Lifetime = LifetimeType.Singleton)]";
             builder.AppendLine(tmpCode);
             //  其他特性标签的处理，去掉[Component]
             foreach (var attr in Node.AttributeLists.GetAttributes())
@@ -268,7 +268,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
                     case SyntaxKind.AbstractKeyword:
                         break;
                     default:
-                        builder.Append(token).Append(" ");
+                        builder.Append(token).Append(' ');
                         break;
                 }
             }
@@ -473,9 +473,9 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
         }
     }
     /// <summary>
-    /// 基于参数生成代码<br />
-    ///     1、保留参数Attribute、in、out等信息<br />
-    ///     2、生成参数代码格式：(参数类型 参数名称, [参数属性]参数类型 参数名称...)
+    /// 基于参数生成代码
+    /// <para>1、保留参数Attribute、in、out等信息 </para>
+    /// <para>2、生成参数代码格式：(参数类型 参数名称, [参数属性]参数类型 参数名称...) </para>
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="parameters"></param>
@@ -483,8 +483,8 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <returns>参数名称</returns>
     private static List<string> GenerateCodeByParameter(StringBuilder builder, ParameterListSyntax parameters, SourceGenerateContext context)
     {
-        List<string> names = new List<string>();
-        builder.Append("(")
+        List<string> names = [];
+        builder.Append('(')
                .Append(string.Join(", ", parameters.Parameters.Select(parameter =>
                {
                    names.Add(parameter.Identifier.Text);

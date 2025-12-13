@@ -120,18 +120,26 @@ public abstract class Application<App> : IApplication where App : class
         if (OnScan != null)
         {
             StartScan(this, OnScan.Invoke);
+            OnScan = null;
         }
         ((IApplication)this).Setting.Run();
-        OnRegister?.Invoke();
-        OnRegistered?.Invoke();
+        //      组件服务注册
+        {
+            OnRegister?.Invoke();
+            OnRegister = null;
+            OnRegistered?.Invoke();
+            OnRegistered = null;
+        }
         //  2、程序启动；启动自定义服务，触发【OnRun】事件，交给外部进行自定义服务启动
         if (appBuilder != null)
         {
             var app = appBuilder.Invoke();
             ThrowIfNull(app, $"{nameof(appBuilder)}委托返回的App对象为null");
             OnBuild?.Invoke(app);
+            OnBuild = null;
         }
         OnRun?.Invoke();
+        OnRun = null;
     }
 
     /// <summary>
@@ -154,11 +162,11 @@ public abstract class Application<App> : IApplication where App : class
             return;
         }
         //  按照扫描顺序分组升序，相同组内部，按照文件名称升序：检索程序集，整理需要进行遍历Type的程序集；后续这里可以考虑做多线程，提升匹配性能
-        Dictionary<int, List<Tuple<Type, Attribute[]>>> typeMap = new Dictionary<int, List<Tuple<Type, Attribute[]>>>();
+        Dictionary<int, List<Tuple<Type, Attribute[]>>> typeMap = [];
         Parallel.ForEach(map.GroupBy(kv => kv.Value.Order), group =>
         {
             //  以order做key始终不会重复，直接add到字典中，但注意多线程影响
-            List<Tuple<Type, Attribute[]>> types = new List<Tuple<Type, Attribute[]>>();
+            List<Tuple<Type, Attribute[]>> types = [];
             {
                 lock (typeMap)
                 {
@@ -181,7 +189,7 @@ public abstract class Application<App> : IApplication where App : class
             {
                 if (attrs.Any() == true)
                 {
-                    ReadOnlySpan<Attribute> attrSpan = new ReadOnlySpan<Attribute>(attrs.ToArray());
+                    ReadOnlySpan<Attribute> attrSpan = new ReadOnlySpan<Attribute>([.. attrs]);
                     callback.Invoke(type, attrSpan);
                 }
             }
@@ -198,10 +206,10 @@ public abstract class Application<App> : IApplication where App : class
     /// <param name="context">程序集加载上下文</param>
     /// <param name="extScanDir">扩展扫描目录（存在才会扫描）；分析此目录直属dll，不会递归查找；传null则不额外扫描指定目录下的程序集</param>
     /// <returns></returns>
-    private static IDictionary<Assembly, AppScanAttribute> GetScanAssemblies(AssemblyLoadContext context, in string? extScanDir = null)
+    private static Dictionary<Assembly, AppScanAttribute> GetScanAssemblies(AssemblyLoadContext context, in string? extScanDir = null)
     {
         /*  要确保扫描的程序集和传入context；否则会会导致 is、强制类型转换 等实现，因为不在同一个context下  */
-        IDictionary<Assembly, AppScanAttribute> map = new Dictionary<Assembly, AppScanAttribute>();
+        Dictionary<Assembly, AppScanAttribute> map = [];
         //  查看指定目录下程序集是否在AssemblyLoadContext加载；仅判断有AppScanAttribute标签的
         if (Directory.Exists(extScanDir) == true)
         {
@@ -343,7 +351,7 @@ public abstract class Application<App> : IApplication where App : class
     private static void GetTypes(Assembly assembly, in IList<Tuple<Type, Attribute[]>> types)
     {
         //  同程序集下的程序集，做一下属性判断；Aspect标记类型，放到最后；
-        List<Tuple<Type, Attribute[]>> aspectTypes = new List<Tuple<Type, Attribute[]>>();
+        List<Tuple<Type, Attribute[]>> aspectTypes = [];
         foreach (Type type in assembly.GetTypes())
         {
             bool isAspectType = false;

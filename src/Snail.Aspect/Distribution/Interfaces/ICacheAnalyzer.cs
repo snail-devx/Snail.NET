@@ -3,9 +3,9 @@
 namespace Snail.Aspect.Distribution.Interfaces;
 
 /// <summary>
-/// 接口：缓存分析器<br/>
-///     1、前置分析：分析缓存key和masterkey值<br/>
-///     2、后置分析：分析缓存有效性、、、，暂不支持<br/>
+/// 接口：缓存分析器
+/// <para>1、前置分析：分析缓存key和masterkey值 </para>
+/// <para>2、后置分析：分析缓存有效性、、、，暂不支持 </para>
 /// </summary>
 public interface ICacheAnalyzer
 {

@@ -29,28 +29,30 @@ internal readonly struct CacheMethodOptions
     public CacheType Type { get; }
 
     /// <summary>
-    /// 缓存操作类型：<br />
-    ///     1、<see cref="CacheActionType.Load"/>：传入缓存key，取到了则直接返回；取不到再执行方法代码；若传入多key，则自动过滤取到的，最后再合并<br />
-    ///     1、<see cref="CacheActionType.LoadSave"/>：传入缓存key，取到了则直接返回；取不到再执行方法代码并把取到数据再加入缓存；若传入多key，则自动过滤取到的，最后再合并<br />
-    ///     2、<see cref="CacheActionType.Save"/>：方法返回数据，自动加入缓存中<br />
-    ///     3、<see cref="CacheActionType.Delete"/>：传入的缓存Key，执行完方法后自动删除<br />
+    /// 缓存操作类型
+    /// <para>1、<see cref="CacheActionType.Load"/>：传入缓存key，取到则直接返回；否则执行方法代码；若传入多key，则自动过滤取到的，最后再合并 </para>
+    /// <para>1、<see cref="CacheActionType.LoadSave"/>：传入缓存key，取到则直接返回；否则执行方法代码并把取到数据加入缓存；若传入多key，则自动过滤取到的，最后再合并 </para>
+    /// <para>2、<see cref="CacheActionType.Save"/>：方法返回数据，自动加入缓存中 </para>
+    /// <para>3、<see cref="CacheActionType.Delete"/>：传入的缓存Key，执行完方法后自动删除 </para>
     /// </summary>
     public CacheActionType Action { get; }
 
     /// <summary>
-    /// 缓存主Key：；参照<see cref="Attributes.CacheMethodBase.MasterKey"/>
+    /// 缓存主Key
+    /// <para>参照<see cref="Attributes.CacheMethodBase.MasterKey"/> </para>
     /// </summary>
     public AttributeArgumentSyntax MasterKey { get; }
     /// <summary>
-    /// 缓存数据Key前缀；参照<see cref="Attributes.CacheMethodBase.DataKeyPrefix"/>
+    /// 缓存数据Key前缀
+    /// <para>参照<see cref="Attributes.CacheMethodBase.DataKeyPrefix"/> </para>
     /// </summary>
     public AttributeArgumentSyntax DataKeyPrefix { get; }
 
     /// <summary>
-    /// 缓存数据类型名称；<br />
-    ///     1、必传，基于此分析缓存数据类型<br />
-    ///     2、最初想基于方法返回值分析，这样限制太多，且分析得不一定准确<br />
-    ///     3、抛出错误信息时，基于此节点做定位使用；支持属性值和泛型参数值
+    /// 缓存数据类型名称
+    /// <para>1、必传，基于此分析缓存数据类型 </para>
+    /// <para>2、最初想基于方法返回值分析，这样限制太多，且分析得不一定准确 </para>
+    /// <para>3、抛出错误信息时，基于此节点做定位使用；支持属性值和泛型参数值 </para>
     /// </summary>
     public SyntaxNode DataType { get; }
     /// <summary>
@@ -163,9 +165,9 @@ internal readonly struct CacheMethodOptions
 
     #region 公共方法
     /// <summary>
-    /// 结构选项；将如下属性解构成字符串，方便做代码生成 <br/>
-    ///     1、<see cref="Attributes.CacheMethodBase.MasterKey"/> <br/>
-    ///     2、<see cref="Attributes.CacheMethodBase.DataKeyPrefix"/> <br/>
+    /// 结构选项；将如下属性解构成字符串，方便做代码生成
+    /// <para>1、<see cref="Attributes.CacheMethodBase.MasterKey"/> </para>
+    /// <para>2、<see cref="Attributes.CacheMethodBase.DataKeyPrefix"/> </para>
     /// </summary>
     /// <param name="masterKey"></param>
     /// <param name="dataKeyPrefix"></param>
@@ -175,9 +177,9 @@ internal readonly struct CacheMethodOptions
         dataKeyPrefix = DataKeyPrefix == null ? "null" : $"{DataKeyPrefix.Expression}";
     }
     /// <summary>
-    /// 结构选项；将如下属性结构成字符串，方便做代码生成 <br/>
-    ///     1、<see cref="Attributes.CacheMethodBase.Type"/> <br/>
-    ///     2、<see cref="Attributes.CacheMethodAttribute.DataType"/> <br/>
+    /// 结构选项；将如下属性结构成字符串，方便做代码生成
+    /// <para>1、<see cref="Attributes.CacheMethodBase.Type"/> </para>
+    /// <para>2、<see cref="Attributes.CacheMethodAttribute.DataType"/> </para>
     /// </summary>
     /// <param name="cacheType">缓存类型字符串：如CacheType.Object</param>
     /// <param name="dataType">缓存数据类型：如string、TestCache</param>

@@ -15,10 +15,10 @@ internal readonly struct ReturnTypeOptions
 {
     #region 属性变量
     /// <summary>
-    /// 实际的返回值数据类型，可用于缓存操作的数据类型 <br />
-    ///     1、<see cref="IsDataBag"/>为true时，则是指数据包泛型对象解析结果 <br />
-    ///     2、<see cref="IsList"/>为true时， List{T}的T类型 <br />
-    ///     、、、
+    /// 实际的返回值数据类型，可用于缓存操作的数据类型
+    /// <para>1、<see cref="IsDataBag"/>为true时，则是指数据包泛型对象解析结果 </para>
+    /// <para>2、<see cref="IsList"/>为true时， List{T}的T类型 </para>
+    /// <para>、、、 </para>
     /// </summary>
     public ITypeSymbol DataTypeSymbol { get; }
 
@@ -28,40 +28,40 @@ internal readonly struct ReturnTypeOptions
     public bool IsDataBag { get; }
 
     /// <summary>
-    /// 是否是多模式：List、Dictionary、Array、、、 <br />
-    ///     1、为false时，为单模式； <br />
-    ///     2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 <br />
+    /// 是否是多模式：List、Dictionary、Array、、、
+    /// <para>1、为false时，为单模式 </para>
+    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
     /// </summary>
     public bool IsMulti { get; }
     /// <summary>
-    /// 多模式类型：List{string}、string[]、、、 <br />
-    ///     1、<see cref="IsMulti"/>为true时，生效 <br />
-    ///     2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 <br />
+    /// 多模式类型：List{string}、string[]、、、
+    /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
+    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
     /// </summary>
     public ITypeSymbol MultiTypeSymbol { get; }
 
     /// <summary>
-    /// 是否是数组 <br />
-    ///     1、<see cref="IsMulti"/>为true时，生效 <br />
-    ///     2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 <br />
+    /// 是否是数组
+    /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
+    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
     /// </summary>
     public bool IsArray { get; }
     /// <summary>
-    /// 是否是List对象 <br />
-    ///     1、<see cref="IsMulti"/>为true时，生效 <br />
-    ///     2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 <br />
+    /// 是否是List对象
+    /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
+    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
     /// </summary>
     public bool IsList { get; }
 
     /// <summary>
-    /// 是否是Dictionary <br />
-    ///     1、<see cref="IsMulti"/>为true时，生效 <br />
-    ///     2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 <br />
+    /// 是否是Dictionary
+    /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
+    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
     /// </summary>
     public bool IsDictionary { get; }
     /// <summary>
-    /// 字典Key类型 <br />
-    ///     1、<see cref="IsDictionary"/>为true时，生效 <br />
+    /// 字典Key类型
+    /// <para>1、<see cref="IsDictionary"/>为true时，生效 </para>
     /// </summary>
     public ITypeSymbol KeyType { get; }
     #endregion
@@ -113,8 +113,7 @@ internal readonly struct ReturnTypeOptions
                 DataTypeSymbol = realType;
             }
             //      整理遍历做分析自身+实际实现接口
-            List<ITypeSymbol> types = new List<ITypeSymbol>() { DataTypeSymbol };
-            types.AddRange(DataTypeSymbol.AllInterfaces);
+            List<ITypeSymbol> types = [DataTypeSymbol, .. DataTypeSymbol.AllInterfaces];
             realType = null;
             foreach (var ti in types)
             {
@@ -189,9 +188,9 @@ internal readonly struct ReturnTypeOptions
         }
         if (type is INamedTypeSymbol nts && nts.TypeArguments.Length > 0)
         {
-            code.Append("<");
+            code.Append('<');
             code.Append(string.Join(", ", nts.TypeArguments.Select(GetSymbolName)));
-            code.Append(">");
+            code.Append('>');
         }
         //  如果是数组的话，需要追加上
         code.Append(type.TypeKind == TypeKind.Array ? "[]" : string.Empty);

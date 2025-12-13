@@ -17,9 +17,9 @@ using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 namespace Snail.Aspect.General;
 
 /// <summary>
-/// [GeneralAspect]语法节点通用源码中间件 <br />
-///     1、侦测打了<see cref="MethodAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 <br />
-///     2、自动分析可重写实现的方法，拦截方法执行<see cref="IMethodRunHandle.OnRun"/>或者<see cref="IMethodRunHandle.OnRunAsync"/>方法<br />
+/// [GeneralAspect]语法节点通用源码中间件
+/// <para>1、侦测打了<see cref="MethodAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 </para>
+/// <para>2、自动分析可重写实现的方法，拦截方法执行<see cref="IMethodRunHandle.OnRun"/>或者<see cref="IMethodRunHandle.OnRunAsync"/>方法 </para>
 /// </summary>
 internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
 {
@@ -39,8 +39,8 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
-    protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
-    {
+    protected static readonly IReadOnlyList<string> FixedNamespaces =
+    [
         //  全局依赖的
         typeof(Task).Namespace,//                           System
         "Snail.Utilities.Common",//                         
@@ -54,7 +54,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         typeof(IMethodRunHandle).Namespace,
         typeof(MethodRunHandleExtensions).Namespace,
         typeof(MethodRunContext).Namespace,
-    };
+    ];
 
     /// <summary>
     /// [CacheAspect]特性标签
@@ -175,9 +175,9 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         return builder.ToString();
     }
     /// <summary>
-    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助 <br />
-    ///     1、多个方法用到的通用逻辑，抽取成辅助方法 
-    ///     2、方法实现所需的依赖注入变量 <br />
+    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助
+    /// <para>1、多个方法用到的通用逻辑，抽取成辅助方法  </para>
+    /// <para>2、方法实现所需的依赖注入变量 </para>
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>

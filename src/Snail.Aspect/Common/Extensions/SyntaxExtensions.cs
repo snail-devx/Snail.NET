@@ -38,11 +38,11 @@ internal static class SyntaxExtensions
         */
     }
     /// <summary>
-    /// 获取类型使用到的命名空间 <br />
-    ///     1、类型自身所处的命名空间 <br />
-    ///     2、类型为泛型时，泛型参数类型所处的命名空间，包括泛型参数内部的泛型参数 <br />
-    /// 举例：AspectTest{XC{LockList{Disposable[]}}}则会返回下列类型所在的命名空间 <br />
-    ///     1、AspectTest、XC、LockList、Disposable
+    /// 获取类型使用到的命名空间
+    /// <para>1、类型自身所处的命名空间 </para>
+    /// <para>2、类型为泛型时，泛型参数类型所处的命名空间，包括泛型参数内部的泛型参数 </para>
+    /// <para>举例说明：</para>
+    /// <para>1、AspectTest{XC{LockList{Disposable[]}}}则会返回下列类型所在的命名空间：AspectTest、XC、LockList、Disposable </para>
     /// </summary>
     /// <param name="type"></param>
     /// <param name="semantic"></param>
@@ -69,9 +69,10 @@ internal static class SyntaxExtensions
         return rt;
     }
     /// <summary>
-    /// 获取实际类型名称；举例： <br />
-    ///     1、Task 返回：System.Threading.Tasks.Task <br />
-    ///     2、Task&lt;HttpResult&gt; 返回：System.Threading.Tasks.Task&lt;Snail.Abstractions.Web.DataModels.HttpResult&gt; <br />
+    /// 获取实际类型名称
+    /// <para>举例：</para>
+    /// <para>1、Task 返回：System.Threading.Tasks.Task </para>
+    /// <para>2、Task&lt;HttpResult&gt; 返回：System.Threading.Tasks.Task&lt;Snail.Abstractions.Web.DataModels.HttpResult&gt; </para>
     /// </summary>
     /// <param name="node"></param>
     /// <param name="semantic"></param>
@@ -121,9 +122,9 @@ internal static class SyntaxExtensions
         return null;
     }
     /// <summary>
-    /// 获取【定义的类型】所使用到的命名空间<br />
-    ///     1、自身所处命名空间<br />
-    ///     2、using使用到其他类型的命名空间；不带using关键字<br />
+    /// 获取【定义的类型】所使用到的命名空间
+    /// <para>1、自身所处命名空间 </para>
+    /// <para>2、using使用到其他类型的命名空间；不带using关键字 </para>
     /// </summary>
     /// <param name="tds"></param>
     /// <remarks>针对内部嵌套类型时没办法分析出来上层类型；比较复杂，不兼容这种情况</remarks>
@@ -131,7 +132,7 @@ internal static class SyntaxExtensions
     public static IList<string> GetUsedNamespaces(this TypeDeclarationSyntax tds)
     {
         //  往↑找节点，然后看使用到的using节点
-        List<string> nss = new List<string>();
+        List<string> nss = [];
         SyntaxNode tmpNode = tds.Parent;
         while (tmpNode != null)
         {
@@ -232,7 +233,7 @@ internal static class SyntaxExtensions
     /// <returns></returns>
     public static IList<string> GetUsedNamespaces(this SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semantic)
     {
-        List<string> nss = new List<string>();
+        List<string> nss = [];
         foreach (var aList in attributeLists)
         {
             foreach (var attr in aList.Attributes)
@@ -252,7 +253,7 @@ internal static class SyntaxExtensions
     public static IList<AttributeArgumentSyntax> GetArguments(this AttributeSyntax attr)
     {
         //  最初是想转成字典，但属性构造方法传入参数，无Name值，转字典会导致多个参数冲掉
-        List<AttributeArgumentSyntax> args = new List<AttributeArgumentSyntax>();
+        List<AttributeArgumentSyntax> args = [];
         args.TryAddRange(attr.ArgumentList?.Arguments.Select(arg => arg));
         return args;
     }
@@ -278,9 +279,9 @@ internal static class SyntaxExtensions
         => HasArgument(attr, "Analyzer", out argument);
 
     /// <summary>
-    /// 获取【属性节点】所使用到的命名空间 <br />
-    ///     1、属性自身类型的命名空间，如<see cref="Web.Attributes.HttpAspectAttribute"/> <br />
-    ///     2、使用属性时传入的参数值类型命名空间，如[Http("Test", Workspace = "Test", Code = Xx.Xxx.Code, Analyzer = Cons.Analyzer)]中Cons.Analyzer的Cons类命名空间<br />
+    /// 获取【属性节点】所使用到的命名空间
+    /// <para>1、属性自身类型的命名空间，如<see cref="Web.Attributes.HttpAspectAttribute"/> </para>
+    /// <para>2、使用属性时传入的参数值类型命名空间，如[Http("Test", Analyzer = Cons.Analyzer)]中Cons.Analyzer的Cons类命名空 </para>
     /// </summary>
     /// <param name="attr"></param>
     /// <param name="semantic"></param>
@@ -288,7 +289,7 @@ internal static class SyntaxExtensions
     /// <returns></returns>
     public static IList<string> GetUsedNamespaces(this AttributeSyntax attr, SemanticModel semantic)
     {
-        List<string> nss = new List<string>();
+        List<string> nss = [];
         //  获取自身，Name类型是TypeSyntax的派生类；可以直接通过语法树分析命名空间，不用单独分析取
         {
             nss.TryAddRange(attr.Name.GetUsedNamespaces(semantic));
@@ -315,8 +316,8 @@ internal static class SyntaxExtensions
     }
 
     /// <summary>
-    /// 获取【属性参数】所用到的命名空间 <br />
-    ///     1、仅分析参数值类型所在命名空间
+    /// 获取【属性参数】所用到的命名空间
+    /// <para>1、仅分析参数值类型所在命名空间 </para>
     /// </summary>
     /// <param name="arg"></param>
     /// <param name="semantic"></param>

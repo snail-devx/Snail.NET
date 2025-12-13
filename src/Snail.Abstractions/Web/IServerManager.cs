@@ -4,9 +4,9 @@ using Snail.Abstractions.Web.Interfaces;
 namespace Snail.Abstractions.Web;
 
 /// <summary>
-/// 接口约束：服务器管理器<br />
-///     1、支撑http、rabbitmq、redis等可抽取成workspace-section-code模式管理服务器地址的模块<br />
-///     2、配合各个管理器使用，实现实例不基于【依赖注入】做处理
+/// 接口约束：服务器管理器
+/// <para>1、支撑http、rabbitmq、redis等可抽取成workspace-section-code模式管理服务器地址的模块 </para>
+/// <para>2、配合各个管理器使用，实现实例不基于【依赖注入】做处理 </para>
 /// </summary>
 public interface IServerManager
 {

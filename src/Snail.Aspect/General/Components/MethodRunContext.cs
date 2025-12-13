@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace Snail.Aspect.General.Components;
 
 /// <summary>
-/// 方法执行时的上下文；实现方法执行拦截，切面注入逻辑<br />
-///     1、配合<see cref="IMethodRunHandle"/>使用<br />
-///     2、记录方法名称、参数等信息<br />
-///     3、存储、修改方法返回值数据
+/// 方法执行时的上下文；实现方法执行拦截，切面注入逻辑
+/// <para>1、配合<see cref="IMethodRunHandle"/>使用 </para>
+/// <para>2、记录方法名称、参数等信息 </para>
+/// <para>3、存储、修改方法返回值数据 </para>
 /// </summary>
 public sealed class MethodRunContext
 {

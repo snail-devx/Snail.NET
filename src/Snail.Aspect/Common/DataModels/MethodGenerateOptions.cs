@@ -46,9 +46,9 @@ internal readonly struct MethodGenerateOptions
     /// </summary>
     public bool IsAsync { get; }
     /// <summary>
-    /// 方法返回值类型 <br />
-    ///     1、若为异步方法，则为Task的泛型参数值，如<see cref="Task{String}"/>，则是<see cref="string"/> <br />
-    ///     2、若为null，则为void方法
+    /// 方法返回值类型
+    /// <para>1、若为异步方法，则为Task的泛型参数值，如<see cref="Task{String}"/>，则是<see cref="string"/> </para>
+    /// <para>2、若为null，则为void方法 </para>
     /// </summary>
     public TypeSyntax ReturnType { get; }
 
@@ -77,7 +77,7 @@ internal readonly struct MethodGenerateOptions
             ReturnType = null;
         }
         //  基于访问修饰符初始化
-        List<SyntaxToken> accessTokens = new List<SyntaxToken>();
+        List<SyntaxToken> accessTokens = [];
         foreach (var token in method.Modifiers)
         {
             switch (token.Kind())

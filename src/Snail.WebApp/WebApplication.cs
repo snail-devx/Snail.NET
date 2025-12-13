@@ -65,6 +65,7 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
             var mvc = Builder.Services.AddControllers();
             mvc.AddControllersAsServices();
             OnController?.Invoke(mvc);
+            OnController = null;
             //  内部会固化IServiceCollection注册服务，并转换成ServiceProvider对外提供
             app = Builder.Build();
             return app;

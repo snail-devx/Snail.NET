@@ -3,9 +3,9 @@
 namespace Snail.Abstractions.Web.DataModels;
 
 /// <summary>
-/// Http请求结果<br />
-///     1、对Http请求结果包装；提供常用数据类型快捷访问属性，如转成String、Bytes、、、<br />
-///     2、封装JSON反序列化方法，As《T》<br />
+/// Http请求结果
+/// <para>1、对Http请求结果包装；提供常用数据类型快捷访问属性，如转成String、Bytes、、、 </para>
+/// <para>2、封装JSON反序列化方法，As《T》 </para>
 /// </summary>
 public sealed class HttpResult
 {

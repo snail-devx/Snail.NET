@@ -5,8 +5,8 @@ namespace Snail.Aspect.Distribution.Interfaces;
 
 /// <summary>
 /// 接口：并发锁分析器
-///     1、处理并发锁操作时的Key上的动态参数信息<br />
-///     2、配合<see cref="LockAspectAttribute"/>在进行并发锁操作干预<br />
+/// <para>1、处理并发锁操作时的Key上的动态参数信息 </para>
+/// <para>2、配合<see cref="LockAspectAttribute"/>在进行并发锁操作干预 </para>
 /// </summary>
 public interface ILockAnalyzer
 {

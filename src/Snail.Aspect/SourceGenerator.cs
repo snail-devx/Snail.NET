@@ -13,8 +13,8 @@ using System.Linq;
 namespace Snail.Aspect;
 
 /// <summary>
-/// 源码生成器 <br />
-///     1、自动为打了<see cref="HttpAspectAttribute"/>标签的Interface生成实现class，并注册为组件 <br />
+/// 源码生成器
+/// <para>1、自动为打了<see cref="HttpAspectAttribute"/>标签的Interface生成实现class，并注册为组件 </para>
 /// </summary>
 [Generator(LanguageNames.CSharp)]
 public sealed class SourceGenerator : IIncrementalGenerator

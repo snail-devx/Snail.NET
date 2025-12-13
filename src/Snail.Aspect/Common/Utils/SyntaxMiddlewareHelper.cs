@@ -12,15 +12,15 @@ using System.Text;
 namespace Snail.Aspect.Common.Utils;
 
 /// <summary>
-/// 语法相关中间件的助手类 <br />
-///     1、负责为中间件实现，提供一下通用方法逻辑
+/// 语法相关中间件的助手类
+/// <para>1、负责为中间件实现，提供一下通用方法逻辑 </para>
 /// </summary>
 internal static class SyntaxMiddlewareHelper
 {
     #region 属性变量
     /// <summary>
-    /// 类方法的【原始代码】调用委托；<br />
-    ///     1、base.xxxxx
+    /// 类方法的【原始代码】调用委托
+    /// <para>1、base.xxxxx </para>
     /// </summary>
     public static readonly MethodCodeDelegate CallBaseMethodCode = (method, context, options) =>
     {
@@ -33,7 +33,7 @@ internal static class SyntaxMiddlewareHelper
                .Append(options.ReturnType == null ? string.Empty : $"return ")
                .Append(options.IsAsync == false ? string.Empty : $"await ")
                .Append("base.").Append(method.Identifier.Text)
-               .Append("(").Append(string.Join(", ", method.ParameterList.Parameters.Select(p => p.Identifier.Text))).AppendLine(");");
+               .Append('(').Append(string.Join(", ", method.ParameterList.Parameters.Select(p => p.Identifier.Text))).AppendLine(");");
 
         context.AddGeneratedMiddleware(nameof(CallBaseMethodCode));
         return builder.ToString();
@@ -67,10 +67,10 @@ internal static class SyntaxMiddlewareHelper
     }
 
     /// <summary>
-    /// 基于属性节点，构建【服务器】注入代码 <br />
-    ///     1、示例属性节点：[HttpAspect(Workspace = "Test", Code = "BAIDU", Analyzer = Cons.Analyzer)] <br />
-    ///     2、将返回注入代码：Server(Workspace = "Test",Code = "BAIDU")；需要外部自己组装到 “[]”中
-    ///     3、其他属性参数，通过<paramref name="otherArgs"/>通知外面自己处理
+    /// 基于属性节点，构建【服务器】注入代码
+    /// <para>1、示例属性节点：[HttpAspect(Workspace = "Test", Code = "BAIDU", Analyzer = Cons.Analyzer)] </para>
+    /// <para>2、将返回注入代码：Server(Workspace = "Test",Code = "BAIDU")；需要外部自己组装到 “[]”中 </para>
+    /// <para>3、其他属性参数，通过<paramref name="otherArgs"/>通知外面自己处理 </para>
     /// </summary>
     /// <param name="aspectAttr"></param>
     /// <param name="context"></param>
@@ -152,10 +152,10 @@ internal static class SyntaxMiddlewareHelper
     }
 
     /// <summary>
-    /// 基于<paramref name="next"/>生成执行代码；可生成两种模式的执行代码<br />
-    ///     1、生成本地方法，此时外部可传入<paramref name="localMethodName"/><br />
-    ///     2、生成基类代码，此时<paramref name="localMethodName"/>失效，此种情况一般为执行基类方法时，仅一行代码，生成【本地方法】不符合逻辑<br />
-    ///     3、根据代码情况做自动优化；若生成本地方法，则自动加入<see cref="SourceGenerateContext.LocalMethods"/>代码中<br />
+    /// 基于<paramref name="next"/>生成执行代码；可生成两种模式的执行代码
+    /// <para>1、生成本地方法，此时外部可传入<paramref name="localMethodName"/> </para>
+    /// <para>2、生成基类代码，此时<paramref name="localMethodName"/>失效，此种情况一般为执行基类方法时，仅一行代码，生成【本地方法】不符合逻辑 </para>
+    /// <para>3、根据代码情况做自动优化；若生成本地方法，则自动加入<see cref="SourceGenerateContext.LocalMethods"/>代码中 </para>
     /// </summary>
     /// <param name="method"></param>
     /// <param name="context"></param>
@@ -195,9 +195,9 @@ internal static class SyntaxMiddlewareHelper
                    ? (options.IsAsync ? $"async Task" : "void")
                    : (options.IsAsync ? $"async Task<{options.ReturnType}>" : $"{options.ReturnType}");
                 context.LocalMethods
-                    .Append(TAB_MethodSpace).Append(modifierCode).Append(" ").Append(localMethodName).AppendLine("()")
+                    .Append(TAB_MethodSpace).Append(modifierCode).Append(' ').Append(localMethodName).AppendLine("()")
                     .Append(TAB_MethodSpace).AppendLine("{")
-                    .Append(TAB_MethodSpace).Append("\t").AppendLine(nextCode)
+                    .Append(TAB_MethodSpace).Append('\t').AppendLine(nextCode)
                     .Append(TAB_MethodSpace).AppendLine("}");
                 //      返回本地方法执行代码
                 return options.IsAsync
@@ -218,10 +218,9 @@ internal static class SyntaxMiddlewareHelper
     /// <param name="typeName">from类型名：如 ICacheAnalyzer</param>
     /// <param name="injectVarName">依赖注入实例变量名：如 _cacheAnalyzer</param>
     /// <returns>生成成功返回true；否则false</returns>
-    /// <remarks>
-    /// 生成的示例代码：<br />
-    ///     [Inject(Key = "xxx")]<br />
-    ///     private ICacheAnalyzer? _cacheAnalyzer { init; get; }<br />
+    /// <remarks>生成的示例代码：
+    /// <para>[Inject(Key = "xxx")] </para>
+    /// <para>private ICacheAnalyzer? _cacheAnalyzer { init; get; } </para>
     /// </remarks>
     public static bool GenerateInjectAssistantCode(StringBuilder builder, SourceGenerateContext context, AttributeArgumentSyntax injectKeyArg, string typeName, string injectVarName)
     {

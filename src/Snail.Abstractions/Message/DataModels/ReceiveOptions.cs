@@ -25,7 +25,7 @@ public sealed class ReceiveOptions : MessageOptions, IReceiveOptions
     public int Attempt { init; get; }
 
     /// <summary>
-    /// 消息接收器并发数量 <br />
+    /// 消息接收器并发数量
     /// <para>1、当前接收器从<see cref="Queue"/>接收消息的并发量 </para>
     /// <para>2、大于1时生效，合理设置，提高消息消费效率 </para>
     /// </summary>

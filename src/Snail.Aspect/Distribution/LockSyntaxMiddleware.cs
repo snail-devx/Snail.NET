@@ -16,9 +16,9 @@ using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 namespace Snail.Aspect.Distribution;
 
 /// <summary>
-/// 【LockAspect】语法节点源码中间件<br/>
-///     1、侦测打了<see cref="LockAspectAttribute"/>标签的class和interface节点，为其生成实现class，并注册为组件 <br />
-///     2、自动为方法加入【分布式并发锁】控制代码
+/// 【LockAspect】语法节点源码中
+///  <para>1、侦测打了<see cref="LockAspectAttribute"/>标签的class和interface节点，为其生成实现class，并注册为组件 </para>
+///  <para>2、自动为方法加入【分布式并发锁】控制代码 </para>
 /// </summary>
 internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
 {
@@ -42,8 +42,8 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
-    protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
-    {
+    protected static readonly IReadOnlyList<string> FixedNamespaces =
+    [
         //  全局依赖的
         typeof(Task).Namespace,//                           System
         "Snail.Utilities.Common",//                         
@@ -69,7 +69,7 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
         //  并发锁 切面编程相关命名空间
         typeof(LockAspectAttribute).Namespace,
         typeof(ILockAnalyzer).Namespace,
-    };
+    ];
 
     /// <summary>
     /// [LockAspect]特性标签
@@ -213,9 +213,9 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
         return builder.ToString();
     }
     /// <summary>
-    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助 <br />
-    ///     1、多个方法用到的通用逻辑，抽取成辅助方法 
-    ///     2、方法实现所需的依赖注入变量 <br />
+    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助
+    /// <para>1、多个方法用到的通用逻辑，抽取成辅助方法  </para>
+    /// <para>2、方法实现所需的依赖注入变量 </para>
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>

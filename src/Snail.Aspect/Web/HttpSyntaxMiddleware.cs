@@ -17,8 +17,8 @@ using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 namespace Snail.Aspect.Web;
 
 /// <summary>
-/// [Http]语法节点源码中间件 <br />
-///     1、侦测打了<see cref="HttpAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 <br />
+/// [Http]语法节点源码中间件
+/// <para>1、侦测打了<see cref="HttpAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 </para>
 /// </summary>
 /// <remarks>将作为最底层插件，不会再执行next插件动作</remarks>
 internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
@@ -44,8 +44,8 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 固定需要引入的命名空间几何
     /// </summary>
-    protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
-    {
+    protected static readonly IReadOnlyList<string> FixedNamespaces =
+    [
         //  全局依赖的
         "Snail.Utilities.Common.Utils",                      //  typeof(ObjectHelper).Namespace,//                   ,
         "static Snail.Utilities.Common.Utils.ObjectHelper",
@@ -62,7 +62,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
         typeof(HttpMethodType).Namespace,
         typeof(IHttpAnalyzer).Namespace,
         $"static {typeof(HttpAspectHelper).FullName}",
-    };
+    ];
 
     /// <summary>
     /// [Http]特性标签
@@ -173,7 +173,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
         _needAssistantCode = true;
         StringBuilder builder = new StringBuilder();
         //      1、分析方法参数，得到HttpBodyAttribute参数信息；不准有out参数，不准有task参数，不会等待
-        List<string> parameters = new List<string>();
+        List<string> parameters = [];
         string bodyParameter = null;
         ForEachMethodParametes(method, context, (name, parameter) =>
         {
@@ -194,9 +194,9 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     }
 
     /// <summary>
-    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助 <br />
-    ///     1、多个方法用到的通用逻辑，抽取成辅助方法 
-    ///     2、方法实现所需的依赖注入变量 <br />
+    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助
+    /// <para>1、多个方法用到的通用逻辑，抽取成辅助方法  </para>
+    /// <para>2、方法实现所需的依赖注入变量 </para>
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
@@ -303,7 +303,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="builder"></param>
     /// <param name="returnType"></param>
     /// <param name="context"></param>
-    private void GenerateMethodReturnCode(StringBuilder builder, TypeSyntax returnType, SourceGenerateContext context)
+    private static void GenerateMethodReturnCode(StringBuilder builder, TypeSyntax returnType, SourceGenerateContext context)
     {
         if (returnType != null)
         {

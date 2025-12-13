@@ -29,7 +29,7 @@ internal class SourceGenerateContext
     /// <summary>
     /// 命名空间，收集源码生成时用到过的命名空间；在生成实现类时using引入
     /// </summary>
-    public readonly List<string> Namespaces = new List<string>();
+    public readonly List<string> Namespaces = [];
 
     /// <summary>
     /// 所属类型，如class和Interface语法节点对象
@@ -49,9 +49,9 @@ internal class SourceGenerateContext
     /// </summary>
     public bool Generated { set; get; } = false;
     /// <summary>
-    /// 是否需要生成【方法参数映射字典】；<br />
-    ///     1、全局生成一次，避免多个插件中生成重复代码<br />
-    ///     2、生成IDictionary 字典，包含方法的所有参数，key为参数名，value为object参数值
+    /// 是否需要生成【方法参数映射字典】
+    /// <para>1、全局生成一次，避免多个插件中生成重复代码 </para>
+    /// <para>2、生成IDictionary 字典，包含方法的所有参数，key为参数名，value为object参数值 </para>
     /// </summary>
     public bool NeedMethodParameterMap { get; private set; } = false;
 
@@ -62,18 +62,18 @@ internal class SourceGenerateContext
     /// <summary>
     /// 实际生成过代码的中间件编码；在生成代码返回前添加
     /// </summary>
-    public IList<string> Middlewares = new List<string>();
+    public IList<string> Middlewares = [];
     /// <summary>
     /// 生成过程中用到的参数名称
     /// </summary>
-    private readonly List<string> _varNames = new List<string>();
+    private readonly List<string> _varNames = [];
     /// <summary>
-    /// 必须的字段信息<br />
-    ///     1、key：字段名称；value为字段为null时的提示信息<br />
-    ///     2、如CacheAspect中需要强制 _cacher字段非null，否则无法进行缓存操作<br />
-    ///     3、在生成代码后，如有必须字段，则生成依赖注入方法做验证，确保代码符合运行条件<br />
+    /// 必须的字段信息
+    /// <para>1、key：字段名称；value为字段为null时的提示信息 </para>
+    /// <para>2、如CacheAspect中需要强制 _cacher字段非null，否则无法进行缓存操作 </para>
+    /// <para>3、在生成代码后，如有必须字段，则生成依赖注入方法做验证，确保代码符合运行条件 </para>
     /// </summary>
-    private readonly IDictionary<string, string> _requiredFields = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> _requiredFields = [];
     #endregion
 
     #region 构造方法
@@ -127,8 +127,8 @@ internal class SourceGenerateContext
         return this;
     }
     /// <summary>
-    /// 添加实际生成过代码的中间件编码 <br/>
-    ///     1、仅执行next中间件生成代码，不作为实际生成过代码
+    /// 添加实际生成过代码的中间件编码
+    /// <para>1、仅执行next中间件生成代码，不作为实际生成过代码 </para>
     /// </summary>
     /// <param name="code"></param>
     public void AddGeneratedMiddleware(string code)
@@ -145,9 +145,9 @@ internal class SourceGenerateContext
         _varNames.TryAddRange(vars);
     }
     /// <summary>
-    /// 获取变量名称<br />
-    ///      1、若<paramref name="varName"/>已经使用过了，则重新生成一个<br />
-    ///      2、避免代码中参数名称重复，特别是和方法、类定义的变量重复
+    /// 获取变量名称
+    /// <para>1、若<paramref name="varName"/>已经使用过了，则重新生成一个 </para>
+    /// <para>2、避免代码中参数名称重复，特别是和方法、类定义的变量重复 </para>
     /// </summary>
     /// <param name="varName"></param>
     /// <returns></returns>
@@ -287,8 +287,8 @@ internal class SourceGenerateContext
     }
 
     /// <summary>
-    /// 禁用【泛型】类型 <br />
-    ///     1、不支持泛型时报错
+    /// 禁用【泛型】类型
+    /// <para>1、不支持泛型时报错 </para>
     /// </summary>
     /// <param name="aspectTitle"></param>
     /// <returns></returns>
@@ -303,8 +303,8 @@ internal class SourceGenerateContext
         return true;
     }
     /// <summary>
-    /// 禁用【接口实现】 <br />
-    /// 1、若 <see cref="TypeSyntax" />实现了<paramref name="iTypeFullName"/>则报错
+    /// 禁用【接口实现】
+    /// <para>1、若 <see cref="TypeSyntax" />实现了<paramref name="iTypeFullName"/>则报错 </para>
     /// </summary>
     /// <param name="aspectTitle">标题；切面标题</param>
     /// <param name="iTypeFullName">接口全名</param>

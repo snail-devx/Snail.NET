@@ -19,9 +19,9 @@ using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 namespace Snail.Aspect.Distribution;
 
 /// <summary>
-/// 【CacheAspect】语法节点源码中间件<br/>
-///     1、侦测打了<see cref="CacheAspectAttribute"/>标签的class和interface节点，为其生成实现class，并注册为组件 <br />
-///     2、自动为方法加入【分布式缓存】控制代码，实现自动缓存加载、保存、删除操作 <br />
+/// 【CacheAspect】语法节点源码中间件
+///  <para>1、侦测打了<see cref="CacheAspectAttribute"/>标签的class和interface节点，为其生成实现class，并注册为组件 </para>
+///  <para>2、自动为方法加入【分布式缓存】控制代码，实现自动缓存加载、保存、删除操作 </para>
 /// </summary>
 internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
 {
@@ -63,8 +63,8 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
-    protected static readonly IReadOnlyList<string> FixedNamespaces = new List<string>()
-    {
+    protected static readonly IReadOnlyList<string> FixedNamespaces =
+    [
         //  全局依赖的
         typeof(Task).Namespace,//                           System
         "Snail.Utilities.Common.Utils",//                   typeof(ObjectHelper).Namespace,           
@@ -94,7 +94,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         typeof(CacheActionType).Namespace,
         typeof(ICacheAnalyzer).Namespace,
         $"static {typeof(CacheAspectHelper).FullName}",
-    };
+    ];
 
     /// <summary>
     /// [CacheAspect]特性标签
@@ -257,9 +257,9 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     }
 
     /// <summary>
-    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助 <br />
-    ///     1、多个方法用到的通用逻辑，抽取成辅助方法 
-    ///     2、方法实现所需的依赖注入变量 <br />
+    /// 生成<see cref="ITypeDeclarationMiddleware.GenerateMethodCode"/>的辅助
+    /// <para>1、多个方法用到的通用逻辑，抽取成辅助方法  </para>
+    /// <para>2、方法实现所需的依赖注入变量 </para>
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
@@ -338,10 +338,10 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     }
 
     /// <summary>
-    /// 生成【加载缓存】的相关代码实现 <br />
-    ///     1、先从缓存中基于<see cref="CacheKeyAttribute"/>取数据，能全部取到则直接返回 <br />
-    ///     2、部分取到或者没取到时，则执行<see cref="NAME_LocalMethod"/>本地方法，分析其中的Data数据将其加入缓存中 <br />
-    ///     3、合并缓存数据和<see cref="NAME_LocalMethod"/>数据返回 <br />
+    /// 生成【加载缓存】的相关代码实现
+    /// <para>1、先从缓存中基于<see cref="CacheKeyAttribute"/>取数据，能全部取到则直接返回 </para>
+    /// <para>2、部分取到或者没取到时，则执行<see cref="NAME_LocalMethod"/>本地方法，分析其中的Data数据将其加入缓存中 </para>
+    /// <para>3、合并缓存数据和<see cref="NAME_LocalMethod"/>数据返回 </para>
     /// </summary>
     /// <param name="method"></param>
     /// <param name="context"></param>
@@ -393,7 +393,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
 
                 builder.Append(context.LinePrefix).AppendLine($"if (IsNullOrEmpty({keyOptions.VarName}) == false)")
                        .Append(context.LinePrefix).AppendLine("{")
-                       .Append(context.LinePrefix).Append("\t").AppendLine($"cacheNextData = {nextRunCode}");
+                       .Append(context.LinePrefix).Append('\t').AppendLine($"cacheNextData = {nextRunCode}");
                 if (needSaveCache == true)
                 {
                     nextRunCode = context.LinePrefix;
@@ -421,9 +421,9 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         return builder.ToString();
     }
     /// <summary>
-    /// 生成【缓存加载】的加载缓存相关代码<br />
-    ///     1、加载完缓存，从key中剔除已加载数据
-    ///     2、配合<see cref="GenerateLoadCode"/>使用，提取其中逻辑抽取成方法，减少相主方法代码
+    /// 生成【缓存加载】的加载缓存相关代码
+    /// <para>1、加载完缓存，从key中剔除已加载数据 </para>
+    /// <para>2、配合<see cref="GenerateLoadCode"/>使用，提取其中逻辑抽取成方法，减少相主方法代码 </para>
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="context"></param>
@@ -473,9 +473,9 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         }
     }
     /// <summary>
-    /// 生成【缓存加载】的数据合并相关代码<br />
-    ///     1、执行nextCode，接收返回值；并作为新缓存保存<br />
-    ///     2、将缓存数据和nextCode返回数据合并一起返回
+    /// 生成【缓存加载】的数据合并相关代码
+    /// <para>1、执行nextCode，接收返回值；并作为新缓存保存 </para>
+    /// <para>2、将缓存数据和nextCode返回数据合并一起返回 </para>
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="context"></param>
@@ -486,7 +486,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     private static void GenerateLoadCodeByMerge(StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, ReturnTypeOptions rtOptions, CacheMethodOptions cacheOptions, CacheKeyOptions keyOptions)
     {
         string bagDataType = rtOptions.GetDataBagTypeName(), multiDataType = rtOptions.GetMultiTypeName();
-        cacheOptions.DeconstructType(out _, out string dataType);
+        cacheOptions.DeconstructType(out _, out _);
         string linePrefix = $"{context.LinePrefix}\t";
         //  合并数据：基于不同数据类型，做区分处理
         string mergeVarName = rtOptions.IsDataBag ? context.GetVarName("bagData") : "cacheNextData";
@@ -537,9 +537,9 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     }
 
     /// <summary>
-    /// 生成【保存缓存】的相关实现代码 <br />
-    ///     1、等<paramref name="next"/>执行完成后，得到返回值，将这些返回值加入缓存中 <br />
-    ///     2、缓存数据类型，需能自动分析出自己的缓存Key值 <br />
+    /// 生成【保存缓存】的相关实现代码
+    /// <para>1、等<paramref name="next"/>执行完成后，得到返回值，将这些返回值加入缓存中 </para>
+    /// <para>2、缓存数据类型，需能自动分析出自己的缓存Key值 </para>
     /// </summary>
     /// <param name="method"></param>
     /// <param name="context"></param>
@@ -585,10 +585,10 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         return builder.ToString();
     }
     /// <summary>
-    /// 基于【NextCode】的返回值【cacheNextData】生成保存缓存的代码<br />
-    ///     1、方法<see cref="GenerateSaveCode"/>和<see cref="GenerateLoadCode"/>复用<br />
-    ///     2、代码逻辑：如果是DataBag类型数据，则解包cacheNextData数据得到cacheBagData；然后执行保存缓存逻辑<br />
-    ///     3、生成代码不包含NextCode执行赋值cacheNextData逻辑；不包含返回值；外部自己确定什么时候返回
+    /// 基于【NextCode】的返回值【cacheNextData】生成保存缓存的代码
+    /// <para>1、方法<see cref="GenerateSaveCode"/>和<see cref="GenerateLoadCode"/>复用 </para>
+    /// <para>2、代码逻辑：如果是DataBag类型数据，则解包cacheNextData数据得到cacheBagData；然后执行保存缓存逻辑 </para>
+    /// <para>3、生成代码不包含NextCode执行赋值cacheNextData逻辑；不包含返回值；外部自己确定什么时候返回 </para>
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="context"></param>
@@ -619,7 +619,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
                 builder.Append(context.LinePrefix).AppendLine($"var cacheBagData = (({bagTypeName})cacheNextData)?.GetData();");
                 saveDataVar = "cacheBagData";
             }
-            saveDataVar = saveDataVar ?? "cacheNextData";
+            saveDataVar ??= "cacheNextData";
         }
         //  生成保存代码：若数据为空，则不用执行保存操作了
         builder.Append(context.LinePrefix).AppendLine(rtOptions.IsMulti
@@ -659,8 +659,8 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     }
 
     /// <summary>
-    /// 生成【删除缓存】的相关实现代码 <br />
-    ///     1、等<paramref name="next"/>执行完成后，执行缓存数据删除 <br />
+    /// 生成【删除缓存】的相关实现代码
+    /// <para>1、等<paramref name="next"/>执行完成后，执行缓存数据删除 </para>
     /// </summary>
     /// <param name="method"></param>
     /// <param name="context"></param>
