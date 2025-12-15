@@ -62,7 +62,7 @@ public static class ApplicationExtensions
                 string msg = $"请使用[ServerAttribute]标签配置消息服务器，type：{type.FullName}";
                 throw new ApplicationException(msg);
             }
-            //  梳理出有效值，加入注册集合中
+            //  梳理出有效值，加入注册集合中；后期这里进行去重，相同type接收多个消息时，依赖注入只需要注册一次
             if (receivers.Count > 0)
             {
                 ReceiverTypeDescriptor descriptor = new ReceiverTypeDescriptor(type, Guid.NewGuid().ToString(), server, receivers);
@@ -91,6 +91,8 @@ public static class ApplicationExtensions
                 IReceiver receiver = app.ResolveRequired<IReceiver>(key: descriptor.Guid);
                 IMessenger? messenger = app.DI.Resolve(key: null, from: typeof(IMessenger), [descriptor.Server]) as IMessenger;
                 ThrowIfNull(messenger, $"{nameof(IMessenger)}实例构建失败");
+                //  构建完成以后，从依赖注入中移除掉，不再管理
+                app.DI.Unregister(key: descriptor.Guid, from: typeof(IReceiver));
 #if DEBUG
                 Debug.WriteLine($"接收消息。接收器：{receiver.GetType().FullName}；服务器：{descriptor.Server.AsJson()}；消息信息：{descriptor.Receivers.AsJson()}");
 #endif
@@ -99,8 +101,6 @@ public static class ApplicationExtensions
                     Task<bool> task = messenger!.Receive(item.MessageType, receiver.OnReceive, item.Options);
                     task.Wait();
                 }
-                //  用完以后，从依赖注入中移除掉，不再管理
-                app.DI.Unregister(key: descriptor.Guid, from: typeof(IReceiver));
             }
         };
 

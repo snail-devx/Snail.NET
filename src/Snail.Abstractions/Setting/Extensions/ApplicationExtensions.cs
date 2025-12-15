@@ -26,12 +26,14 @@ public static class ApplicationExtensions
         public bool IsProduction => "Production".IsEqual(app.Setting.GetEnv(ENV_RunType), ignoreCase: true);
         /// <summary>
         /// 数据中心Id
-        /// <para>用于进行分布式部署时使用，生成唯一主键id时使用</para>
+        /// <para>1、从环境变量<see cref="Env_DatacenterId"/>中分析</para>
+        /// <para>2、用于进行分布式部署时使用，生成唯一主键id时使用</para>
         /// </summary>
         public string? DatacenterId => app.Setting.GetEnv(Env_DatacenterId);
         /// <summary>
         /// 工作节点Id
-        /// <para>和 DatacenterId 配合，生成唯一主键id时使用</para>
+        /// <para>1、从环境变量<see cref="Env_WorkerId"/>中分析</para>
+        /// <para>2、和 DatacenterId 配合，生成唯一主键id时使用</para>
         /// </summary>
         public string? WorkerId => app.Setting.GetEnv(Env_WorkerId);
         #endregion

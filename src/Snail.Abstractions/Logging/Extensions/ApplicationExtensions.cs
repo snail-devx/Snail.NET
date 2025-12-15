@@ -1,6 +1,8 @@
 ﻿using Snail.Abstractions.Logging.DataModels;
 using Snail.Abstractions.Logging.Enumerations;
 using Snail.Abstractions.Logging.Interfaces;
+using Snail.Abstractions.Setting.Extensions;
+using Snail.Utilities.Common.Extensions;
 
 namespace Snail.Abstractions.Logging.Extensions;
 
@@ -11,6 +13,37 @@ public static class ApplicationExtensions
 {
     extension(IApplication app)
     {
+        /// <summary>
+        /// 日志级别
+        /// <para>1、从环境变量中取“LogLevel”配置</para>
+        /// <para>2、生产环境无配置，默认Info；开发环境无配置，默认Trace</para>
+        /// <para>3、配置错误时，强制 Info 级别</para>
+        /// </summary>
+        public LogLevel LogLevel
+        {
+            get
+            {
+                //  通过配置分析日志级别：生产环境无配置，默认Info；开发环境无配置，默认Trace
+                try
+                {
+                    string? logLevel = Default(app.GetEnv("LogLevel"), null);
+                    return logLevel == null
+                        ? app.IsProduction ? LogLevel.Info : LogLevel.Trace
+                        : logLevel.AsEnum<LogLevel>();
+                }
+                catch
+                {
+                    return LogLevel.Info;
+                }
+            }
+        }
+        /// <summary>
+        /// 日志存储天数
+        /// <para>1、从环境变量中取“LogStoreDays”配置</para>
+        /// <para>2、配置天数 &lt;=0 时不自动清理；&gt;0 时，配置天数之前的日志，自动清理掉</para>
+        /// </summary>
+        public int LogStoreDays => app.Setting.GetEnv("LogStoreDays")?.AsInt32() ?? 0;
+
         /// <summary>
         /// 添加日志服务
         /// <para>1、进行日志相关服务组件检测，如确保<see cref="DIKEY_FileLogger"/>组件存在</para>

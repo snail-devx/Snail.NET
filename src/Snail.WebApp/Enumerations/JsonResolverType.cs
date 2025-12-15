@@ -11,6 +11,12 @@ public enum JsonResolverType
     Default = 0,
 
     /// <summary>
+    /// 自定义
+    /// <para>不满足默认规则的，按此规则处理；然后指定自定义序列化类型</para>
+    /// </summary>
+    Custom = 1,
+
+    /// <summary>
     /// 驼峰命名：首字母小写
     /// </summary>
     CamelCase = 10,
@@ -18,10 +24,4 @@ public enum JsonResolverType
     /// 属性名全小写
     /// </summary>
     LowerCase = 20,
-
-    /// <summary>
-    /// 自定义
-    /// <para>不满足默认规则的，按此规则处理；然后指定自定义序列化类型</para>
-    /// </summary>
-    Custom = 1,
 }

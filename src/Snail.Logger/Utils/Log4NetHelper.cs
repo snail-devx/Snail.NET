@@ -1,6 +1,7 @@
 ﻿using log4net.Config;
 using Snail.Abstractions.Identity.Interfaces;
 using Snail.Abstractions.Logging.DataModels;
+using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting.Enumerations;
 using Snail.Utilities.Collections.Extensions;
 using Snail.Utilities.Common.Extensions;
@@ -334,40 +335,31 @@ internal static class Log4NetHelper
     /// <param name="app">应用程序对象</param>
     private static void ConfigAutoClearLogFile(IApplication app)
     {
-        //  未配置【自动清理】逻辑，则忽略掉
-        if (STR_True.IsEqual(app.GetEnv("AutoCleanLogFile"), true) == false)
+        //  日志保留天数，<=0 时，则忽略掉不自动清理
+        int logStoreDays = app.LogStoreDays;
+        if (logStoreDays <= 0)
         {
             return;
         }
         //  定时器，每1小时执行一次
-        System.Timers.Timer timer = new System.Timers.Timer(60 * 60 * 1000)
-        {
-            AutoReset = true,
-            Enabled = true,
-        };
-        string rootDirectory = Path.Combine(app.RootDirectory, "App_Log");
-        //  执行事件处理，确保凌晨清理，减少资源占用
-        timer.Elapsed += (sender, args) =>
+        TimerHelper.Start(TimeSpan.FromHours(1), () =>
         {
             DateTime nowDate = DateTime.Now;
-            if (nowDate.Hour != 0)
-            {
-                return;
-            }
             //  找到目录下的日志文件txt；
+            string rootDirectory = Path.Combine(app.RootDirectory, "App_Log");
             string[] files = Directory.GetFiles(rootDirectory, "*.txt");
             if (files?.Any() != true)
             {
                 return;
             }
-            //  遍历做清理：文件大小为0的文件；其他文件，超过1个月的直接清理掉
+            //  遍历做清理：文件大小为0的文件；超过配置天数的日志文件直接清理掉
             foreach (string file in files)
             {
                 FileInfo fi = new(file);
                 int tmpDay = nowDate.Subtract(fi.CreationTime).Days;
-                RunIf(tmpDay >= 30 || (fi.Length == 0 && tmpDay >= 3) == true, fi.Delete);
+                RunIf(tmpDay >= logStoreDays || (fi.Length == 0 && tmpDay >= 3) == true, fi.Delete);
             }
-        };
+        }, runRightNow: false);
     }
     #endregion
 }

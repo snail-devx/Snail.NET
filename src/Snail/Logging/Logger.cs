@@ -2,6 +2,7 @@
 using Snail.Abstractions.Logging;
 using Snail.Abstractions.Logging.DataModels;
 using Snail.Abstractions.Logging.Enumerations;
+using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Logging.Interfaces;
 using Snail.Abstractions.Web.Interfaces;
 using Snail.Logging.DataModels;
@@ -52,19 +53,7 @@ public sealed class Logger : ILogger
     public Logger(IApplication app, IServerOptions? server = null, ILogProvider? provider = null)
     {
         ThrowIfNull(app);
-        //  通过配置分析日志级别：生产环境无配置，默认Info；开发环境无配置，默认Trace
-        try
-        {
-            string? logLevel = Default(app.GetEnv("LogLevel"), null);
-            _level = logLevel == null
-                ? app.IsProduction ? LogLevel.Info : LogLevel.Trace
-                : logLevel.AsEnum<LogLevel>();
-        }
-        catch
-        {
-            _level = LogLevel.Info;
-        }
-
+        _level = app.LogLevel;
         _server = server;
         _provider = provider ?? app.ResolveRequired<ILogProvider>();
         _idGenerator = app.ResolveRequired<IIdGenerator>();
