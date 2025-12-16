@@ -16,7 +16,7 @@ public class WebAppInitializer : IInitializer<WebApplication>
     void IInitializer<WebApplication>.Initialize(WebApplication application)
     {
         //  监听【OnController】事件，完成控制器默认配置
-        application.OnController += builder =>
+        application.OnController += (builder, services) =>
         {
             //  控制器自定义配置选项
             builder.AddMvcOptions(options =>
@@ -46,7 +46,7 @@ public class WebAppInitializer : IInitializer<WebApplication>
 
         };
         //  监听OnBuild事件，完成web应用内置中间件集成
-        application.OnBuild += app =>
+        application.OnBuild += (app, services) =>
         {
             //  启用 请求提交数据 重复读取功能：解决actionfilter取不到request.Body数据的问题
             app.UseRereadRequestBody();

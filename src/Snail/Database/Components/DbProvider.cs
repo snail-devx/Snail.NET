@@ -21,7 +21,7 @@ public abstract class DbProvider : IDbProvider
 
     #region 构造方法
     /// <summary>
-    /// 
+    /// 构造方法
     /// </summary>
     /// <param name="app"></param>
     /// <param name="server"></param>

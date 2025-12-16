@@ -3,6 +3,7 @@ using Snail.Abstractions.Dependency.Interfaces;
 using Snail.Dependency.Components;
 using Snail.Dependency.Interfaces;
 using Snail.Utilities.Collections;
+using Snail.Utilities.Threading.Extensions;
 
 namespace Snail.Dependency;
 
@@ -17,13 +18,6 @@ public sealed class DIManager : Disposable, IDIManager
     #region 属性变量
 
     #region 静态属性变量
-    /** 暂时不对外提供，DI实例管理，交给<see cref="Application"/>完成
-    /// <summary>
-    /// 依赖注入管理器根实例
-    /// <para>1、程序启动时，自动将依赖注入信息注册到此实例下 </para>
-    /// <para>2、如webapi站点，在程序启动时自动赋值 </para>
-    /// </summary>
-    public static readonly IDIManager Root;*/
     /// <summary>
     /// 空的管理器实例
     /// </summary>
@@ -35,13 +29,11 @@ public sealed class DIManager : Disposable, IDIManager
     private static readonly AsyncLocal<IDIManager> _current = new();
     /// <summary>
     /// 当前线程上管理器实例；创建一份
-    /// <para>1、不存在自动基于<see cref="Empty"/>创建一份新的 </para>
-    /// <para>2、内部使用<see cref="AsyncLocal{T}"/>做管理，子线程会自动继承父线程值 </para>
+    /// <para>1、不存在时自动基于<see cref="Empty"/>创建一份新的 </para>
     /// </summary>
     public static IDIManager Current
     {
-        //get => _current.Value = _current.Value ?? Root.New();
-        get => _current.Value = _current.Value ?? Empty;
+        get => TrySetCurrent(() => new DIManager());
         set => _current.Value = value;
     }
     #endregion
@@ -100,6 +92,12 @@ public sealed class DIManager : Disposable, IDIManager
                 }
             });
         }
+        //  将自己注册为默认服务（移除其他的，避免干扰）：key默认为null，强制为【瞬时】，不用ITypeStorager保存实例，直接用当前this即可
+        _registers.Replace
+        (
+            predict: di => IsFromDescriptor(key: null, from: typeof(IDIManager), descriptor: di),
+            obj: new DIDescriptor<IDIManager>(key: null, lifetime: LifetimeType.Transient, this)
+        );
     }
     #endregion
 
@@ -245,14 +243,27 @@ public sealed class DIManager : Disposable, IDIManager
     }
     #endregion
 
+    #region 内部方法
+    /// <summary>
+    /// 尝试设置当前依赖注入管理器
+    /// <para>1、若当前管理器实例为null，则执行<paramref name="setFunc"/>构建新的管理器实例</para>
+    /// </summary>
+    /// <param name="setFunc"></param>
+    /// <returns></returns>
+    internal static IDIManager TrySetCurrent(Func<IDIManager> setFunc)
+    {
+        ThrowIfNull(setFunc);
+        return _current.GetOrSetValue(setFunc);
+    }
+    #endregion
+
     #region 私有方法
 
     #region 实例方法，this便捷访问
     /// <summary>
     /// 确保当前实例可用；检测当前Manager是否销毁了
     /// </summary>
-    private void EnsureEnable()
-        => ObjectDisposedException.ThrowIf(IsDisposed, this);
+    private void EnsureEnable() => ObjectDisposedException.ThrowIf(IsDisposed, this);
 
     /// <summary>
     /// 尝试【依赖注入】存储器

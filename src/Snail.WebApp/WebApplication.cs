@@ -14,8 +14,11 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
     /// 事件：配置Web应用控制器
     /// <para>1、触发时机：<see cref="IApplication.Run"/> AddControllers添加控制器后 </para>
     /// <para>2、用途说明：对配置好的控制器增加功能，如自定义序列化和反序列化 </para>
+    /// <para>3、参数说明：</para>
+    /// <para>- <see cref="IMvcBuilder"/>mvc构建器实例</para>
+    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
     /// </summary>
-    public event Action<IMvcBuilder>? OnController;
+    public event Action<IMvcBuilder, IDIManager>? OnController;
 
     /// <summary>
     /// WebApplication 对象构建器
@@ -37,7 +40,7 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
         //  1、webapi相关服务初始化
         Builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
         //      替换内置ioc服务
-        Builder.Host.UseServiceProviderFactory(new ServiceProviderFactory(DI));
+        Builder.Host.UseServiceProviderFactory(new ServiceProviderFactory(RootServices));
         //  2、app自定义初始化工作；传null则使用默认初始化器
         (initializer ?? new WebAppInitializer()).Initialize(this);
     }
@@ -64,7 +67,7 @@ public class WebApplication : Application<IApplicationBuilder>, IApplication
             //  添加控制器支持：AddControllers，支持Controller自定义，mvcbuilder干预；通过事件
             var mvc = Builder.Services.AddControllers();
             mvc.AddControllersAsServices();
-            OnController?.Invoke(mvc);
+            OnController?.Invoke(mvc, RootServices);
             OnController = null;
             //  内部会固化IServiceCollection注册服务，并转换成ServiceProvider对外提供
             app = Builder.Build();

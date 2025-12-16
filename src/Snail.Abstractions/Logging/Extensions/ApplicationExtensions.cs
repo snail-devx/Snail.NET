@@ -52,10 +52,10 @@ public static class ApplicationExtensions
         public IApplication AddLogServices()
         {
             //  服务注册完成后，确保【文件】日志组件存在，否则会影响某些组件功能
-            app.OnRegistered += () =>
+            app.OnRegistered += services =>
             {
-                app.ResolveRequired<ILogProvider>();
-                app.ResolveRequired<ILogProvider>(key: DIKEY_FileLogger);
+                services.ResolveRequired<ILogProvider>();
+                services.ResolveRequired<ILogProvider>(key: DIKEY_FileLogger);
             };
 
             return app;
@@ -86,7 +86,7 @@ public static class ApplicationExtensions
         /// <returns></returns>
         public bool LogErrorFile(string title, string? content, Exception? ex = null)
         {
-            LogDescriptor log = new LogDescriptor()
+            LogDescriptor log = new()
             {
                 Level = LogLevel.Error,
                 Title = title,

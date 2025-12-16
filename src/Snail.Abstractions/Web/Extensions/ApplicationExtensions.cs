@@ -14,9 +14,9 @@ public static class ApplicationExtensions
         public IApplication AddHttpService()
         {
             //  服务注册完成后，对Http请求相关对象做一下预热操作
-            app.OnRegistered += () =>
+            app.OnRegistered += services =>
             {
-                app.ResolveRequired<IHttpManager>();
+                services.ResolveRequired<IHttpManager>();
             };
             return app;
         }

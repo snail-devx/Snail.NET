@@ -1,8 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# vs2026为18版本，此时Aspect的SDK可为net10，以前在vs 2022下不只能支持net standard 2.0
-# Visual Studio Version 18  
-VisualStudioVersion = 18.0.11205.157 d18.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 18.0.11205.157
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "💎 系统扩展", "💎 系统扩展", "{70A0643A-4067-4CDD-9374-6167D671914D}"
 EndProject

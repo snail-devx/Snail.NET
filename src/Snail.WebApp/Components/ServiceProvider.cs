@@ -149,9 +149,6 @@ public sealed class ServiceProvider : Disposable, IServiceProvider, IKeyedServic
                 .Register<IKeyedServiceProvider>(LifetimeType.Scope, this)
                 .Register<IServiceScopeFactory>(LifetimeType.Scope, this)
                 .Register<IServiceScope>(LifetimeType.Scope, this);
-
-        //  注册IDIManager为当前实例中管理器
-        _manager.Unregister<IDIManager>().Register(LifetimeType.Scope, _manager);
     }
 
     /// <summary>
@@ -249,13 +246,13 @@ public sealed class ServiceProvider : Disposable, IServiceProvider, IKeyedServic
     /// <returns></returns>
     private static LifetimeType ConverLifetime(in ServiceDescriptor sd)
     {
-        switch (sd.Lifetime)
+        return sd.Lifetime switch
         {
-            case ServiceLifetime.Singleton: return LifetimeType.Singleton;
-            case ServiceLifetime.Scoped: return LifetimeType.Scope;
-            case ServiceLifetime.Transient: return LifetimeType.Transient;
-            default: throw new NotSupportedException($"不支持的ServiceLifetime生命周期值：{sd.Lifetime.ToString()}");
-        }
+            ServiceLifetime.Singleton => LifetimeType.Singleton,
+            ServiceLifetime.Scoped => LifetimeType.Scope,
+            ServiceLifetime.Transient => LifetimeType.Transient,
+            _ => throw new NotSupportedException($"不支持的ServiceLifetime生命周期值：{sd.Lifetime.ToString()}"),
+        };
     }
     #endregion
 }

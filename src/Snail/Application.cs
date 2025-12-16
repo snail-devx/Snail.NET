@@ -1,5 +1,4 @@
-﻿using Snail.Abstractions.Common.Delegates;
-using Snail.Abstractions.Logging.Extensions;
+﻿using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting;
 using Snail.Abstractions.Setting.Delegates;
 using Snail.Abstractions.Web.Extensions;
@@ -15,20 +14,28 @@ namespace Snail;
 /// <summary>
 /// 应用程序；泛型，支持<see cref="OnBuild"/>事件
 /// </summary>
+/// <typeparam name="App">应用程序类型</typeparam>
 public abstract class Application<App> : IApplication where App : class
 {
     #region 事件、属性变量
     /// <summary>
     /// 事件：配置Web应用时；
     /// <para>1、触发时机：<see cref="OnRun"/>之前执行</para>
-    /// <para>2、用途说明：区别于OnRun，暴露构建完的app实例做一些专有配置，如WebApi配置app中间件等 </para>
+    /// <para>2、用途说明：区别于OnRun，暴露构建完的app实例做一些专有配置，如WebApi配置app中间件等；</para>
+    /// <para>3、参数说明：</para>
+    /// <para>- <see cref="Application{App}"/>的泛型类型App的实例；如WebAPI项目的 WebApplicationBuilder</para>
+    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
     /// </summary>
-    public event Action<App>? OnBuild;
+    public event Action<App, IDIManager>? OnBuild;
 
+    /// <summary>
+    /// 依赖注入根服务
+    /// </summary>
+    protected IDIManager RootServices { get; private init; }
     /// <summary>
     /// 应用程序配置管理器
     /// </summary>
-    protected readonly ISettingManager Setting;
+    protected ISettingManager Setting { get; private init; }
     #endregion
 
     #region 构造方法
@@ -37,19 +44,15 @@ public abstract class Application<App> : IApplication where App : class
     /// </summary>
     public Application()
     {
+        RunContext.New();
         //  1、内置配置、实例 初始化
-        DI = DIManager.Empty;
-        DIManager.Current = DI;
         Setting = SettingFactory.Create();
+        RootServices = (DIManager.Current = DIManager.Empty);
         //  2、内置依赖注入实例
-        DI.Register<IApplication>(LifetimeType.Singleton, this);
-        //      依赖注入管理器，作为scope构建
-        DI.Register<IDIManager>(LifetimeType.Scope, manager => DIManager.Current);
+        RootServices.Register<IApplication>(LifetimeType.Singleton, this);
         //  3、强制内置服务初始化
         this.AddDIService();/*                  依赖注入服务：进行IoC相关功能实现*/
         this.AddLogServices();/*                日志服务：检测必备组件完整性*/
-
-        RunContext.New();
     }
     #endregion
 
@@ -57,44 +60,62 @@ public abstract class Application<App> : IApplication where App : class
     /// <summary>
     /// 事件：应用扫描时
     /// <para>1、触发时机：<see cref="Run"/>时，首先执行程序扫描</para>
+    /// <para>2、用途说明：用于实现组件自动扫描注册</para>
+    /// <para>3、参数说明：</para>
+    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
+    /// <para>- <see cref="Type"/> 为当前正在扫描的类型</para>
+    /// <para>- <see cref="Attribute"/> 当前扫描类型的特性标签</para>
     /// </summary>
     /// <remarks>
     /// 注意事项：
     /// <para>1、只有打上<see cref="AppScanAttribute"/>标签的<see cref="Assembly"/>才会被扫描</para>
     /// <para>2、只有有<see cref="Attribute"/>标签的<see cref="Type"/>才会被扫描</para>
     /// </remarks>
-    public event AppScanDelegate? OnScan;
+    public event Action<IDIManager, Type, ReadOnlySpan<Attribute>>? OnScan;
     /// <summary>
     /// 事件：服务注册时
     /// <para>1、触发时机：系统内置依赖注入注册完成后</para>
-    /// <para>2、用于外部覆盖内置依赖注入配置完成个性化配置</para>
+    /// <para>2、用途说明：用于外部覆盖内置依赖注入配置完成个性化配置</para>
+    /// <para>3、参数说明：</para>
+    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
     /// </summary>
     /// <remarks>
     /// 注意事项：
     /// <para>1、不要在此事件中进行对象构建，否则可能导致依赖注入关系错误</para>
     /// </remarks>
-    public event Action? OnRegister;
+    public event Action<IDIManager>? OnRegister;
     /// <summary>
     /// 事件：服务注册完成时
-    /// <para>1、触发实际：事件<see cref="OnRegister"/>之后执行</para>
-    /// <para>2、用于进行一些服务预热处理，如提前构建实例</para>
+    /// <para>1、触发时机：事件<see cref="OnRegister"/>之后执行</para>
+    /// <para>2、用途说明：用于进行服务预热处理，如提前构建实例</para>
+    /// <para>3、参数说明：</para>
+    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>ara>
     /// </summary>
-    public event Action? OnRegistered;
+    public event Action<IDIManager>? OnRegistered;
     /// <summary>
     /// 事件：程序运行时触发
     /// <para>1、触发时机：app配置完成，准备启动前触发</para>
-    /// <para>2、用于启动依赖的相关服务，如启动mq接收消息</para>
+    /// <para>2、用途说明：用于启动依赖的相关服务，如启动mq接收消息</para>
+    /// <para>3、参数说明：</para>
+    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
     /// </summary>
-    public event Action? OnRun;
+    public event Action<IDIManager>? OnRun;
 
-    /// <summary>
-    /// 依赖注入 管理器
-    /// </summary>
-    public IDIManager DI { private init; get; }
     /// <summary>
     /// 应用配置 管理器
     /// </summary>
     ISettingManager IApplication.Setting => Setting;
+    /// <summary>
+    /// 依赖注入根服务
+    /// </summary>
+    IDIManager IApplication.RootServices => RootServices;
+    /// <summary>
+    /// 当前作用域的依赖注入服务
+    /// <para>1、实现作用域之间实例隔离</para>
+    /// <para>2、如一个ASP.NET Core的HTTP请求，就是一个全新的作用域</para>
+    /// </summary>
+    IDIManager IApplication.ScopeServices => DIManager.TrySetCurrent(RootServices.New);
+
     /// <summary>
     /// 运行应用程序，执行顺序
     /// <para>1、内置服务注册（在app构造方法执行）</para>
@@ -119,15 +140,15 @@ public abstract class Application<App> : IApplication where App : class
         //  1、自定义【依赖注入】、服务信息注册；触发服务注册事件，交给外部进行自定义服务注册
         if (OnScan != null)
         {
-            StartScan(this, OnScan.Invoke);
+            StartScan(this, OnScan);
             OnScan = null;
         }
         ((IApplication)this).Setting.Run();
         //      组件服务注册
         {
-            OnRegister?.Invoke();
+            OnRegister?.Invoke(RootServices);
             OnRegister = null;
-            OnRegistered?.Invoke();
+            OnRegistered?.Invoke(RootServices);
             OnRegistered = null;
         }
         //  2、程序启动；启动自定义服务，触发【OnRun】事件，交给外部进行自定义服务启动
@@ -135,10 +156,10 @@ public abstract class Application<App> : IApplication where App : class
         {
             var app = appBuilder.Invoke();
             ThrowIfNull(app, $"{nameof(appBuilder)}委托返回的App对象为null");
-            OnBuild?.Invoke(app);
+            OnBuild?.Invoke(app, RootServices);
             OnBuild = null;
         }
-        OnRun?.Invoke();
+        OnRun?.Invoke(RootServices);
         OnRun = null;
     }
 
@@ -152,7 +173,7 @@ public abstract class Application<App> : IApplication where App : class
     /// </summary>
     /// <param name="app">应用程序实例，会自动扫描对应的<see cref="IApplication.RootDirectory"/>目录下程序集做补偿</param>
     /// <param name="callback">扫描程序集后，遍历<see cref="Type"/>的回调方法</param>
-    protected static void StartScan(IApplication app, in AppScanDelegate callback)
+    protected void StartScan(IApplication app, in Action<IDIManager, Type, ReadOnlySpan<Attribute>> callback)
     {
         ThrowIfNull(callback);
         //  获取需要扫描的程序集
@@ -189,8 +210,8 @@ public abstract class Application<App> : IApplication where App : class
             {
                 if (attrs.Any() == true)
                 {
-                    ReadOnlySpan<Attribute> attrSpan = new ReadOnlySpan<Attribute>([.. attrs]);
-                    callback.Invoke(type, attrSpan);
+                    ReadOnlySpan<Attribute> attrSpan = new([.. attrs]);
+                    callback.Invoke(RootServices, type, attrSpan);
                 }
             }
         }
@@ -355,7 +376,7 @@ public abstract class Application<App> : IApplication where App : class
         foreach (Type type in assembly.GetTypes())
         {
             bool isAspectType = false;
-            Attribute[] attrs = type.GetCustomAttributes()
+            Attribute[] attrs = [.. type.GetCustomAttributes()
                 .Where(attr =>
                 {
                     /** 剔除掉系统自带的编译属性；即时没有任何属性标记，编译后也会自带一些特性标签
@@ -371,11 +392,10 @@ public abstract class Application<App> : IApplication where App : class
                         isAspectType = true;
                         return false;
                     }
-                    string? typeName = type.FullName
-                        ?? type.GetGenericTypeDefinition()?.FullName;
+                    string? typeName = type.FullName?? type.GetGenericTypeDefinition()?.FullName;
                     return typeName != null && typeName.StartsWith("System.Runtime.CompilerServices") == false;
                 })
-                .ToArray();
+            ];
             var item = new Tuple<Type, Attribute[]>(type, attrs);
             item.AddTo(isAspectType ? aspectTypes : types);
         }

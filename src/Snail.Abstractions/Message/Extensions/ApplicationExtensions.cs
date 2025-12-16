@@ -24,8 +24,8 @@ public static class ApplicationExtensions
     public static IApplication AddMessageService(this IApplication app)
     {
         //  程序集扫描时，进行消息接收器扫描，整理出需要接收哪些消息  
-        IList<ReceiverTypeDescriptor> descriptors = new List<ReceiverTypeDescriptor>();
-        app.OnScan += (Type type, ReadOnlySpan<Attribute> attributes) =>
+        IList<ReceiverTypeDescriptor> descriptors = [];
+        app.OnScan += (services, type, attributes) =>
         {
             //  实现接口的类型才做处理：IReceiver
             if (type.IsAssignableTo(typeof(IReceiver)) == false)
@@ -34,7 +34,7 @@ public static class ApplicationExtensions
             }
             //  遍历特性标签：约束必须得有消息服务器地址配置
             ServerAttribute? server = null;
-            IList<ReceiverDescriptor> receivers = new List<ReceiverDescriptor>();
+            IList<ReceiverDescriptor> receivers = [];
             foreach (Attribute attr in attributes)
             {
                 switch (attr)
@@ -62,40 +62,43 @@ public static class ApplicationExtensions
                 string msg = $"请使用[ServerAttribute]标签配置消息服务器，type：{type.FullName}";
                 throw new ApplicationException(msg);
             }
-            //  梳理出有效值，加入注册集合中；后期这里进行去重，相同type接收多个消息时，依赖注入只需要注册一次
+            //  梳理出有效值，加入注册集合中
             if (receivers.Count > 0)
             {
-                ReceiverTypeDescriptor descriptor = new ReceiverTypeDescriptor(type, Guid.NewGuid().ToString(), server, receivers);
+                ReceiverTypeDescriptor descriptor = new(type, Guid.NewGuid().ToString(), server, receivers);
                 descriptors.Add(descriptor);
             }
         };
         //  服务注册时：进行服务注册
-        app.OnRegister += () =>
+        app.OnRegister += services =>
         {
             //  遍历消息接收器，注册依赖
-            IList<DIDescriptor> dis = descriptors
+            IList<DIDescriptor> dis = [.. descriptors
                 .Select(descriptor => new DIDescriptor(descriptor.Guid, from: typeof(IReceiver), LifetimeType.Transient, descriptor.Type))
-                .ToList();
-            app.DI.Register(dis);
+            ];
+            services.Register(dis);
         };
         //  服务注册完成后：进行一些依赖组件预热
         //app.OnRegistered += () =>
         //{
         //};
         //  运行时，启动消息接收
-        app.OnRun += () =>
+        app.OnRun += services =>
         {
             //  遍历消息接收信息，动态构建消息接收器
             foreach (var descriptor in descriptors)
             {
-                IReceiver receiver = app.ResolveRequired<IReceiver>(key: descriptor.Guid);
-                IMessenger? messenger = app.DI.Resolve(key: null, from: typeof(IMessenger), [descriptor.Server]) as IMessenger;
-                ThrowIfNull(messenger, $"{nameof(IMessenger)}实例构建失败");
                 //  构建完成以后，从依赖注入中移除掉，不再管理
-                app.DI.Unregister(key: descriptor.Guid, from: typeof(IReceiver));
+                IReceiver receiver;
+                {
+                    receiver = services.ResolveRequired<IReceiver>(key: descriptor.Guid);
+                    services.Unregister(key: descriptor.Guid, from: typeof(IReceiver));
+                }
 #if DEBUG
                 Debug.WriteLine($"接收消息。接收器：{receiver.GetType().FullName}；服务器：{descriptor.Server.AsJson()}；消息信息：{descriptor.Receivers.AsJson()}");
 #endif
+                //  进行消息接收处理
+                IMessenger messenger = services.ResolveRequired<IMessenger>(key: null, [descriptor.Server]);
                 foreach (var item in descriptor.Receivers)
                 {
                     Task<bool> task = messenger!.Receive(item.MessageType, receiver.OnReceive, item.Options);
