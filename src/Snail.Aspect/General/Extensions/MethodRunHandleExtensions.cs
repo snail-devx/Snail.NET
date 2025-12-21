@@ -19,14 +19,14 @@ public static class MethodRunHandleExtensions
     /// <param name="next"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static async Task<T> OnRunAsync<T>(this IMethodRunHandle handle, Func<Task<T>> next, MethodRunContext context)
+    public static async Task<T?> OnRunAsync<T>(this IMethodRunHandle handle, Func<Task<T?>> next, MethodRunContext context)
     {
         await handle.OnRunAsync(async () =>
         {
-            T data = await next.Invoke();
+            T? data = await next.Invoke();
             context.SetReturnValue(data);
         }, context);
-        return (T)context.ReturnValue;
+        return (T?)context.ReturnValue;
     }
 
     /// <summary>
@@ -37,14 +37,14 @@ public static class MethodRunHandleExtensions
     /// <param name="next"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static T OnRun<T>(this IMethodRunHandle handle, Func<T> next, MethodRunContext context)
+    public static T? OnRun<T>(this IMethodRunHandle handle, Func<T?> next, MethodRunContext context)
     {
         handle.OnRun(() =>
         {
-            T data = next.Invoke();
+            T? data = next.Invoke();
             context.SetReturnValue(data);
         }, context);
-        return (T)context.ReturnValue;
+        return (T?)context.ReturnValue;
     }
     #endregion
 }

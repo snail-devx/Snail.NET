@@ -27,19 +27,19 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 类型名：HttpAspectAttribute
     /// </summary>
-    protected static readonly string TYPENAME_HttpAspectAttribute = typeof(HttpAspectAttribute).FullName;
+    protected static readonly string TYPENAME_HttpAspectAttribute = typeof(HttpAspectAttribute).FullName!;
     /// <summary>
     /// 类型名：HttpMethodAttribute
     /// </summary>
-    protected static readonly string TYPENAME_HttpMethodAttribute = typeof(HttpMethodAttribute).FullName;
+    protected static readonly string TYPENAME_HttpMethodAttribute = typeof(HttpMethodAttribute).FullName!;
     /// <summary>
     /// 类型名：HttpBodyAttribute
     /// </summary>
-    protected static readonly string TYPENAME_HttpBodyAttribute = typeof(HttpBodyAttribute).FullName;
+    protected static readonly string TYPENAME_HttpBodyAttribute = typeof(HttpBodyAttribute).FullName!;
     /// <summary>
     /// 类型名：IHttpAnalyzer
     /// </summary>
-    protected static readonly string TYPENAME_IHttpAnalyzer = typeof(IHttpAnalyzer).FullName;
+    protected static readonly string TYPENAME_IHttpAnalyzer = typeof(IHttpAnalyzer).FullName!;
 
     /// <summary>
     /// 固定需要引入的命名空间几何
@@ -58,9 +58,9 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Abstractions.Web.DataModels",//              typeof(HttpResult).Namespace,// 
         "Snail.Abstractions.Web.Extensions",//              typeof(HttpRequestorExtensions).Namespace,// 
         //  Web 切面编程相关命名空间
-        typeof(HttpAspectAttribute).Namespace,
-        typeof(HttpMethodType).Namespace,
-        typeof(IHttpAnalyzer).Namespace,
+        typeof(HttpAspectAttribute).Namespace!,
+        typeof(HttpMethodType).Namespace!,
+        typeof(IHttpAnalyzer).Namespace!,
         $"static {typeof(HttpAspectHelper).FullName}",
     ];
 
@@ -71,7 +71,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// HTTP分析器参数：<see cref="IHttpAnalyzer"/>分析缓存相关Key
     /// </summary>
-    protected readonly AttributeArgumentSyntax AnalyzerArg;
+    protected readonly AttributeArgumentSyntax? AnalyzerArg;
     /// <summary>
     /// 是否需要【辅助】代码
     /// </summary>
@@ -96,12 +96,12 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="node"></param>
     /// <param name="semantic"></param>
     /// <returns></returns>
-    public static ITypeDeclarationMiddleware Build(TypeDeclarationSyntax node, SemanticModel semantic)
+    public static ITypeDeclarationMiddleware? Build(TypeDeclarationSyntax node, SemanticModel semantic)
     {
         //  仅针对“有【HttpAttribute】属性标记的interface和class”做处理
         if (node is InterfaceDeclarationSyntax || node is ClassDeclarationSyntax)
         {
-            AttributeSyntax httpAttr = node.AttributeLists.GetAttribute(semantic, TYPENAME_HttpAspectAttribute);
+            AttributeSyntax? httpAttr = node.AttributeLists.GetAttribute(semantic, TYPENAME_HttpAspectAttribute);
             return httpAttr != null
                 ? new HttpSyntaxMiddleware(httpAttr)
                 : null;
@@ -133,7 +133,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="next">下一步操作</param>
     /// <remarks>若不符合自身业务逻辑</remarks>
     /// <returns>代码字符串</returns>
-    string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
+    string? ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next)
     {
         /** 基本思路：
          *      1、标注了HttpMethod属性，则作为最底层插件对外提供；不会再调用next
@@ -141,10 +141,10 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
          *      2、未标注HttpMethod属性，则继续执行Next逻辑
          */
         //  1、无缓存属性标记，直接执行下一步逻辑
-        AttributeSyntax methodAttr = method.AttributeLists.GetAttribute(context.Semantic, TYPENAME_HttpMethodAttribute);
+        AttributeSyntax? methodAttr = method.AttributeLists.GetAttribute(context.Semantic, TYPENAME_HttpMethodAttribute);
         if (methodAttr == null)
         {
-            string nextCode = next?.Invoke(method, context, options);
+            string? nextCode = next?.Invoke(method, context, options);
             return nextCode;
         }
         //  2、有HttpMethod标记，执行进行下一步验证
@@ -171,10 +171,9 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
         }
         //  3、进行HTTP请求方法代码实现
         _needAssistantCode = true;
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         //      1、分析方法参数，得到HttpBodyAttribute参数信息；不准有out参数，不准有task参数，不会等待
-        List<string> parameters = [];
-        string bodyParameter = null;
+        string? bodyParameter = null;
         ForEachMethodParametes(method, context, (name, parameter) =>
         {
             if (parameter.AttributeLists.GetAttribute(context.Semantic, TYPENAME_HttpBodyAttribute) != null)
@@ -182,10 +181,9 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
                 context.ReportErrorIf(bodyParameter != null, "不支持多个[HttpBody]标记参数", parameter);
                 bodyParameter = name;
             }
-            parameters.Add(name);
         });
         //      2、生成http请求结果；发送请求前，针对url参数做处理
-        GenerateHttpRequestCode(builder, method, methodAttr, context, parameters, bodyParameter, options.ReturnType == null);
+        GenerateHttpRequestCode(builder, method, methodAttr, context, bodyParameter, options.ReturnType == null);
         //      3、构建返回结果：根据返回数据类型做区别处理
         GenerateMethodReturnCode(builder, options.ReturnType, context);
 
@@ -200,7 +198,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
+    string? ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
     {
         /** 辅助代码样例
         
@@ -215,7 +213,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
         {
             context.AddNamespaces(FixedNamespaces);
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append(context.LinePrefix).AppendLine("//  生成[HttpAspect]辅助代码;");
             //  生成 IHttpRequestor 注入代码；加入必填验证
             string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
@@ -242,15 +240,14 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="mNode">方法节点</param>
     /// <param name="methodAttr">方法属性语法节点，分析请求的url和method</param>
     /// <param name="context">代码生成上下文，用于报告错误信息</param>
-    /// <param name="parameters">方法的参数名列表</param>
     /// <param name="bodyParameter">post时提交的数据参数名</param>
     /// <param name="isVoidMethod">是否是void类型方法，如void或者Task</param>
-    private void GenerateHttpRequestCode(StringBuilder builder, MethodDeclarationSyntax mNode, AttributeSyntax methodAttr, SourceGenerateContext context, List<string> parameters, string bodyParameter, bool isVoidMethod)
+    private void GenerateHttpRequestCode(StringBuilder builder, MethodDeclarationSyntax mNode, AttributeSyntax methodAttr, SourceGenerateContext context, string? bodyParameter, bool isVoidMethod)
     {
         //  分析url和method类型
         HttpMethodType method = HttpMethodType.Get; string url;
         {
-            AttributeArgumentSyntax urlArg = null;
+            AttributeArgumentSyntax? urlArg = null;
             foreach (var arg in methodAttr.GetArguments())
             {
                 switch (arg.NameEquals?.Name.Identifier.ValueText)
@@ -266,10 +263,10 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
             }
             //  url参数
             context.ReportErrorIf(SyntaxExtensions.IsNullOrEmpty(urlArg), "[HttpMethod]标签传入了null/空的 Url 值", methodAttr);
-            url = $"{urlArg.Expression}";
+            url = $"{urlArg!.Expression}";
         }
         //  url相关参数处理（执行AnalysisUrl方法）
-        string urlVarName = null;
+        string? urlVarName = null;
         if (AnalyzerArg != null)
         {
             urlVarName = context.GetVarName("url");
@@ -303,11 +300,11 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="builder"></param>
     /// <param name="returnType"></param>
     /// <param name="context"></param>
-    private static void GenerateMethodReturnCode(StringBuilder builder, TypeSyntax returnType, SourceGenerateContext context)
+    private static void GenerateMethodReturnCode(StringBuilder builder, TypeSyntax? returnType, SourceGenerateContext context)
     {
         if (returnType != null)
         {
-            string typeName = returnType.GetTypeName(context.Semantic);
+            string typeName = returnType.GetTypeName(context.Semantic)!;
             //builder.Append("\t\t\t").AppendLine($"//返回值类型：{typeName}");
             builder.Append(context.LinePrefix);
             switch (typeName)

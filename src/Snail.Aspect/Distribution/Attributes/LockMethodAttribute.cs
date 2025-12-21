@@ -14,14 +14,14 @@ public sealed class LockMethodAttribute : Attribute
     /// <para>1、支持从方法参数上进行动态key构建，如 "/api/x/{orgId}" 则orgId为方法参数名，自动取值做替换 </para>
     /// <para>2、支持动态参数，从方法传入参数值动态构建 </para>
     /// </summary>
-    public string Key { set; get; }
+    public required string Key { set; get; }
 
     /// <summary>
     /// 锁的值
     /// <para>1、在释放锁时使用；只有值正确才能被释放掉 </para>
     /// <para>2、支持动态参数，从方法传入参数值动态构建 </para>
     /// </summary>
-    public string Value { set; get; }
+    public required string Value { set; get; }
 
     /// <summary>
     /// 本次加锁尝试失败的最大重试次数

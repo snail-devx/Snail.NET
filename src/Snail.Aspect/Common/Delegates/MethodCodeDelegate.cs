@@ -11,4 +11,4 @@ namespace Snail.Aspect.Common.Delegates;
 /// <param name="context">源码生成上下文</param>
 /// <param name="options">方法生成配置选项</param>
 /// <returns></returns>
-internal delegate string MethodCodeDelegate(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options);
+internal delegate string? MethodCodeDelegate(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options);

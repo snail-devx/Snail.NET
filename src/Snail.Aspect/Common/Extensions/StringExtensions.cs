@@ -17,8 +17,8 @@ internal static class StringExtensions
     /// <returns></returns>
     public static string AsMD5(this string str, in bool needStrikethrough = false)
     {
-        byte[] data = MD5.Create().ComputeHash(Encoding.Default.GetBytes(str));
-        StringBuilder sBuilder = new StringBuilder();
+        byte[] data = MD5.HashData(Encoding.Default.GetBytes(str));// MD5.Create().ComputeHash(Encoding.Default.GetBytes(str));
+        StringBuilder sBuilder = new();
         for (int i = 0; i < data.Length; i++)
         {
             sBuilder.Append(data[i].ToString("x2"));

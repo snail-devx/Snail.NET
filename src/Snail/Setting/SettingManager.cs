@@ -23,16 +23,16 @@ public sealed class SettingManager : ISettingManager
     /// <summary>
     /// 应用程序配置 使用者
     /// </summary>
-    private readonly List<SettingUser> _users = new List<SettingUser>();
+    private readonly List<SettingUser> _users = [];
 
     /// <summary>
     /// 环境变量配置信息
     /// </summary>
-    private readonly Dictionary<string, string> _envs = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> _envs = [];
     /// <summary>
     /// 应用程序配置资源
     /// </summary>
-    private readonly List<FileResourceDescriptor> _resources = new List<FileResourceDescriptor>();
+    private readonly List<FileResourceDescriptor> _resources = [];
 
     /// <summary>
     /// 管理器是否已经run过了
@@ -197,16 +197,16 @@ public sealed class SettingManager : ISettingManager
     /// <param name="project">项目编码，为null表示是工作空间直属资源</param>
     /// <param name="node">资源节点</param>
     /// <returns></returns>
-    private IList<FileResourceDescriptor>? BuildByNode(in string workspace, in string? project, in XmlNode? node)
+    private List<FileResourceDescriptor>? BuildByNode(in string workspace, in string? project, in XmlNode? node)
     {
         //  强制忽略 code 节点，这个在项目下会作为特殊属性排除掉
-        IDictionary<string, string>? attrs = node?.Attributes?.ToDictionary();
+        Dictionary<string, string>? attrs = node?.Attributes?.ToDictionary();
         if (attrs?.Any() == true)
         {
             attrs.Remove("code");
             //  组装资源文件地址，验证地址存在性
             string? dir = project == null ? Path.Combine(_root, workspace) : Path.Combine(_root, workspace, project);
-            List<FileResourceDescriptor> resources = new List<FileResourceDescriptor>();
+            List<FileResourceDescriptor> resources = [];
             foreach (var (code, value) in attrs)
             {
                 string path = Path.Combine(dir, value);

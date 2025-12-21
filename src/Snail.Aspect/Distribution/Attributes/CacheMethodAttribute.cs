@@ -32,13 +32,13 @@ public abstract class CacheMethodBase : Attribute
     /// <para>2、传入时，则基于“<see cref="DataKeyPrefix"/>+<see cref="CacheKeyAttribute"/>标记参数值”；若方法参数为批量数组，则循环每个元素做构建 </para>
     /// <para>3、支持动态参数，从方法传入参数值动态构建 </para>
     /// </summary>
-    public string DataKeyPrefix { get; set; }
+    public string? DataKeyPrefix { get; set; }
     /// <summary>
     /// 缓存主Key：根据<see cref="Type"/>取值，此值意义不一样
     /// <para>1、在<see cref="CacheType.ObjectCache"/>缓存时，目前忽略 </para>
     /// <para>2、在<see cref="CacheType.HashCache"/>缓存时，为Hash缓存key </para>
     /// </summary>
-    public string MasterKey { set; get; }
+    public string? MasterKey { set; get; }
 }
 
 /// <summary>
@@ -53,7 +53,7 @@ public sealed class CacheMethodAttribute : CacheMethodBase
     /// <para>1、必传，基于此分析缓存数据类型 </para>
     /// <para>2、最初想基于方法返回值分析，这样限制太多，且分析得不一定准确 </para>
     /// </summary>
-    public Type DataType { set; get; }
+    public required Type DataType { set; get; }
 }
 
 /// <summary>

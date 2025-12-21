@@ -78,7 +78,7 @@ internal static class SyntaxExtensions
     /// <param name="semantic"></param>
     /// <returns>加上命名空间的类型名称；如Task则返回</returns>
     /// <remarks></remarks>
-    public static string GetTypeName(this TypeSyntax node, SemanticModel semantic)
+    public static string? GetTypeName(this TypeSyntax node, SemanticModel semantic)
     {
         var symbol = semantic.GetSymbolInfo(node).Symbol;
         return symbol == null ? null : $"{symbol}";
@@ -103,7 +103,7 @@ internal static class SyntaxExtensions
     /// </summary>
     /// <param name="tds"></param>
     /// <returns></returns>
-    public static string GetNamespace(this TypeDeclarationSyntax tds)
+    public static string? GetNamespace(this TypeDeclarationSyntax tds)
     {
         // 向上查找最近的命名空间声明
         var namespaceDeclaration = tds.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
@@ -133,7 +133,7 @@ internal static class SyntaxExtensions
     {
         //  往↑找节点，然后看使用到的using节点
         List<string> nss = [];
-        SyntaxNode tmpNode = tds.Parent;
+        SyntaxNode? tmpNode = tds.Parent;
         while (tmpNode != null)
         {
             foreach (var cNode in tmpNode.ChildNodes())
@@ -186,7 +186,7 @@ internal static class SyntaxExtensions
     /// <param name="semantic"></param>
     /// <param name="typeSymbol">属性类型的Symbol，访问此类型的全路径：如“Snail.Aspect.Web.Enumerations.HttpMethodType”</param>
     /// <returns></returns>
-    public static AttributeSyntax GetAttribute(this SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semantic, string typeSymbol)
+    public static AttributeSyntax? GetAttribute(this SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semantic, string typeSymbol)
     {
         //  遍历找属性值
         foreach (var aList in attributeLists)
@@ -209,7 +209,7 @@ internal static class SyntaxExtensions
     /// <param name="semantic"></param>
     /// <param name="predicate">属性类型的Symbol断言</param>
     /// <returns></returns>
-    public static AttributeSyntax GetAttribute(this SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semantic, Predicate<ISymbol> predicate)
+    public static AttributeSyntax? GetAttribute(this SyntaxList<AttributeListSyntax> attributeLists, SemanticModel semantic, Predicate<ISymbol> predicate)
     {
         //  遍历找属性值
         foreach (var aList in attributeLists)
@@ -264,7 +264,7 @@ internal static class SyntaxExtensions
     /// <param name="agName"></param>
     /// <param name="argument"></param>
     /// <returns></returns>
-    public static bool HasArgument(this AttributeSyntax attr, string agName, out AttributeArgumentSyntax argument)
+    public static bool HasArgument(this AttributeSyntax attr, string agName, out AttributeArgumentSyntax? argument)
     {
         argument = attr?.GetArguments()?.FirstOrDefault(ag => ag.NameEquals?.Name?.Identifier.ValueText == agName);
         return argument != null;
@@ -275,7 +275,7 @@ internal static class SyntaxExtensions
     /// <param name="attr"></param>
     /// <param name="argument"></param>
     /// <returns></returns>
-    public static bool HasAnalyzer(this AttributeSyntax attr, out AttributeArgumentSyntax argument)
+    public static bool HasAnalyzer(this AttributeSyntax attr, out AttributeArgumentSyntax? argument)
         => HasArgument(attr, "Analyzer", out argument);
 
     /// <summary>
@@ -356,9 +356,9 @@ internal static class SyntaxExtensions
     /// </summary>
     /// <param name="arg"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty(this AttributeArgumentSyntax arg)
+    public static bool IsNullOrEmpty(this AttributeArgumentSyntax? arg)
     {
-        string value = arg?.Expression == null
+        string? value = arg?.Expression == null
             ? null
             : $"{arg.Expression}";
         return string.IsNullOrEmpty(value)
@@ -389,16 +389,16 @@ internal static class SyntaxExtensions
     /// <param name="ns">方法返回值用到的数据类型的命名空间</param>
     /// <remarks>针对内部嵌套类型时没办法分析出来上层类型；比较复杂，不兼容这种情况</remarks>
     /// <returns>若为Task{T}则返回T；若为void则返回null</returns>
-    public static TypeSyntax GetRealReturnType(this MethodDeclarationSyntax mNode, SemanticModel semantic, out bool isAsync, out List<string> ns)
+    public static TypeSyntax? GetRealReturnType(this MethodDeclarationSyntax mNode, SemanticModel semantic, out bool isAsync, out List<string> ns)
     {
         ns = mNode.ReturnType.GetUsedNamespaces(semantic);
         isAsync = mNode.ReturnType.IsTaskType(semantic);
 
-        TypeSyntax type = isAsync
+        TypeSyntax? type = isAsync
             ? mNode.ReturnType.DescendantNodes().OfType<TypeSyntax>().FirstOrDefault()
             : mNode.ReturnType;
         //  type.ToFullString().Trim() == "void"
-        string typeName = type?.ToFullString()?.Trim();
+        string? typeName = type?.ToFullString()?.Trim();
         return typeName == "void"
             ? null
             : type;

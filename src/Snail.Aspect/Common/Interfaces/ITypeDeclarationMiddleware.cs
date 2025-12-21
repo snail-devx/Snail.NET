@@ -25,7 +25,7 @@ internal interface ITypeDeclarationMiddleware
     /// <param name="options">方法生成配置选项</param>
     /// <remarks>若不符合自身业务逻辑</remarks>
     /// <returns>代码字符串</returns>
-    string GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next);
+    string? GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next);
 
     /// <summary>
     /// 生成<see cref="GenerateMethodCode"/>的辅助
@@ -34,5 +34,5 @@ internal interface ITypeDeclarationMiddleware
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    string GenerateAssistantCode(SourceGenerateContext context);
+    string? GenerateAssistantCode(SourceGenerateContext context);
 }

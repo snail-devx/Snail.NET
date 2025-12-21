@@ -15,7 +15,7 @@
 		<!-- 覆盖公共配置中的配置项： -->
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Nullable>disable</Nullable>
+		<!--<Nullable>disable</Nullable>-->
 	</PropertyGroup>
 	
 	<!-- 默认配置项 -->

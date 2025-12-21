@@ -27,11 +27,11 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <summary>
     /// 中间件配置
     /// </summary>
-    private static readonly IList<Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware>> _middlewareConfigs;
+    private static readonly IList<Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware?>> _middlewareConfigs;
     /// <summary>
     /// 类型名：<see cref="AspectIgnoreAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_AspectIgnoreAttribute = typeof(AspectIgnoreAttribute).FullName;
+    protected static readonly string TYPENAME_AspectIgnoreAttribute = typeof(AspectIgnoreAttribute).FullName!;
     /// <summary>
     /// 固定需要引入的命名空间几何
     /// </summary>
@@ -107,7 +107,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// 配置中间件
     /// </summary>
     /// <param name="middleware">中间件构造委托</param>
-    public static void Config(Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware> middleware)
+    public static void Config(Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware?> middleware)
         => _middlewareConfigs.TryAdd(middleware);
 
     /// <summary>
@@ -115,16 +115,16 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static IncrementalValuesProvider<ISyntaxProxy> BuildProvider(IncrementalGeneratorInitializationContext context)
+    public static IncrementalValuesProvider<ISyntaxProxy?> BuildProvider(IncrementalGeneratorInitializationContext context)
     {
         //  有中间件时，才构建代理
-        return context.SyntaxProvider.CreateSyntaxProvider<ISyntaxProxy>(
+        return context.SyntaxProvider.CreateSyntaxProvider<ISyntaxProxy?>(
             predicate: (syntax, _) => syntax is InterfaceDeclarationSyntax || syntax is ClassDeclarationSyntax,
             transform: (ctx, _) =>
             {
-                TypeDeclarationSyntax tds = ctx.Node as TypeDeclarationSyntax;
+                TypeDeclarationSyntax tds = (ctx.Node as TypeDeclarationSyntax)!;
                 //  如果标记为AspectIgnoreAttribute，则忽略掉
-                AttributeSyntax attr = tds.AttributeLists.GetAttribute(ctx.SemanticModel, TYPENAME_AspectIgnoreAttribute);
+                AttributeSyntax? attr = tds.AttributeLists.GetAttribute(ctx.SemanticModel, TYPENAME_AspectIgnoreAttribute);
                 if (attr != null)
                 {
                     return null;
@@ -133,8 +133,8 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
                 List<ITypeDeclarationMiddleware> middlewares = [];
                 foreach (var item in _middlewareConfigs)
                 {
-                    ITypeDeclarationMiddleware middleware = item.Invoke(tds, ctx.SemanticModel);
-                    middlewares.TryAdd(middleware);
+                    ITypeDeclarationMiddleware? middleware = item.Invoke(tds, ctx.SemanticModel);
+                    middlewares!.TryAdd(middleware);
                 }
                 return middlewares.Count > 0
                     ? new ClassInterfaceSyntaxProxy(tds, ctx.SemanticModel, middlewares)
@@ -188,7 +188,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
             builder.AppendLine().Append('\t').AppendLine("#region 辅助代码");
             foreach (var middleware in Middlewares)
             {
-                string code = middleware.GenerateAssistantCode(context)?.TrimEnd();
+                string? code = middleware.GenerateAssistantCode(context)?.TrimEnd();
                 if (string.IsNullOrEmpty(code) == false)
                 {
                     builder.AppendLine(code);
@@ -213,11 +213,11 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
         //      using处理：插入到最前面；using命名空间，只有再最后的时候才知道要引入哪些
         builder.Insert(0, "\r\n").Insert(0, "\r\n")
                .Insert(0, string.Join("\r\n", context.Namespaces.Distinct().OrderBy(item => item).Select(item => $"using {item};")))
-               .Insert(0, "#pragma warning disable CS1591, CS8600, CS8602, CS8603, CS8604\r\n")
+               .Insert(0, "#pragma warning disable CS1591, CS8600, CS8602, CS8603, CS8604,CS8621 \r\n")
                .Insert(0, "#nullable enable\r\n");
         //      类和命名空间收尾，追加到最后面：
         builder.AppendLine("}")
-               .AppendLine("#pragma warning restore CS1591, CS8600, CS8602, CS8603, CS8604")
+               .AppendLine("#pragma warning restore CS1591, CS8600, CS8602, CS8603, CS8604,CS8621 ")
                .AppendLine("#nullable disable");
 
         return builder.ToString();
@@ -240,7 +240,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
         {
             //  强制加上aspct和继承实现类型组件注入生命
             builder.AppendLine($"[{nameof(AspectAttribute).Replace("Attribute", "")}]");
-            string tmpCode = null;
+            string? tmpCode = null;
             if (Node.TypeParameterList?.Parameters.Count > 0)
             {
                 tmpCode = string.Join(",", Node.TypeParameterList.Parameters.Select(p => string.Empty));
@@ -333,7 +333,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
         }
         //  执行【中间件】生成具体代码；未生成代码，直接返回不生成
         MethodGenerateOptions options = new MethodGenerateOptions(mNode, context);
-        string code = GenerateMethodByRunMiddleware(mNode, context, options);
+        string? code = GenerateMethodByRunMiddleware(mNode, context, options);
         if (string.IsNullOrEmpty(code) == true)
         {
             return false;
@@ -386,10 +386,10 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <param name="context"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    private string GenerateMethodByRunMiddleware(MethodDeclarationSyntax mNode, SourceGenerateContext context, MethodGenerateOptions options)
+    private string? GenerateMethodByRunMiddleware(MethodDeclarationSyntax mNode, SourceGenerateContext context, MethodGenerateOptions options)
     {
         //  1、构建方法中间件：起始中间件，接口和抽象方法无需生成；否则【基类方法调用】作为起始中间件
-        MethodCodeDelegate mcd = (IsInterface || options.IsAbstract) ? null : CallBaseMethodCode;
+        MethodCodeDelegate? mcd = (IsInterface || options.IsAbstract) ? null : CallBaseMethodCode;
         foreach (var item in Middlewares.Reverse())
         {
             mcd = BuildDelegate(item, mcd);
@@ -397,7 +397,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
         //  2、执行代码生成，执行前上下文信息重置
         context.Reset(linePrefix: TAB_MethodSpace)
                .AddVarNames(mNode.ParameterList.Parameters.Select(item => item.Identifier.Text).ToArray());
-        string code = mcd.Invoke(mNode, context, options);
+        string? code = mcd?.Invoke(mNode, context, options);
         //  3、校正生成情况：根据生成情况，判断是否合法
         //      未生成：abstract方法必须有实现、接口方法若无实现则需要报错
         if (context.Generated == false)
@@ -454,7 +454,7 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <param name="middleware"></param>
     /// <param name="next"></param>
     /// <returns></returns>
-    private static MethodCodeDelegate BuildDelegate(ITypeDeclarationMiddleware middleware, MethodCodeDelegate next)
+    private static MethodCodeDelegate BuildDelegate(ITypeDeclarationMiddleware middleware, MethodCodeDelegate? next)
          => (method, context, options) => middleware.GenerateMethodCode(method, context, options, next);
 
     /// <summary>

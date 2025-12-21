@@ -15,17 +15,17 @@ public sealed class MethodRunContext
     /// <summary>
     /// 执行的方法名称
     /// </summary>
-    public string Method { get; }
+    public readonly string Method;
 
     /// <summary>
     /// 方法传入的参数
     /// </summary>
-    public IDictionary<string, object> Parameters { get; }
+    public readonly IDictionary<string, object?>? Parameters;
 
     /// <summary>
     /// 执行方法的返回值；若方法为void或者Task，则无返回值
     /// </summary>
-    public object ReturnValue { private set; get; }
+    public object? ReturnValue { private set; get; }
     #endregion
 
     #region 构造方法
@@ -34,7 +34,7 @@ public sealed class MethodRunContext
     /// </summary>
     /// <param name="method"></param>
     /// <param name="parameters"></param>
-    public MethodRunContext(string method, IDictionary<string, object> parameters)
+    public MethodRunContext(string method, IDictionary<string, object?>? parameters)
     {
         Method = method;
         Parameters = parameters;
@@ -48,7 +48,7 @@ public sealed class MethodRunContext
     /// <typeparam name="T"></typeparam>
     /// <param name="data"></param>
     /// <returns></returns>
-    public T SetReturnValue<T>(T data)
+    public T? SetReturnValue<T>(T? data)
     {
         ReturnValue = data;
         return data;

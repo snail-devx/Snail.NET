@@ -46,7 +46,7 @@ internal static class ListExtensions
     /// <param name="source"></param>
     /// <param name="list"></param>
     /// <returns></returns>
-    public static List<T> TryAddRange<T>(this List<T> source, IEnumerable<T> list)
+    public static List<T> TryAddRange<T>(this List<T> source, IEnumerable<T>? list)
     {
         if (list?.Any() == true)
         {

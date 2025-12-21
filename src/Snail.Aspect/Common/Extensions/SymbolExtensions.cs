@@ -26,9 +26,12 @@ internal static class SymbolExtensions
         //     return true;
         // }
         //  int? nullable<int>、、、
+        //return type is INamedTypeSymbol nts
+        //    ? nts.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T && nts.TypeArguments.Length == 1
+        //    : false;
         return type is INamedTypeSymbol nts
-            ? nts.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T && nts.TypeArguments.Length == 1
-            : false;
+            && nts.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T
+            && nts.TypeArguments.Length == 1;
     }
 
     /// <summary>
@@ -57,7 +60,7 @@ internal static class SymbolExtensions
     /// <param name="type"></param>
     /// <param name="elementType">数组元素类型；如string[],则为string</param>
     /// <returns></returns>
-    public static bool IsArray(this ITypeSymbol type, out ITypeSymbol elementType)
+    public static bool IsArray(this ITypeSymbol type, out ITypeSymbol? elementType)
     {
         elementType = type is IArrayTypeSymbol ats ? ats.ElementType : null;
         return elementType != null;
@@ -66,10 +69,10 @@ internal static class SymbolExtensions
     /// 是否是List集合；实现IList接口
     /// </summary>
     /// <param name="type"></param>
-    /// <param name="genericArgType">泛型类型，如<see cref="IList{Int32}"/>则为<see cref="Int32"/></param>
+    /// <param name="genericArgType">泛型类型，如<see cref="IList{Int32}"/>则为<see cref="int"/></param>
     /// <param name="inherit">是否算继承类型：为true时<paramref name="type"/>及基类实现了<see cref="IList{T}"/>也算List</param>
     /// <returns></returns>
-    public static bool IsList(this ITypeSymbol type, out ITypeSymbol genericArgType, bool inherit = true)
+    public static bool IsList(this ITypeSymbol type, out ITypeSymbol? genericArgType, bool inherit = true)
     {
         //  遍历自身+基类实现接口
         genericArgType = null;
@@ -103,7 +106,7 @@ internal static class SymbolExtensions
     /// <param name="valueType">字典Value类型</param>
     /// <param name="inherit">是否算继承类型：为true时<paramref name="type"/>及基类实现了<see cref="IDictionary{TKey, TValue}"/>也算IDictionary</param>
     /// <returns></returns>
-    public static bool IsDictionary(this ITypeSymbol type, out ITypeSymbol keyType, out ITypeSymbol valueType, bool inherit = true)
+    public static bool IsDictionary(this ITypeSymbol type, out ITypeSymbol? keyType, out ITypeSymbol? valueType, bool inherit = true)
     {
         //  遍历自身+基类实现接口
         keyType = null;
@@ -138,7 +141,7 @@ internal static class SymbolExtensions
     /// <param name="genericArgType">泛型类型，如IDataBag{Int32}则为<see cref="Int32"/></param>
     /// <param name="inherit">是否算继承类型：为true时<paramref name="type"/>及基类实现了IDataBag{Int32}也算IDataBag</param>
     /// <returns></returns>
-    public static bool IsDataBag(this ITypeSymbol type, out ITypeSymbol genericArgType, bool inherit = true)
+    public static bool IsDataBag(this ITypeSymbol type, out ITypeSymbol? genericArgType, bool inherit = true)
     {
         //  遍历自身+基类实现接口
         genericArgType = null;

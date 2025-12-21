@@ -27,11 +27,11 @@ public static class CacheAspectHelper
     /// <param name="dataKeys"></param>
     /// <param name="dataKeyPrefix"></param>
     /// <returns></returns>
-    public static IList<string> CombineDataKey(IList<string> dataKeys, string dataKeyPrefix)
+    public static IList<string>? CombineDataKey(IList<string> dataKeys, string dataKeyPrefix)
     {
         if (dataKeys?.Count > 0)
         {
-            IList<string> cacheKeys = new List<string>(dataKeys.Count);
+            List<string> cacheKeys = new(dataKeys.Count);
             for (int index = 0; index < dataKeys.Count; index++)
             {
                 cacheKeys.Add(CombineDataKey(dataKeys[index], dataKeyPrefix));
@@ -46,7 +46,7 @@ public static class CacheAspectHelper
     /// <param name="dataKeys"></param>
     /// <param name="dataKeyPrefix"></param>
     /// <returns></returns>
-    public static string[] CombineDataKey(string[] dataKeys, string dataKeyPrefix)
+    public static string[]? CombineDataKey(string[] dataKeys, string dataKeyPrefix)
     {
         if (dataKeys?.Length > 0)
         {
@@ -68,11 +68,11 @@ public static class CacheAspectHelper
     /// <param name="keyFunc">获取数据Key的委托</param>
     /// <param name="dataKeyPrefix">数据Key的前缀，无则忽略</param>
     /// <returns>保存缓存时所需的字典数据</returns>
-    public static IDictionary<string, T> BuildCacheMap<T>(T data, Func<T, string> keyFunc, string dataKeyPrefix = null)
+    public static IDictionary<string, T> BuildCacheMap<T>(T data, Func<T, string> keyFunc, string? dataKeyPrefix = null)
     {
-        ThrowIfNull(data, "data");
-        ThrowIfNull(keyFunc, "keyFunc");
-        dataKeyPrefix = dataKeyPrefix == null ? string.Empty : dataKeyPrefix;
+        ThrowIfNull(data, nameof(data));
+        ThrowIfNull(keyFunc, nameof(keyFunc));
+        dataKeyPrefix ??= string.Empty;
         return new Dictionary<string, T>()
         {
             {$"{dataKeyPrefix}{keyFunc(data)}",data}
@@ -86,12 +86,12 @@ public static class CacheAspectHelper
     /// <param name="keyFunc">获取数据Key的委托</param>
     /// <param name="dataKeyPrefix">数据Key的前缀，无则忽略</param>
     /// <returns>保存缓存时所需的字典数据</returns>
-    public static IDictionary<string, T> BuildCacheMap<T>(IList<T> datas, Func<T, string> keyFunc, string dataKeyPrefix = null)
+    public static IDictionary<string, T> BuildCacheMap<T>(IList<T> datas, Func<T, string> keyFunc, string? dataKeyPrefix = null)
     {
-        ThrowIfNull(datas, "datas");
-        ThrowIfNull(keyFunc, "keyFunc");
-        dataKeyPrefix = dataKeyPrefix == null ? string.Empty : dataKeyPrefix;
-        IDictionary<string, T> map = new Dictionary<string, T>();
+        ThrowIfNull(datas, nameof(datas));
+        ThrowIfNull(keyFunc, nameof(keyFunc));
+        dataKeyPrefix ??= string.Empty;
+        Dictionary<string, T> map = new();
         for (int index = 0; index < datas.Count; index++)
         {
             T data = datas[index];
@@ -108,12 +108,12 @@ public static class CacheAspectHelper
     /// <param name="keyFunc">获取数据Key的委托</param>
     /// <param name="dataKeyPrefix">数据Key的前缀，无则忽略</param>
     /// <returns>保存缓存时所需的字典数据</returns>
-    public static IDictionary<string, T> BuildCacheMap<T>(T[] datas, Func<T, string> keyFunc, string dataKeyPrefix = null)
+    public static IDictionary<string, T> BuildCacheMap<T>(T[] datas, Func<T, string> keyFunc, string? dataKeyPrefix = null)
     {
-        ThrowIfNull(datas, "datas");
-        ThrowIfNull(keyFunc, "keyFunc");
-        dataKeyPrefix = dataKeyPrefix == null ? string.Empty : dataKeyPrefix;
-        IDictionary<string, T> map = new Dictionary<string, T>();
+        ThrowIfNull(datas, nameof(datas));
+        ThrowIfNull(keyFunc, nameof(keyFunc));
+        dataKeyPrefix ??= string.Empty;
+        Dictionary<string, T> map = new();
         for (int index = 0; index < datas.Length; index++)
         {
             T data = datas[index];
@@ -131,7 +131,7 @@ public static class CacheAspectHelper
     /// <typeparam name="T"></typeparam>
     /// <param name="datas"></param>
     /// <param name="paramName"></param>
-    private static void ThrowIfNull<T>(T datas, string paramName = null)
+    private static void ThrowIfNull<T>(T datas, string? paramName = null)
     {
         if (datas == null)
         {

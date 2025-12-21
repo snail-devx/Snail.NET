@@ -41,12 +41,12 @@ internal readonly struct CacheMethodOptions
     /// 缓存主Key
     /// <para>参照<see cref="Attributes.CacheMethodBase.MasterKey"/> </para>
     /// </summary>
-    public AttributeArgumentSyntax MasterKey { get; }
+    public AttributeArgumentSyntax? MasterKey { get; }
     /// <summary>
     /// 缓存数据Key前缀
     /// <para>参照<see cref="Attributes.CacheMethodBase.DataKeyPrefix"/> </para>
     /// </summary>
-    public AttributeArgumentSyntax DataKeyPrefix { get; }
+    public AttributeArgumentSyntax? DataKeyPrefix { get; }
 
     /// <summary>
     /// 缓存数据类型名称
@@ -54,7 +54,7 @@ internal readonly struct CacheMethodOptions
     /// <para>2、最初想基于方法返回值分析，这样限制太多，且分析得不一定准确 </para>
     /// <para>3、抛出错误信息时，基于此节点做定位使用；支持属性值和泛型参数值 </para>
     /// </summary>
-    public SyntaxNode DataType { get; }
+    public SyntaxNode? DataType { get; }
     /// <summary>
     /// 缓存数据类型
     /// </summary>
@@ -77,7 +77,7 @@ internal readonly struct CacheMethodOptions
     /// <param name="context"></param>
     /// <param name="dataTypeNode">缓存数据类型节点；为null时则基于<paramref name="attr"/>分析；和<paramref name="dataTypeSymbol"/>同时传入时生效</param>
     /// <param name="dataTypeSymbol">缓存数据类型；为null时则基于<paramref name="attr"/>分析；和<paramref name="dataTypeNode"/>同时传入时生效</param>
-    public CacheMethodOptions(AttributeSyntax attr, SourceGenerateContext context, SyntaxNode dataTypeNode, ITypeSymbol dataTypeSymbol)
+    public CacheMethodOptions(AttributeSyntax attr, SourceGenerateContext context, SyntaxNode? dataTypeNode, ITypeSymbol? dataTypeSymbol)
     {
         //  默认值处理
         {
@@ -88,7 +88,7 @@ internal readonly struct CacheMethodOptions
             MasterKey = null;
             DataKeyPrefix = null;
             DataType = null;
-            DataTypeSymbol = null;
+            DataTypeSymbol = null!;
         }
         //  外部同时传入dataTypeNode、dataTypeSymbol时，生效
         if (dataTypeNode != null && dataTypeSymbol != null)
@@ -123,7 +123,7 @@ internal readonly struct CacheMethodOptions
                         if (ag.Expression is TypeOfExpressionSyntax typeOfNode == true)
                         {
                             DataType = ag;
-                            DataTypeSymbol = context.Semantic.GetTypeInfo(typeOfNode.Type).Type;
+                            DataTypeSymbol = context.Semantic.GetTypeInfo(typeOfNode.Type).Type!;
                         }
                         else
                         {

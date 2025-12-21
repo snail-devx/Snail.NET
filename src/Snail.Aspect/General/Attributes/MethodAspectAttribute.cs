@@ -15,6 +15,6 @@ public sealed class MethodAspectAttribute : Attribute
     /// 方法运行句柄
     /// <para>1、必传；实现<see cref="Interfaces.IMethodRunHandle"/>的类型依赖注入Key值 </para>
     /// </summary>
-    public string RunHandle { get; set; }
+    public required string RunHandle { get; set; }
 }
 

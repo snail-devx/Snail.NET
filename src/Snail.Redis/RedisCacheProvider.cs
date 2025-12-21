@@ -458,7 +458,7 @@ public class RedisCacheProvider : ICacheProvider
     /// <param name="key"></param>
     /// <param name="expireSeconds">整个SortedSet的过期时间（单位秒）；为null则默认2小时，&lt;=0则始终不过期</param>
     /// <returns></returns>
-    private async Task<bool> KeyExpire(IDatabase db, RedisKey key, long? expireSeconds)
+    private static async Task<bool> KeyExpire(IDatabase db, RedisKey key, long? expireSeconds)
     {
         //  加多线程并发，实现快速设置过期时间；db自身没找到批量设置过期时间接口
         expireSeconds ??= DEFAULT_ExpireSeconds;

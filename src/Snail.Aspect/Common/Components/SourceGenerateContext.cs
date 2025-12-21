@@ -121,7 +121,7 @@ internal class SourceGenerateContext
     /// </summary>
     /// <param name="nss"></param>
     /// <returns></returns>
-    public SourceGenerateContext AddNamespaces(IEnumerable<string> nss)
+    public SourceGenerateContext AddNamespaces(IEnumerable<string>? nss)
     {
         Namespaces.TryAddRange(nss);
         return this;
@@ -221,7 +221,7 @@ internal class SourceGenerateContext
     /// </summary>
     /// <param name="message">诊断消息</param>
     /// <param name="syntax">语法节点对象；用户取location等信息</param>
-    public void ReportError(string message, SyntaxNode syntax)
+    public void ReportError(string message, SyntaxNode? syntax)
         => ReportDiagnostic(id: "Snail_Error", message, DiagnosticSeverity.Error, syntax);
     /// <summary>
     /// 报告【错误】诊断信息；在<paramref name="condition"/>条件为true时执行
@@ -229,7 +229,7 @@ internal class SourceGenerateContext
     /// <param name="condition"></param>
     /// <param name="message">诊断消息</param>
     /// <param name="syntax">语法节点对象；用户取location等信息</param>
-    public void ReportErrorIf(bool condition, string message, SyntaxNode syntax)
+    public void ReportErrorIf(bool condition, string message, SyntaxNode? syntax)
     {
         _ = condition && ReportDiagnostic(id: "Snail_Error", message, DiagnosticSeverity.Error, syntax);
     }
@@ -268,7 +268,7 @@ internal class SourceGenerateContext
     /// <param name="severity">级别：错误、警告、信息</param>
     /// <param name="syntax">语法节点对象；用户取location等信息</param>
     /// <returns></returns>
-    public bool ReportDiagnostic(string id, string message, DiagnosticSeverity severity, SyntaxNode syntax)
+    public bool ReportDiagnostic(string id, string message, DiagnosticSeverity severity, SyntaxNode? syntax)
     {
         var diagnostic = Diagnostic.Create(
             descriptor: new DiagnosticDescriptor(
@@ -314,7 +314,7 @@ internal class SourceGenerateContext
         //  如 [LockAspect]标记的类型不能实现 [ILockAnalyzer]；若[LockAspect]指定的Analyzer也是当前类型自身，则会造成依赖注入构建实例时死循环
         if (TypeSyntax.BaseList != null)
         {
-            ITypeSymbol ts = Semantic.GetDeclaredSymbol(TypeSyntax) as ITypeSymbol;
+            ITypeSymbol? ts = Semantic.GetDeclaredSymbol(TypeSyntax) as ITypeSymbol;
             ReportErrorIf
             (
                 condition: ts != null && ts.IsInterface(iTypeFullName),

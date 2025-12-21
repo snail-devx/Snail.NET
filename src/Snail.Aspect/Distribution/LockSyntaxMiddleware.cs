@@ -30,22 +30,22 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 类型名：<see cref="LockAspectAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_LockAspectAttribute = typeof(LockAspectAttribute).FullName;
+    protected static readonly string TYPENAME_LockAspectAttribute = typeof(LockAspectAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="LockMethodAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_LockMethodAttribute = typeof(LockMethodAttribute).FullName;
+    protected static readonly string TYPENAME_LockMethodAttribute = typeof(LockMethodAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="ILockAnalyzer"/>
     /// </summary>
-    protected static readonly string TYPENAME_ILockAnalyzer = typeof(ILockAnalyzer).FullName;
+    protected static readonly string TYPENAME_ILockAnalyzer = typeof(ILockAnalyzer).FullName!;
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
     protected static readonly IReadOnlyList<string> FixedNamespaces =
     [
         //  全局依赖的
-        typeof(Task).Namespace,//                           System
+        typeof(Task).Namespace!,//                           System
         "Snail.Utilities.Common",//                         
         "Snail.Utilities.Common.Utils",//                   typeof(ObjectHelper).Namespace,           
         "Snail.Utilities.Collections.Utils",//              typeof(ListHelper).Namespace,//
@@ -67,8 +67,8 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Abstractions.Distribution.Exceptions",//     typeof(LockException).Namespace,//               
         "Snail.Abstractions.Distribution.Extensions",//     typeof(CacherExtensions).Namespace,//              
         //  并发锁 切面编程相关命名空间
-        typeof(LockAspectAttribute).Namespace,
-        typeof(ILockAnalyzer).Namespace,
+        typeof(LockAspectAttribute).Namespace!,
+        typeof(ILockAnalyzer).Namespace!,
     ];
 
     /// <summary>
@@ -78,7 +78,7 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// Lock分析器参数：<see cref="ILockAnalyzer"/>分析缓存相关Key
     /// </summary>
-    protected readonly AttributeArgumentSyntax AnalyzerArg;
+    protected readonly AttributeArgumentSyntax? AnalyzerArg;
     /// <summary>
     /// 是否需要【辅助】代码
     /// </summary>
@@ -104,12 +104,12 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="node"></param>
     /// <param name="semantic"></param>
     /// <returns></returns>
-    public static ITypeDeclarationMiddleware Build(TypeDeclarationSyntax node, SemanticModel semantic)
+    public static ITypeDeclarationMiddleware? Build(TypeDeclarationSyntax node, SemanticModel semantic)
     {
         //  仅针对“有【LockAspectAttribute】属性标记的interface和class”做处理
         if (node is InterfaceDeclarationSyntax || node is ClassDeclarationSyntax)
         {
-            AttributeSyntax attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_LockAspectAttribute);
+            AttributeSyntax? attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_LockAspectAttribute);
             return attr != null
                 ? new LockSyntaxMiddleware(attr)
                 : null;
@@ -138,18 +138,18 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="next">下一步操作；若为null则不用继续执行，返回即可</param>
     /// <remarks>若不符合自身业务逻辑</remarks>
     /// <returns>代码字符串</returns>
-    string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
+    string? ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next)
     {
         //  1、无【LockMethod】属性标记，直接执行下一步逻辑
-        AttributeSyntax attr = method.AttributeLists.GetAttribute(context.Semantic, TYPENAME_LockMethodAttribute);
+        AttributeSyntax? attr = method.AttributeLists.GetAttribute(context.Semantic, TYPENAME_LockMethodAttribute);
         if (attr == null)
         {
-            string nextCode = next?.Invoke(method, context, options);
+            string? nextCode = next?.Invoke(method, context, options);
             return nextCode;
         }
         //  2、实现前的基础验证；
         context.Generated = true;
-        string key, value, tryCount, expireSeconds;
+        string? key, value, tryCount, expireSeconds;
         {
             //  方法必须是异步的：强制规则，推进异步编程
             if (options.IsAsync == false)
@@ -165,9 +165,9 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
             ForEachMethodParametes(method, context);
         }
         //  3、生成实现代码；先构建nextRunCode：无实际业务代码，直接空实现
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         _needAssistantCode = true;
-        string nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod, simpleBaseCall: false);
+        string? nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod, simpleBaseCall: false);
         if (string.IsNullOrEmpty(nextRunCode) == true)
         {
             builder.Append(context.LinePrefix).AppendLine("//   执行并发锁时，无NextCode代码，无需加锁，进行空实现");
@@ -177,7 +177,7 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
         else
         {
             //  根据进行lockKey、lockValue参数解析
-            string tmpCode = null, lockKey = null, lockValue = null;
+            string? tmpCode = null, lockKey = null, lockValue = null;
             if (AnalyzerArg != null)
             {
                 lockKey = context.GetVarName("lockKey");
@@ -194,7 +194,7 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
             //  执行加锁逻辑
             tmpCode = string.Join(
                 ", ",
-                new List<string> { lockKey, lockValue, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null)
+                new List<string?> { lockKey, lockValue, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null)
             );
             _ = options.ReturnType == null
                 ? builder.Append(context.LinePrefix)
@@ -219,7 +219,7 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
+    string? ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
     {
         /** 辅助代码示例：_lockAnalyzer按需生成
         
@@ -233,7 +233,7 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
         {
             context.AddNamespaces(FixedNamespaces);
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append(context.LinePrefix).AppendLine("//  生成[LockAspect]辅助代码;");
             //  生成 ILocker 注入代码；加入必填验证
             string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
@@ -265,11 +265,11 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="tryCount">out参数：尝试次数</param>
     /// <param name="expireSeconds">out参数：失效时间</param>
     /// <returns></returns>
-    private static bool CheckLockMethodAttr(SourceGenerateContext context, AttributeSyntax attr, out string key, out string value, out string tryCount, out string expireSeconds)
+    private static bool CheckLockMethodAttr(SourceGenerateContext context, AttributeSyntax attr, out string? key, out string? value, out string? tryCount, out string? expireSeconds)
     {
         key = value = tryCount = expireSeconds = null;
         //  LockMethod属性验证；解析出具体的值
-        AttributeArgumentSyntax keyArg = null, valueArg = null;
+        AttributeArgumentSyntax? keyArg = null, valueArg = null;
         foreach (var arg in attr.GetArguments())
         {
             switch (arg.NameEquals?.Name.Identifier.ValueText)

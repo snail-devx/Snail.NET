@@ -76,14 +76,14 @@ internal static class SyntaxMiddlewareHelper
     /// <param name="context"></param>
     /// <param name="otherArgs"></param>
     /// <returns></returns>
-    public static string BuildServerInjectCodeByAttribute(AttributeSyntax aspectAttr, SourceGenerateContext context, Action<string, AttributeArgumentSyntax> otherArgs = null)
+    public static string BuildServerInjectCodeByAttribute(AttributeSyntax aspectAttr, SourceGenerateContext context, Action<string?, AttributeArgumentSyntax>? otherArgs = null)
     {
-        AttributeArgumentSyntax code = null;
+        AttributeArgumentSyntax? code = null;
         //  遍历属性参数信息，得到Server注入参数：非Server的注入参数，执行otherArgs通知外面；并将Code独立出来，方便后面做必填验证
         List<AttributeArgumentSyntax> serverParams = aspectAttr.GetArguments()
             .Where(ag =>
             {
-                string agName = ag.NameEquals?.Name?.Identifier.ValueText;
+                string? agName = ag.NameEquals?.Name?.Identifier.ValueText;
                 switch (agName)
                 {
                     //  server相关注入参数
@@ -117,7 +117,7 @@ internal static class SyntaxMiddlewareHelper
     /// <param name="supportRefParam"></param>
     /// <param name="supportInParam"></param>
     /// <param name="supportOutParam"></param>
-    public static void ForEachMethodParametes(MethodDeclarationSyntax mNode, SourceGenerateContext context, Action<string, ParameterSyntax> action = null,
+    public static void ForEachMethodParametes(MethodDeclarationSyntax mNode, SourceGenerateContext context, Action<string, ParameterSyntax>? action = null,
         bool supportTaskParam = false, bool supportRefParam = false, bool supportInParam = false, bool supportOutParam = false)
     {
         foreach (ParameterSyntax parameter in mNode.ParameterList.Parameters)
@@ -165,9 +165,9 @@ internal static class SyntaxMiddlewareHelper
     /// <param name="simpleBaseCall">简化base方法的调用；如果next插件生成的是执行基类方法，则做简化处理，如“base.LockTest();”，减少本地方法的生成</param>
     /// <returns>执行代码（如  base.SaveObjects(x);、await _CacheNextCodeMethod();），若生成失败，则返回null</returns>
     /// <remarks>仅在自身有同样需要生成代码时才实用，否则不推荐使用</remarks>
-    public static string GenerateRunCodeWithNext(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next, string localMethodName, bool simpleBaseCall = true)
+    public static string? GenerateRunCodeWithNext(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next, string localMethodName, bool simpleBaseCall = true)
     {
-        string nextCode;
+        string? nextCode;
         {
             string oldLine = context.LinePrefix;
             context.LinePrefix = $"{TAB_MethodSpace}\t";
@@ -222,7 +222,7 @@ internal static class SyntaxMiddlewareHelper
     /// <para>[Inject(Key = "xxx")] </para>
     /// <para>private ICacheAnalyzer? _cacheAnalyzer { init; get; } </para>
     /// </remarks>
-    public static bool GenerateInjectAssistantCode(StringBuilder builder, SourceGenerateContext context, AttributeArgumentSyntax injectKeyArg, string typeName, string injectVarName)
+    public static bool GenerateInjectAssistantCode(StringBuilder builder, SourceGenerateContext context, AttributeArgumentSyntax? injectKeyArg, string typeName, string injectVarName)
     {
         if (injectKeyArg != null)
         {

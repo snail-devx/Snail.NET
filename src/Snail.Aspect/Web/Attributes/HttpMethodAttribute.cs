@@ -18,5 +18,5 @@ public sealed class HttpMethodAttribute : Attribute
     /// <summary>
     /// 请求Url地址，目标服务器<see cref="HttpAspectAttribute"/>
     /// </summary>
-    public string Url { set; get; }
+    public required string Url { set; get; }
 }

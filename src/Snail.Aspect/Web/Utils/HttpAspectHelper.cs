@@ -19,7 +19,7 @@ public static class HttpAspectHelper
     /// <param name="parameters"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public async static Task<string> AnalysisHttpUrl(IHttpAnalyzer analyzer, string url, IDictionary<string, object> parameters)
+    public async static Task<string> AnalysisHttpUrl(IHttpAnalyzer analyzer, string url, IDictionary<string, object?>? parameters)
     {
         if (analyzer != null)
         {

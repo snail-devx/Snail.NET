@@ -50,7 +50,7 @@ internal readonly struct MethodGenerateOptions
     /// <para>1、若为异步方法，则为Task的泛型参数值，如<see cref="Task{String}"/>，则是<see cref="string"/> </para>
     /// <para>2、若为null，则为void方法 </para>
     /// </summary>
-    public TypeSyntax ReturnType { get; }
+    public TypeSyntax? ReturnType { get; }
 
     /// <summary>
     /// 是否是显示接口实现方法
@@ -112,7 +112,7 @@ internal readonly struct MethodGenerateOptions
         context.AddNamespaces(ns);
 
         //  显示接口实现方法
-        ExplicitInterface = context.Semantic.GetDeclaredSymbol(method).ExplicitInterfaceImplementations.Length > 0;
+        ExplicitInterface = context.Semantic.GetDeclaredSymbol(method)!.ExplicitInterfaceImplementations.Length > 0;
     }
     #endregion
 }

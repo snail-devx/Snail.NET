@@ -42,19 +42,19 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 类型名：<see cref="CacheAspectAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_CacheAspectAttribute = typeof(CacheAspectAttribute).FullName;
+    protected static readonly string TYPENAME_CacheAspectAttribute = typeof(CacheAspectAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="CacheMethodAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_CacheMethodAttribute = typeof(CacheMethodAttribute).FullName;
+    protected static readonly string TYPENAME_CacheMethodAttribute = typeof(CacheMethodAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="CacheKeyAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_CacheKeyAttribute = typeof(CacheKeyAttribute).FullName;
+    protected static readonly string TYPENAME_CacheKeyAttribute = typeof(CacheKeyAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="ICacheAnalyzer"/>
     /// </summary>
-    protected static readonly string TYPENAME_ICacheAnalyzer = typeof(ICacheAnalyzer).FullName;
+    protected static readonly string TYPENAME_ICacheAnalyzer = typeof(ICacheAnalyzer).FullName!;
     /// <summary>
     /// 类型名：IIdentity
     /// </summary>
@@ -66,7 +66,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     protected static readonly IReadOnlyList<string> FixedNamespaces =
     [
         //  全局依赖的
-        typeof(Task).Namespace,//                           System
+        typeof(Task).Namespace!,//                           System
         "Snail.Utilities.Common.Utils",//                   typeof(ObjectHelper).Namespace,           
         "Snail.Utilities.Collections.Utils",//              typeof(ListHelper).Namespace,//
         "Snail.Utilities.Common.Extensions",
@@ -90,9 +90,9 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Abstractions.Distribution.Extensions",//     typeof(CacherExtensions).Namespace,//       
         "Snail.Abstractions.Identity.Extensions",        
         //  缓存 切面编程相关命名空间
-        typeof(CacheAspectAttribute).Namespace,
-        typeof(CacheActionType).Namespace,
-        typeof(ICacheAnalyzer).Namespace,
+        typeof(CacheAspectAttribute).Namespace!,
+        typeof(CacheActionType).Namespace!,
+        typeof(ICacheAnalyzer).Namespace!,
         $"static {typeof(CacheAspectHelper).FullName}",
     ];
 
@@ -103,7 +103,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 缓存分析器参数：<see cref="ICacheAnalyzer"/>分析缓存相关Key
     /// </summary>
-    protected readonly AttributeArgumentSyntax AnalyzerArg;
+    protected readonly AttributeArgumentSyntax? AnalyzerArg;
     /// <summary>
     /// 是否需要【辅助】代码
     /// </summary>
@@ -129,12 +129,12 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="node"></param>
     /// <param name="semantic"></param>
     /// <returns></returns>
-    public static ITypeDeclarationMiddleware Build(TypeDeclarationSyntax node, SemanticModel semantic)
+    public static ITypeDeclarationMiddleware? Build(TypeDeclarationSyntax node, SemanticModel semantic)
     {
         //  仅针对“有【CacheAspectAttribute】属性标记的interface和class”做处理
         if (node is InterfaceDeclarationSyntax || node is ClassDeclarationSyntax)
         {
-            AttributeSyntax attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_CacheAspectAttribute);
+            AttributeSyntax? attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_CacheAspectAttribute);
             return attr != null
                 ? new CacheSyntaxMiddleware(attr)
                 : null;
@@ -165,12 +165,12 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="next">下一步操作；若为null则不用继续执行，返回即可</param>
     /// <remarks>若不符合自身业务逻辑</remarks>
     /// <returns>代码字符串</returns>
-    string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
+    string? ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next)
     {
         //  1、分析方法的缓存配置
         if (AnalysisCacheOptions(method, context, out CacheMethodOptions cacheOptions) == false)
         {
-            string nextCode = next?.Invoke(method, context, options);
+            string? nextCode = next?.Invoke(method, context, options);
             return nextCode;
         }
         //  2、实现前的基础验证：只要有标记属性标签，都算实现了；内部再判断是否能够进行实现
@@ -191,7 +191,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         }
         //  3、进行缓存请求相关代码实现：将next代码构建为本地方法
         _needAssistantCode = true;
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         //      辅助代码：masterKey和dataKeyPrefix处理
         cacheOptions.DeconstructKey(out string masterKey, out string dataKeyPrefix);
         if (cacheOptions.MasterKey != null)
@@ -223,7 +223,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             }
         }
         //      业务代码
-        string code = null;
+        string? code = null;
         if (cacheOptions.IsValid == true)
         {
             switch (cacheOptions.Action)
@@ -263,7 +263,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
+    string? ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
     {
         /** 生成的辅助代码 样例
 
@@ -278,7 +278,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         if (_needAssistantCode == true)
         {
             context.AddNamespaces(FixedNamespaces);
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append(context.LinePrefix).AppendLine("//  生成[CacheAspect]辅助代码;");
             //  生成 ICacher 注入代码；加入必填验证
             string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
@@ -308,8 +308,8 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     private static bool AnalysisCacheOptions(MethodDeclarationSyntax method, SourceGenerateContext context, out CacheMethodOptions cacheOptions)
     {
         //  分析CacheMethodAttribute：先分析 CacheMethodAttribute；分析不出来，则尝试 CacheMethodAttribute<T>
-        ITypeSymbol genericDataType = null;
-        AttributeSyntax attr = method.AttributeLists.GetAttribute(context.Semantic, symbol =>
+        ITypeSymbol? genericDataType = null;
+        AttributeSyntax? attr = method.AttributeLists.GetAttribute(context.Semantic, symbol =>
         {
             string typeName = $"{symbol.ContainingType}";
             if (typeName == TYPENAME_CacheMethodAttribute)
@@ -330,7 +330,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             return false;
         }
         //  分析泛型参数的具体类型Syntax节点
-        SyntaxNode dataTypeNode = genericDataType != null
+        SyntaxNode? dataTypeNode = genericDataType != null
             ? attr.ChildNodes().OfType<GenericNameSyntax>().First().TypeArgumentList.Arguments[0]
             : null;
         cacheOptions = new CacheMethodOptions(attr, context, dataTypeNode, genericDataType);
@@ -350,7 +350,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="next">是否有next中间件生成的代码，有则可以执行<see cref="NAME_LocalMethod"/>方法，得到next代码执行结果</param>
     /// <param name="needSaveCache">是否需要进行新数据的Save缓存操作</param>
     /// <returns></returns>
-    private static string GenerateLoadCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, MethodCodeDelegate next, bool needSaveCache)
+    private static string? GenerateLoadCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, MethodCodeDelegate? next, bool needSaveCache)
     {
         //  1、准备工作：分析后面会用到的一些参数
         ReturnTypeOptions rtOptions; CacheKeyOptions keyOptions;
@@ -372,7 +372,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             }
         }
         //  2、生成缓存加载方法
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         string oldLinePrefix = context.LinePrefix;
         //      需确保key有值才执行
         {
@@ -383,7 +383,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         }
         //      生成具体逻辑代码
         {
-            string nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod);
+            string? nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod);
             bool hasNextRunCode = string.IsNullOrEmpty(nextRunCode) == false;
             //      加载缓存；并将已有数据从key中剔除
             GenerateLoadCodeByCache(builder, context, cacheOptions, keyOptions, hasNextRunCode);
@@ -434,7 +434,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     {
         cacheOptions.DeconstructType(out string cacheType, out string dataType);
         string key = keyOptions.VarName;
-        string cacheDataKey = null;
+        string? cacheDataKey = null;
         if (cacheOptions.DataKeyPrefix != null)
         {
             cacheDataKey = context.GetVarName($"{key}ToCache");
@@ -485,7 +485,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="keyOptions"></param>
     private static void GenerateLoadCodeByMerge(StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, ReturnTypeOptions rtOptions, CacheMethodOptions cacheOptions, CacheKeyOptions keyOptions)
     {
-        string bagDataType = rtOptions.GetDataBagTypeName(), multiDataType = rtOptions.GetMultiTypeName();
+        string? bagDataType = rtOptions.GetDataBagTypeName(), multiDataType = rtOptions.GetMultiTypeName();
         cacheOptions.DeconstructType(out _, out _);
         string linePrefix = $"{context.LinePrefix}\t";
         //  合并数据：基于不同数据类型，做区分处理
@@ -547,7 +547,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="cacheOptions"></param>
     /// <param name="next"></param>
     /// <returns></returns>
-    private static string GenerateSaveCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, MethodCodeDelegate next)
+    private static string? GenerateSaveCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, MethodCodeDelegate? next)
     {
         //  1、基础验证：确保执行下一步时，不用关心数据有效性等
         ReturnTypeOptions rtOptions;
@@ -566,8 +566,8 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             CheckMethodParameters(method, context, mustCacheKey: false, out _);
         }
         //  2、执行nextCode；无代码时，给出空实现
-        StringBuilder builder = new StringBuilder();
-        string nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod);
+        StringBuilder builder = new();
+        string? nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod);
         if (string.IsNullOrEmpty(nextRunCode) == false)
         {
             //  接收nextRunCode值给cacheNextData，然后保存缓存，
@@ -610,12 +610,12 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         //  参数准备
         cacheOptions.DeconstructType(out string cacheType, out string dataType);
         //      若返回值为数据包，则需要转成实际保存对象：cacheBagData
-        string saveDataVar = null;
+        string? saveDataVar = null;
         {
             if (rtOptions.IsDataBag == true)
             {
                 //  这里需要处理一下，得到DataBag做强转，转换成 IDataBag<>
-                string bagTypeName = rtOptions.GetDataBagTypeName();
+                string? bagTypeName = rtOptions.GetDataBagTypeName();
                 builder.Append(context.LinePrefix).AppendLine($"var cacheBagData = (({bagTypeName})cacheNextData)?.GetData();");
                 saveDataVar = "cacheBagData";
             }
@@ -628,7 +628,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
                 )
                .Append(context.LinePrefix).AppendLine("{");
         //      若存在DataKeyPrefix，则将缓存转换成字段
-        string dataCacheKeyMapVar = null;
+        string? dataCacheKeyMapVar = null;
         if (cacheOptions.DataKeyPrefix != null)
         {
             dataCacheKeyMapVar = context.GetVarName("cacheDataMap");
@@ -636,7 +636,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
                    .AppendLine($"var {dataCacheKeyMapVar} = BuildCacheMap<{dataType}>({saveDataVar}, cld => (cld as IIdentity).Id, {VAR_DataKeyPrefix});");
         }
         //      基于缓存Type，生成保存代码
-        string runCode = null;
+        string? runCode = null;
         switch (cacheOptions.Type)
         {
             case CacheType.ObjectCache:
@@ -668,7 +668,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="cacheOptions"></param>
     /// <param name="next"></param>
     /// <returns></returns>
-    private static string GenerateDeleteCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, MethodCodeDelegate next)
+    private static string? GenerateDeleteCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, MethodCodeDelegate? next)
     {
         //  1、准备工作：分析方法参数，得到缓存Key值；并确认方法参数无out、int等参数
         if (CheckMethodParameters(method, context, mustCacheKey: true, out CacheKeyOptions keyOptions) == false)
@@ -676,8 +676,8 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             return null;
         }
         //  2、执行NextCode代码，获取返回数据，使用 cacheNextData 接收
-        StringBuilder builder = new StringBuilder();
-        string nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod);
+        StringBuilder builder = new();
+        string? nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod);
         if (string.IsNullOrEmpty(nextRunCode) == false)
         {
             _ = options.ReturnType == null
@@ -734,22 +734,22 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <returns>返回值信息选项；为null则默认，返回值分析则默认走<see cref="CacheMethodOptions.DataType"/></returns>
     private static ReturnTypeOptions CheckCacheReturnDataType(SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, bool onlyClass = true)
     {
-        ReturnTypeOptions rtOptions = new ReturnTypeOptions(context, options, onlyClass);
+        ReturnTypeOptions rtOptions = new(context, options, onlyClass);
         //  1、【缓存DataType】需实现【IIdentity】；否则无法分析缓存数据Id；这里在Save时，会有一个情况不用实现（returnType为字典时），但先不考虑，简化一下
         if (cacheOptions.DataTypeSymbol.IsIIdentity() == false)
         {
             string msg = $"{cacheOptions.DataTypeSymbol.Name}需要实现接口[{TYPENAME_IIdentity}]；否则无法分析缓存数据Id";
-            context.ReportError(msg, cacheOptions.DataType);
+            context.ReportError(msg, cacheOptions.DataType!);
             return rtOptions;
         }
         //  2、判断返回值的实际缓存类型和【缓存DataType】的匹配程度；不匹配给出提示
         /*  简化规则：二者类型一致，不考虑基类、继承的情况；在Save时，ReturnType可为基类；但Load时ReturnType不能为基类，相互矛盾，简化一下*/
         if (rtOptions.DataTypeSymbol != null)
         {
-            if (rtOptions.IsDictionary == true && rtOptions.KeyType.IsString() == false)
+            if (rtOptions.IsDictionary == true && rtOptions.KeyType!.IsString() == false)
             {
                 string msg = $"{rtOptions.DataTypeSymbol.Name}为IDictionary<TKey, TValue> 时，Key必须为string，否则无法进行缓存数据Key处理";
-                context.ReportError(msg, options.ReturnType);
+                context.ReportError(msg, options.ReturnType!);
             }
             //  3、类型不匹配，给出错误提示：兼容一下 TestCache? 可空类型的情况，但不是很准确，也不考虑 IList<TestCache?>的情况
             bool bValue = $"{rtOptions.DataTypeSymbol}" == $"{cacheOptions.DataTypeSymbol}"
@@ -760,7 +760,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
                 dataType = $"{dataType}/IList<{dataType}>/{dataType}[]/IDictionary<string,{dataType}>";
                 dataType = $"{dataType}/Snail.Abstractions.Common.Interfaces.IDataBag<T>(T为{dataType})";
                 string msg = $"返回值{options.ReturnType}分析出的缓存数据类型{rtOptions.DataTypeSymbol}不符合[CacheMethod.DataType]类型{cacheOptions.DataTypeSymbol.Name}要求：{dataType}";
-                context.ReportError(msg, options.ReturnType);
+                context.ReportError(msg, options.ReturnType!);
             }
         }
 

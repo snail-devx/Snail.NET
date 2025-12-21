@@ -31,18 +31,18 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 类型名：<see cref="MethodAspectAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_MethodAspectAttribute = typeof(MethodAspectAttribute).FullName;
+    protected static readonly string TYPENAME_MethodAspectAttribute = typeof(MethodAspectAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="IMethodRunHandle"/>
     /// </summary>
-    protected static readonly string TYPENAME_IMethodRunHandle = typeof(IMethodRunHandle).FullName;
+    protected static readonly string TYPENAME_IMethodRunHandle = typeof(IMethodRunHandle).FullName!;
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
     protected static readonly IReadOnlyList<string> FixedNamespaces =
     [
         //  全局依赖的
-        typeof(Task).Namespace,//                           System
+        typeof(Task).Namespace!,//                           System
         "Snail.Utilities.Common",//                         
         "Snail.Utilities.Common.Utils",//                   typeof(ObjectHelper).Namespace,           
         "Snail.Utilities.Collections.Utils",//              typeof(ListHelper).Namespace,//
@@ -50,10 +50,10 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Utilities.Collections.Extensions",
         "static Snail.Utilities.Common.Utils.ObjectHelper",
         //  切面编程相关命名空间
-        typeof(MethodAspectAttribute).Namespace,
-        typeof(IMethodRunHandle).Namespace,
-        typeof(MethodRunHandleExtensions).Namespace,
-        typeof(MethodRunContext).Namespace,
+        typeof(MethodAspectAttribute).Namespace!,
+        typeof(IMethodRunHandle).Namespace!,
+        typeof(MethodRunHandleExtensions).Namespace!,
+        typeof(MethodRunContext).Namespace!,
     ];
 
     /// <summary>
@@ -63,7 +63,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 缓存分析器参数：<see cref="IMethodRunHandle"/>分析缓存相关Key
     /// </summary>
-    protected readonly AttributeArgumentSyntax RunHandleArg;
+    protected readonly AttributeArgumentSyntax? RunHandleArg;
     /// <summary>
     /// 是否需要【辅助】代码
     /// </summary>
@@ -89,11 +89,11 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="node"></param>
     /// <param name="semantic"></param>
     /// <returns></returns>
-    public static ITypeDeclarationMiddleware Build(TypeDeclarationSyntax node, SemanticModel semantic)
+    public static ITypeDeclarationMiddleware? Build(TypeDeclarationSyntax node, SemanticModel semantic)
     {
         if (node is InterfaceDeclarationSyntax || node is ClassDeclarationSyntax)
         {
-            AttributeSyntax attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_MethodAspectAttribute);
+            AttributeSyntax? attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_MethodAspectAttribute);
             return attr != null
                 ? new MethodSyntaxMiddleware(attr)
                 : null;
@@ -129,7 +129,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="next">下一步操作；若为null则不用继续执行，返回即可</param>
     /// <remarks>若不符合自身业务逻辑</remarks>
     /// <returns>代码字符串</returns>
-    string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
+    string? ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next)
     {
         //  是否能够重写；无法重写的方法直接忽略掉
         {
@@ -145,7 +145,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
             }
         }
         //  分析下一步执行代码；若无具体代码逻辑，则报错提示出来
-        string nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod, simpleBaseCall: false);
+        string? nextRunCode = GenerateRunCodeWithNext(method, context, options, next, NAME_LocalMethod, simpleBaseCall: false);
         if (string.IsNullOrEmpty(nextRunCode) == true)
         {
             context.ReportError
@@ -156,7 +156,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
             return null;
         }
         //  生成面向切面的相关代码
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         context.Generated = true;
         _needAssistantCode = true;
         //      初始化context
@@ -168,7 +168,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         //      生成执行代码：需要区分是否有返回值；配合 IMethodRunHandle 扩展方法，简化代码逻辑；替换下面的旧代码
         builder.Append(context.LinePrefix)
                .Append(options.ReturnType == null ? string.Empty : $"return ")
-               .Append(options.IsAsync ? $"await _aspectRunHandle.OnRunAsync" : $"_aspectRunHandle.OnRun")
+               .Append(options.IsAsync ? $"await _aspectRunHandle!.OnRunAsync" : $"_aspectRunHandle.OnRun")
                .Append(options.ReturnType == null ? string.Empty : $"<{options.ReturnType}>")
                .Append('(').Append(NAME_LocalMethod).AppendLine(", mrhContext);");
 
@@ -181,7 +181,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
+    string? ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
     {
         /** 生成的辅助代码样例：
 
@@ -193,7 +193,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         {
             context.AddNamespaces(FixedNamespaces);
             //  直接生成，在【PrepareGenerate】判断了RunHandleArg必须存在且有效
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append(context.LinePrefix).AppendLine("//  生成[MethodAspect]辅助代码;");
             GenerateInjectAssistantCode(builder, context, RunHandleArg, nameof(IMethodRunHandle), "_aspectRunHandle");
             context.AddRequiredField("_aspectRunHandle", $"_aspectRunHandle为null，无法进行Aspect操作");

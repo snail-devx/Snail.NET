@@ -20,7 +20,7 @@ internal readonly struct ReturnTypeOptions
     /// <para>2、<see cref="IsList"/>为true时， List{T}的T类型 </para>
     /// <para>、、、 </para>
     /// </summary>
-    public ITypeSymbol DataTypeSymbol { get; }
+    public ITypeSymbol? DataTypeSymbol { get; }
 
     /// <summary>
     /// 是否是数据包
@@ -38,7 +38,7 @@ internal readonly struct ReturnTypeOptions
     /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
     /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
     /// </summary>
-    public ITypeSymbol MultiTypeSymbol { get; }
+    public ITypeSymbol? MultiTypeSymbol { get; }
 
     /// <summary>
     /// 是否是数组
@@ -63,7 +63,7 @@ internal readonly struct ReturnTypeOptions
     /// 字典Key类型
     /// <para>1、<see cref="IsDictionary"/>为true时，生效 </para>
     /// </summary>
-    public ITypeSymbol KeyType { get; }
+    public ITypeSymbol? KeyType { get; }
     #endregion
 
     #region 构造方法
@@ -92,9 +92,9 @@ internal readonly struct ReturnTypeOptions
             //  本地方法：基于类型的Kind值检测合法性；需要注意 可能存在 TestCache[]；也不是class，但允许使用，这里先不考虑
             void CheckReturnTypeByKind(ITypeSymbol checkType)
             {
-                if (checkType.IsArray(out ITypeSymbol tmpType) == true)
+                if (checkType.IsArray(out ITypeSymbol? tmpType) == true)
                 {
-                    checkType = tmpType;
+                    checkType = tmpType!;
                 }
                 if (onlyClass == true && checkType.IsClass() == false)
                 {
@@ -104,16 +104,16 @@ internal readonly struct ReturnTypeOptions
 
             //  遍历分析自身+实现接口 分析：若为数据包，则解包分析
             DataTypeSymbol = context.Semantic.GetTypeInfo(options.ReturnType).Type;
-            CheckReturnTypeByKind(DataTypeSymbol);
+            CheckReturnTypeByKind(DataTypeSymbol!);
             //      数据包对象，则需要解包操作
-            if (DataTypeSymbol.IsDataBag(out ITypeSymbol realType, inherit: true) == true)
+            if (DataTypeSymbol!.IsDataBag(out ITypeSymbol? realType, inherit: true) == true)
             {
                 IsDataBag = true;
-                CheckReturnTypeByKind(realType);
+                CheckReturnTypeByKind(realType!);
                 DataTypeSymbol = realType;
             }
             //      整理遍历做分析自身+实际实现接口
-            List<ITypeSymbol> types = [DataTypeSymbol, .. DataTypeSymbol.AllInterfaces];
+            List<ITypeSymbol> types = [DataTypeSymbol!, .. DataTypeSymbol!.AllInterfaces];
             realType = null;
             foreach (var ti in types)
             {
@@ -132,7 +132,7 @@ internal readonly struct ReturnTypeOptions
                     break;
                 }
                 //  Dictionary字典
-                if (ti.IsDictionary(out ITypeSymbol keyType, out realType, inherit: false) == true)
+                if (ti.IsDictionary(out ITypeSymbol? keyType, out realType, inherit: false) == true)
                 {
                     IsDictionary = true;
                     MultiTypeSymbol = DataTypeSymbol;
@@ -156,13 +156,13 @@ internal readonly struct ReturnTypeOptions
     /// 获取数据包类型名称：返回IDataBag{具体类型}
     /// </summary>
     /// <returns></returns>
-    public string GetDataBagTypeName()
-        => IsDataBag ? $"IDataBag<{GetSymbolName(MultiTypeSymbol ?? DataTypeSymbol)}>" : null;
+    public string? GetDataBagTypeName()
+        => IsDataBag ? $"IDataBag<{GetSymbolName(MultiTypeSymbol ?? DataTypeSymbol!)}>" : null;
     /// <summary>
     /// 获取多类型名称；如IList{具体类型}
     /// </summary>
     /// <returns></returns>
-    public string GetMultiTypeName()
+    public string? GetMultiTypeName()
         => MultiTypeSymbol != null ? GetSymbolName(MultiTypeSymbol) : null;
     #endregion
 
@@ -176,7 +176,7 @@ internal readonly struct ReturnTypeOptions
     {
         /* 还需要支持对?的判断逻辑 */
 
-        StringBuilder code = new StringBuilder();
+        StringBuilder code = new();
         switch (type.Name)
         {
             case "String":

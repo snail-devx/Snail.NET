@@ -20,22 +20,22 @@ public sealed class LockAspectAttribute : Attribute
     /// <summary>
     /// 缓存服务器所在工作空间Key值
     /// </summary>
-    public string Workspace { set; get; }
+    public string? Workspace { set; get; }
 
     /// <summary>
     /// 缓存服务器类型；用于对多个服务器做分组用
     /// <para>1、无分组的服务器取null即可 </para>
     /// </summary>
-    public string Type { set; get; }
+    public string? Type { set; get; }
 
     /// <summary>
     /// 缓存服务器编码
     /// </summary>
-    public string Code { set; get; }
+    public required string Code { set; get; }
 
     /// <summary>
     /// 并发锁分析器<see cref="ILockAnalyzer"/>的依赖注入Key值
     /// </summary>
     /// <remarks>不传入则采用默认的分析器</remarks>
-    public string Analyzer { set; get; }
+    public string? Analyzer { set; get; }
 }

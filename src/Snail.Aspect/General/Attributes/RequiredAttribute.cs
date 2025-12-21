@@ -17,7 +17,7 @@ public sealed class RequiredAttribute : Attribute
     /// 构造方法
     /// </summary>
     /// <param name="message">验证失败时的错误消息</param>
-    public RequiredAttribute(string message = null)
+    public RequiredAttribute(string? message = null)
     {
     }
 }

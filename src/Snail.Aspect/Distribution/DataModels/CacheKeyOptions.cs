@@ -52,8 +52,8 @@ internal readonly struct CacheKeyOptions
         }
         //  分析赋值
         {
-            ITypeSymbol type = context.Semantic.GetTypeInfo(parameter.Type).Type;
-            if (type.IsArray(out ITypeSymbol realType) == true)
+            ITypeSymbol type = context.Semantic.GetTypeInfo(parameter.Type!).Type!;
+            if (type.IsArray(out ITypeSymbol? realType) == true)
             {
                 IsArray = true;
             }

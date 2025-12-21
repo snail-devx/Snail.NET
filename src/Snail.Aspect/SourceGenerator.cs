@@ -47,7 +47,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
     void IIncrementalGenerator.Initialize(IncrementalGeneratorInitializationContext context)
     {
         //  语法提供程序
-        var providers = new List<IncrementalValueProvider<ImmutableArray<ISyntaxProxy>>>()
+        var providers = new List<IncrementalValueProvider<ImmutableArray<ISyntaxProxy?>>>()
         {
             //  HTTP语法代理器提供程序：HttpAttribute标记接口，自动生成实现类
             //HttpSyntaxProxy.BuildProvider(context).Collect(),//合并到ClassInterfaceSyntaxProxy处理
@@ -59,9 +59,9 @@ public sealed class SourceGenerator : IIncrementalGenerator
         {
             context.RegisterSourceOutput(provider, (ctx, proxies) =>
             {
-                foreach (ISyntaxProxy proxy in proxies.Where(px => px != null))
+                foreach (ISyntaxProxy proxy in proxies.Where(px => px != null).Select(px => px!))
                 {
-                    string code = proxy.GenerateCode(ctx);
+                    string? code = proxy.GenerateCode(ctx);
                     //  Key值为空、null，则不生成源码；生辰源码时加上时间戳和程序集信息，方便查问题
                     if (string.IsNullOrEmpty(proxy.Key) == false)
                     {

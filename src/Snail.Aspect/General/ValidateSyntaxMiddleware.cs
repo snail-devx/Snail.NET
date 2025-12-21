@@ -24,7 +24,7 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 类型名：<see cref="ValidateAspectAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_ValidateAspectAttribute = typeof(ValidateAspectAttribute).FullName;
+    protected static readonly string TYPENAME_ValidateAspectAttribute = typeof(ValidateAspectAttribute).FullName!;
     /// <summary>
     /// 类型名：<see cref="RequiredAttribute"/>
     /// </summary>
@@ -48,8 +48,8 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
         "static Snail.Utilities.Collections.Utils.ListHelper",
         //  验证 切面编程相关命名空间
         "Snail.Abstractions.Common.Interfaces",
-        typeof(ValidateAspectAttribute).Namespace,
-        typeof(RequiredAttribute).Namespace,
+        typeof(ValidateAspectAttribute).Namespace!,
+        typeof(RequiredAttribute).Namespace!,
     ];
 
     /// <summary>
@@ -74,12 +74,12 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="node"></param>
     /// <param name="semantic"></param>
     /// <returns></returns>
-    public static ITypeDeclarationMiddleware Build(TypeDeclarationSyntax node, SemanticModel semantic)
+    public static ITypeDeclarationMiddleware? Build(TypeDeclarationSyntax node, SemanticModel semantic)
     {
         //  仅针对“有【ValidateAspectAttribute】属性标记的interface和class”做处理
         if (node is InterfaceDeclarationSyntax || node is ClassDeclarationSyntax)
         {
-            AttributeSyntax attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_ValidateAspectAttribute);
+            AttributeSyntax? attr = node.AttributeLists.GetAttribute(semantic, TYPENAME_ValidateAspectAttribute);
             return attr != null
                 ? new ValidateSyntaxMiddleware()
                 : null;
@@ -106,21 +106,21 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="next">下一步操作；若为null则不用继续执行，返回即可</param>
     /// <remarks>若不符合自身业务逻辑</remarks>
     /// <returns>代码字符串</returns>
-    string ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate next)
+    string? ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next)
     {
         //  判断是否有验证参数，有则生成
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         foreach (ParameterSyntax parameter in method.ParameterList.Parameters)
         {
             //  生成验证代码
             bool bValue = false;
             string parameterName = parameter.Identifier.Text;
-            ITypeSymbol type = context.Semantic.GetTypeInfo(parameter.Type).Type;
+            ITypeSymbol type = context.Semantic.GetTypeInfo(parameter.Type!).Type!;
             bool hasRequired = false;
             //      属性验证
             foreach (var attr in parameter.AttributeLists.GetAttributes())
             {
-                switch ($"{context.Semantic.GetSymbolInfo(attr).Symbol.ContainingType}")
+                switch ($"{context.Semantic.GetSymbolInfo(attr).Symbol!.ContainingType}")
                 {
                     //  Snail.Aspect.General.Attributes.RequiredAttribute
                     case TYPENAME_RequiredAttribute:
@@ -158,7 +158,7 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
         }
         // context.ReportError($"{builder}", method);
         //  执行next逻辑，合并代码返回
-        string nextCode = next?.Invoke(method, context, options);
+        string? nextCode = next?.Invoke(method, context, options);
         if (nextCode?.Length > 0)
         {
             builder.Append(nextCode);
@@ -173,7 +173,7 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    string ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
+    string? ITypeDeclarationMiddleware.GenerateAssistantCode(SourceGenerateContext context)
     {
         if (_needAssistantCode == true)
         {

@@ -18,5 +18,5 @@ internal interface ISyntaxProxy
     /// </summary>
     /// <param name="context"></param>
     /// <returns>生成好的代码</returns>
-    string GenerateCode(SourceProductionContext context);
+    string? GenerateCode(SourceProductionContext context);
 }
