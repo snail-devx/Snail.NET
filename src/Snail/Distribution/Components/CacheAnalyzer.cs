@@ -17,7 +17,7 @@ public class CacheAnalyzer : ICacheAnalyzer
     /// <param name="parameters">外部传入的已有参数字典；key为参数名、value为具体参数值</param>
     string? ICacheAnalyzer.AnalysisMasterKey(string? masterKey, IDictionary<string, object?>? parameters)
     {
-        return ParameterAnalyzer.DEFAULT.Resolve(masterKey, parameters)!;
+        return ParameterAnalyzer.DEFAULT.Analysis(masterKey, parameters)!;
     }
     /// <summary>
     /// 分析数据key值前缀
@@ -26,7 +26,7 @@ public class CacheAnalyzer : ICacheAnalyzer
     /// <param name="parameters">外部传入的已有参数字典；key为参数名、value为具体参数值</param>
     string? ICacheAnalyzer.AnalysisDataKeyPrefix(string? dataKeyPrefix, IDictionary<string, object?>? parameters)
     {
-        return ParameterAnalyzer.DEFAULT.Resolve(dataKeyPrefix, parameters)!;
+        return ParameterAnalyzer.DEFAULT.Analysis(dataKeyPrefix, parameters)!;
     }
     #endregion
 }

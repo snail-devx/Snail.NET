@@ -20,8 +20,8 @@ public class LockAnalyzer : ILockAnalyzer
     /// <param name="parameters">外部传入的已有参数字典；key为参数名、value为具体参数值</param>
     void ILockAnalyzer.Analysis(ref string lockKey, ref string lockValue, IDictionary<string, object?>? parameters)
     {
-        lockKey = ParameterAnalyzer.DEFAULT.Resolve(lockKey, parameters)!;
-        lockValue = ParameterAnalyzer.DEFAULT.Resolve(lockValue, parameters)!;
+        lockKey = ParameterAnalyzer.DEFAULT.Analysis(lockKey, parameters)!;
+        lockValue = ParameterAnalyzer.DEFAULT.Analysis(lockValue, parameters)!;
     }
     #endregion
 }

@@ -8,13 +8,20 @@ namespace Snail.Common.Components;
 /// <para>2、如 {name} 将被识别为name参数；然后从传入的name参数值替换字符串中的{name} </para>
 /// <para>3、支持外部指定 参数识别 规则，默认为 {parameter} </para>
 /// </summary>
-public class ParameterAnalyzer
+public partial class ParameterAnalyzer
 {
     #region 属性变量
     /// <summary>
     /// 默认的参数解析器
     /// </summary>
     public static readonly ParameterAnalyzer DEFAULT = new();
+
+    /// <summary>
+    /// 正则表达式：默认参数规则
+    /// <para>1、使用<see cref="GeneratedRegexAttribute"/>在生成节点编译好，避免运行时编译和JIT，从而优化性能</para>
+    /// </summary>
+    [GeneratedRegex("\\{(.+?)\\}", RegexOptions.IgnoreCase)]
+    private static partial Regex REGEX_DefaultRule { get; }
 
     /// <summary>
     /// 参数匹配规则
@@ -28,7 +35,7 @@ public class ParameterAnalyzer
     /// </summary>
     public ParameterAnalyzer()
     {
-        Rule = new Regex("\\{(.+?)\\}", RegexOptions.IgnoreCase);
+        Rule = REGEX_DefaultRule;
     }
     /// <summary>
     /// 构造方法：可指定参数匹配规则
@@ -42,23 +49,13 @@ public class ParameterAnalyzer
 
     #region 公共方法
     /// <summary>
-    /// 分析参数：获取<paramref name="str"/>中的参数信息
-    /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
-    public IList<string>? Analysis(string str)
-    {
-        return string.IsNullOrEmpty(str) == false
-            ? Rule.Matches(str).Select(match => match.Groups[1].Value).Distinct().ToList()
-            : null;
-    }
-    /// <summary>
-    /// 解析参数：将<paramref name="str"/>中的参数使用<paramref name="parameters"/>中值替换
+    /// 解析参数
+    /// <para>1、将<paramref name="str"/>中的参数使用<paramref name="parameters"/>中值替换</para>
     /// </summary>
     /// <param name="str"></param>
     /// <param name="parameters">参数字典；key为参数名，value为参数值</param>
     /// <returns></returns>
-    public string? Resolve(string? str, IDictionary<string, object?>? parameters)
+    public string? Analysis(string? str, IDictionary<string, object?>? parameters)
     {
         if (string.IsNullOrEmpty(str) == false)
         {

@@ -24,7 +24,7 @@ public class HttpAnalyzer : IHttpAnalyzer
             await Task.Yield();
         }
 
-        return ParameterAnalyzer.DEFAULT.Resolve(url, parameters)!;
+        return ParameterAnalyzer.DEFAULT.Analysis(url, parameters)!;
     }
     #endregion
 }

@@ -52,6 +52,7 @@ public static class ApplicationExtensions
             app.Setting.Use(isProject, rsCode, user);
             return app;
         }
+
         /// <summary>
         /// 获取应用程序配置的环境变量值
         /// <para>1、内置使用<see cref="ISettingManager.GetEnv(in string)"/>方法完成取值 </para>
@@ -60,6 +61,19 @@ public static class ApplicationExtensions
         /// <param name="name">环境变量名称</param>
         /// <returns>配置值；若不存在返回null</returns>
         public string? GetEnv(string name) => app.Setting.GetEnv(name);
+        /// <summary>
+        /// 解析输入字符串中的环境变量
+        /// <para>1、将环境变量，采用具体的值替换，内部使用<see cref="ISettingManager.GetEnv(in string)"/>取环境变量值</para>
+        /// <para>2、环境变量格式“${环境变量名称}”；如“my name is ${user}”，会将"${user}"替换成 "user" 环境变量值</para>
+        /// <para>3、环境变量名称，区分大小写；并确保存在，否则解析时会报错；</para>
+        /// </summary>
+        /// <param name="input"></param>
+        /// <exception cref="ApplicationException">环境变量不存在时</exception>
+        /// <remarks>备注事项：
+        /// <para>1、内部使用<see cref="SettingManagerExtensions.AnalysisEnvVars(ISettingManager, in string)"/>实现，详细规则参照此方法</para>
+        /// </remarks>
+        /// <returns>解析后的字符串</returns>
+        public string AnalysisEnvVars(in string input) => app.Setting.AnalysisEnvVars(input);
         #endregion
     }
 }
