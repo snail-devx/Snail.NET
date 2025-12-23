@@ -20,7 +20,7 @@ public static partial class SettingManagerExtensions
     extension(ISettingManager manager)
     {
         /// <summary>
-        /// 解析输入字符串中的环境变量
+        /// 解析输入字符串中的变量
         /// <para>1、将环境变量，采用具体的值替换，内部使用<see cref="ISettingManager.GetEnv(in string)"/>取环境变量值</para>
         /// <para>2、环境变量格式“${环境变量名称}”；如“my name is ${user}”，会将"${user}"替换成 "user" 环境变量值</para>
         /// <para>3、环境变量名称，区分大小写；并确保存在，否则解析时会报错；</para>
@@ -28,7 +28,7 @@ public static partial class SettingManagerExtensions
         /// <param name="input"></param>
         /// <exception cref="ApplicationException">环境变量不存在时</exception>
         /// <returns>解析后的字符串</returns>
-        public string AnalysisEnvVars(in string input)
+        public string AnalysisVars(in string input)
         {
             if (IsNullOrEmpty(input) == false)
             {

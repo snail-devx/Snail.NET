@@ -11,7 +11,9 @@ namespace Snail.Abstractions.Web;
 public interface IServerManager
 {
     /// <summary>
-    /// 注册服务器：确保“Workspace+Type+Code”唯一，重复注册以第一个为准
+    /// 注册服务器
+    /// <para>1、确保“Workspace+Type+Code”唯一</para>
+    /// <para>2、重复注册以最后一个为准</para>
     /// </summary>
     /// <param name="servers">服务器信息</param>
     /// <returns>管理器自身，方便链式调用</returns>

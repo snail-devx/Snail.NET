@@ -79,7 +79,7 @@ public static class DictionaryExtensions
         /// </summary>
         /// <param name="dicts">要合并给当前字典的对象数据</param>
         /// <returns>字典本身；方便实现链式调用</returns>
-        public IDictionary<TKey, TValue> Combine(params IDictionary<TKey, TValue>?[] dicts)
+        public IDictionary<TKey, TValue> Combine(params IList<IDictionary<TKey, TValue>>? dicts)
         {
             //  嵌套有点多，后续考虑用.ForEach优化，
             if (dicts?.Any() == true)

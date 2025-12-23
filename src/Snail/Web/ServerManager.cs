@@ -20,9 +20,19 @@ public class ServerManager : IServerManager
 {
     #region 属性变量
     /// <summary>
-    /// 服务器地址信息
+    /// 应用程序实例
     /// </summary>
-    private readonly LockList<ServerDescriptor> _servers = new();
+    private readonly IApplication _app;
+    /// <summary>
+    /// 文件配置的服务器地址信息
+    /// </summary>
+    private readonly LockList<ServerDescriptor> _fileServers = new();
+    /// <summary>
+    /// 动态注册的服务器地址信息
+    /// <para>1、调用<see cref="IServerManager.RegisterServer(IList{ServerDescriptor})"/>注册的服务器地址信息</para>
+    /// <para>2、和<see cref="_fileServers"/>配置服务器地址信息区分开，避免文件配置自动变化时，冲掉动态注册的配置；从而影响程序逻辑</para>
+    /// </summary>
+    private readonly LockList<ServerDescriptor> _dynamicServers = new();
     #endregion
 
     #region 构造方法
@@ -33,7 +43,7 @@ public class ServerManager : IServerManager
     /// <param name="rsCode">服务器配置资源编码，非空时自动读取</param>
     public ServerManager(IApplication app, string? rsCode)
     {
-        ThrowIfNull(app);
+        _app = ThrowIfNull(app);
         //  使用指定配置初始化服务器地址默认配置
         if (rsCode?.Length > 0)
         {
@@ -44,14 +54,15 @@ public class ServerManager : IServerManager
 
     #region IServerManager
     /// <summary>
-    /// 注册服务器：确保“Workspace+Type+Code”唯一，重复注册以第一个为准
+    /// 注册服务器
+    /// <para>1、确保“Workspace+Type+Code”唯一</para>
+    /// <para>2、重复注册以最后一个为准</para>
     /// </summary>
     /// <param name="servers">服务器信息</param>
     /// <returns>管理器自身，方便链式调用</returns>
     IServerManager IServerManager.RegisterServer(IList<ServerDescriptor> servers)
     {
-        ThrowIfHasNull(servers!, $"{nameof(servers)}存在为null的数据");
-        _servers.AddRange(servers);
+        RegisterServer(_dynamicServers, servers);
         return this;
     }
 
@@ -62,16 +73,39 @@ public class ServerManager : IServerManager
     /// <returns></returns>
     ServerDescriptor? IServerManager.GetServer(IServerOptions options)
     {
+        //  优先从动态注册配置中读取；然后再读取文件配置
         ThrowIfNull(options);
-        ServerDescriptor? descriptor = _servers.Get(
-            predicate: server => server.Workspace == options.Workspace && server.Type == options.Type && server.Code == options.Code,
-            isDescending: false
-        );
+        ServerDescriptor? descriptor = _dynamicServers.Get(predicate: server => PredicateServer(server, options), isDescending: false)
+            ?? _fileServers.Get(predicate: server => PredicateServer(server, options), isDescending: false);
         return descriptor;
     }
     #endregion
 
     #region 私有方法
+    /// <summary>
+    /// 注册服务器配置
+    /// </summary>
+    /// <param name="target">目标服务器集合；将<paramref name="servers"/>注册到此列表中</param>
+    /// <param name="servers">服务器信息</param>
+    /// <returns>管理器自身，方便链式调用</returns>
+    private static void RegisterServer(LockList<ServerDescriptor> target, IList<ServerDescriptor> servers)
+    {
+        ThrowIfNull(servers);
+        ThrowIfHasNull(servers!, $"{nameof(servers)}存在为null的数据");
+        foreach (var server in servers)
+        {
+            target.Replace(predict: item => PredicateServer(item, server), obj: server);
+        }
+    }
+    /// <summary>
+    /// 断言服务器配置信息
+    /// </summary>
+    /// <param name="server"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    private static bool PredicateServer(IServerOptions server, IServerOptions options)
+        => server.Workspace == options.Workspace && server.Type == options.Type && server.Code == options.Code;
+
     /// <summary>
     /// 监听【服务器】配置变动
     /// </summary>
@@ -113,13 +147,14 @@ public class ServerManager : IServerManager
             {
                 string code = Default(add.GetAttribute("code"), defaultStr: null)
                     ?? throw new ApplicationException($"服务器add节点code属性为空。{exPrefix}");
-                string server = Default(add.GetAttribute("server"), defaultStr: null)
+                //  server支持参数化
+                string server = Default(_app.AnalysisVars(add.GetAttribute("server")), defaultStr: null)
                     ?? throw new ApplicationException($"服务器add节点server属性为空。{exPrefix}[code={code}]");
                 descriptors.Add(new ServerDescriptor(workspace, serverType, code: code, server));
             }
         }
-        //  执行接口方法做注册，方便做唯一区分验证
-        (this as IServerManager).RegisterServer(descriptors);
+        //  文件配置服务器信息注册
+        RegisterServer(_fileServers, descriptors);
     }
     #endregion
 }

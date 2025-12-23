@@ -120,28 +120,42 @@ public sealed class SettingManager : ISettingManager
     /// <param name="doc"></param>
     private void BuildEnvironment(in XmlDocument doc)
     {
+        //  整理配置的环境变量信息；优先File模式（放到最后覆盖前面配置的）
+        List<IDictionary<string, string>> envsMaps = [];
         //  1、Application.config集成模式；配置了 envs节点   <add key="name" value="站点名称：记日志等使用" />
-        IDictionary<string, string>? inEnvs = doc.SelectNodes("/configuration/envs/add")
-                                               ?.ToDictionary("环境变量");
+        doc.SelectNodes("/configuration/envs/add")
+            ?.ToDictionary("环境变量")
+            ?.AddTo(envsMaps);
         //  2、Application.config文件模式；配置了 <environment file="Environment.config" />
-        IDictionary<string, string>? fileEnvs = null;
-        XmlNode? fileNode = doc.SelectSingleNode("/configuration/environment");
-        if (fileNode != null)
+        doc.SelectNodes("/configuration/environment")?.ForEach(fileNode =>
         {
+            //  解析环境变量文件路径信息
             string file = fileNode.GetAttribute("file");
-            if (string.IsNullOrEmpty(file) == true)
+            if (IsNullOrEmpty(file) == true)
             {
                 string msg = "Application.config下“/configuration/environment”节点的file属性值为空；无法解析环境变量值";
                 throw new ApplicationException(msg);
             }
             file = Path.Combine(_root, file);
-            //  暂时先支持默认section，后期查找指定section 名称节点数据
-            fileEnvs = XmlHelper.Load(file)
-                                .SelectNodes("/configuration/section/add")
-                                ?.ToDictionary($"环境变量:{file}");
-        }
-        //  3、合并环境变量；优先File模式
-        _envs.Combine(inEnvs!, fileEnvs!);
+            //  解析xml格式环境变量配置文件；文件不存在时，若指定了optional属性为true，则忽略，否则抛出错误
+            try
+            {
+                /* 暂时先支持默认section，后期查找指定section 名称节点数据 */
+                XmlHelper.Load(file).SelectNodes("/configuration/section/add")
+                    ?.ToDictionary($"环境变量:{file}")
+                    ?.AddTo(envsMaps);
+            }
+            catch (FileNotFoundException)
+            {
+                if (STR_True.IsEqual(fileNode.GetAttribute("optional"), ignoreCase: true))
+                {
+                    return;
+                }
+                throw;
+            }
+        });
+        //  3、合并环境变量
+        _envs.Combine(envsMaps);
     }
     /// <summary>
     /// 构建配置资源
