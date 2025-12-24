@@ -102,7 +102,8 @@ public sealed class TypeProxy : PoolObject<Type>
     /// <param name="type"></param>
     public static TypeProxy GetProxy(Type type)
     {
-        TypeProxy proxy = _typePool.GetOrAdd(
+        TypeProxy proxy = _typePool.GetOrAdd
+        (
             predicate: proxy => proxy.Object == type,
             addFunc: () => new TypeProxy(type),
             autoUsing: true

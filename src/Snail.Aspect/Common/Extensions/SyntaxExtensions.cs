@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Snail.Aspect.Common.Extensions;
 
@@ -14,6 +15,14 @@ internal static class SyntaxExtensions
 {
     //  语法树相关参照：https://learn.microsoft.com/zh-cn/dotnet/api/microsoft.codeanalysis.csharp.syntax.memberdeclarationsyntax?view=roslyn-dotnet-4.9.0
 
+    #region 属性变量
+    /// <summary>
+    /// 字符串：顶级命名空间
+    /// <para>1、如nameof(当前类、接口中的方法名称)时，分析出来的命名空间为“&lt;global namespace&gt;”，此时需要忽略掉</para>
+    /// </summary>
+    private const string STR_GlobalNamespace = "<global namespace>";
+    #endregion
+
     #region 公共方法
 
     #region TypeSyntax：类型节点
@@ -22,11 +31,12 @@ internal static class SyntaxExtensions
     /// </summary>
     /// <param name="type"></param>
     /// <param name="semantic"></param>
-    /// <returns></returns>
+    /// <returns>若为顶级命名空间，则返回空字符串；否则返回实际命名空间</returns>
     public static string GetNamespace(this TypeSyntax type, SemanticModel semantic)
     {
         var typeInfo = semantic.GetTypeInfo(type);
-        return $"{typeInfo.Type?.ContainingNamespace}";
+        string ns = $"{typeInfo.Type?.ContainingNamespace}";
+        return ns == STR_GlobalNamespace ? string.Empty : ns;
 
         /** 废弃下面的方式；会导致 Snail.Aspect.Web.Enumerations.HttpMethodType.Get 这类引用，会将命名空间拆开逐级往上找
         var ti = semantic.GetSymbolInfo(type).Symbol;
@@ -84,7 +94,9 @@ internal static class SyntaxExtensions
         return symbol == null ? null : $"{symbol}";
     }
     /// <summary>
-    /// 是否是类型
+    /// 是否是Task类型
+    /// <para>1、Task：<see cref="Task"/>、<see cref="Task{T}"/></para>
+    /// <para>2、ValueTask：<see cref="ValueTask"/>、<see cref="ValueTask{TResult}"/></para>
     /// </summary>
     /// <param name="type"></param>
     /// <param name="semantic"></param>
@@ -92,8 +104,8 @@ internal static class SyntaxExtensions
     public static bool IsTaskType(this TypeSyntax type, SemanticModel semantic)
     {
         string typeName = $"{semantic.GetSymbolInfo(type).Symbol}";
-        return typeName == "System.Threading.Tasks.Task"
-            || typeName.StartsWith("System.Threading.Tasks.Task<");
+        return typeName == "System.Threading.Tasks.Task" || typeName.StartsWith("System.Threading.Tasks.Task<")
+            || typeName == "System.Threading.Tasks.ValueTask" || typeName.StartsWith("System.Threading.Tasks.ValueTask<");
     }
     #endregion
 
@@ -347,7 +359,6 @@ internal static class SyntaxExtensions
         //  测试时做分类使用
         //nss.Insert(0, $"====={arg};{string.Join("\t\n    ", arg.DescendantNodes().Select(node => $"{node}\t{node.GetType().Name}"))}");
         //nss.Insert(0, $"====={arg}");
-
 
         return nss;
     }

@@ -7,7 +7,7 @@ public interface IPoolObject : IDisposable
 {
     /// <summary>
     /// 闲置时间
-    /// <para>1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收 </para>
+    /// <para>1、从什么时候开始闲置了；超过配置的闲置时间则自动回收 </para>
     /// </summary>
     DateTime IdleTime { protected set; get; }
     /// <summary>

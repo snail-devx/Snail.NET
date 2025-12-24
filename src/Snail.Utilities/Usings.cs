@@ -7,3 +7,4 @@ global using static Snail.Utilities.Common.Utils.DelegateHelper;
 global using static Snail.Utilities.Common.Utils.ObjectHelper;
 global using static Snail.Utilities.Common.Utils.StringHelper;
 global using static Snail.Utilities.Common.Utils.ValueTypeHelper;
+global using static System.String;

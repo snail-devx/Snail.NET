@@ -26,7 +26,7 @@ public sealed class LockMethodAttribute : Attribute
     /// <summary>
     /// 本次加锁尝试失败的最大重试次数
     /// <para>1、为0则表示不尝试等待加锁，互斥锁；最大重试400次 </para>
-    /// <para>2、；每次重试间隔100ms </para>
+    /// <para>2、每次重试间隔100ms </para>
     /// </summary>
     public uint TryCount { set; get; }
 

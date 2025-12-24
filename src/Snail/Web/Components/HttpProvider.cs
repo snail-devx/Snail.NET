@@ -78,13 +78,19 @@ public sealed class HttpProvider : IHttpProvider
         //  对uri进行校验；提取UserInfo信息做Authorization验证；后期考虑缓存，空间换时间
         baseAddress = baseAddress.TryClearUserInfo(out string userInfo);
         //  构建hc对象：不用设置为using状态，默认都是空闲状态，确保同一服务器始终一个链接；使用超过2小时，ObjectPool会自动回收创建新链接
-        PoolObject<HttpClient> proxy = _clientPool.GetOrAdd(
+        PoolObject<HttpClient> proxy = _clientPool.GetOrAdd
+        (
              predicate: proxy => proxy.Object.BaseAddress == baseAddress,
-             addFunc: () => new PoolObject<HttpClient>(new HttpClient(_defaultHttpClienHandler)
+             addFunc: () =>
              {
-                 BaseAddress = baseAddress,
-                 Timeout = TimeSpan.FromMinutes(10),/*10分钟超时时间*/
-             }),
+                 // 构建HttpClient时，传入固定handler，不用每次创建，但需要强制指定disposeHandler=false（hc dispose时不销毁handle），否则handler无法复用
+                 HttpClient hc = new HttpClient(_defaultHttpClienHandler, disposeHandler: false)
+                 {
+                     BaseAddress = baseAddress,
+                     Timeout = TimeSpan.FromMinutes(10),/*10分钟超时时间*/
+                 };
+                 return new PoolObject<HttpClient>(hc);
+             },
              autoUsing: false
          );
         ThrowIfNull(proxy?.Object, $"ObjectPool<PoolObject<HttpClient>>返回null；无法发送HTTP请求。URI：{baseAddress}");
