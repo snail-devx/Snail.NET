@@ -1,4 +1,5 @@
-﻿using Snail.Abstractions.Identity.Interfaces;
+﻿using Snail.Abstractions.Identity.Extensions;
+using Snail.Abstractions.Identity.Interfaces;
 using Snail.Utilities.Collections.Extensions;
 
 namespace Snail.Abstractions.Distribution.Extensions;
@@ -49,7 +50,7 @@ public static class CacherExtensions
     /// <returns>成功返回true；否则返回false</returns>
     public static Task<bool> AddObject<T>(this ICacher cacher, IList<T> datas, long? expireSeconds = null) where T : IIdentity
     {
-        IDictionary<string, T> map = BuildCacheData(datas);
+        IDictionary<string, T> map = ThrowIfNullOrEmpty(datas).ToDictionary();
         return cacher.AddObject(map, expireSeconds);
     }
 
@@ -65,19 +66,6 @@ public static class CacherExtensions
         ThrowIfNullOrEmpty(key);
         IList<T>? lst = await cacher.GetObject<T>([key]);
         return lst.FirstOrDefault();
-    }
-
-    /// <summary>
-    /// 移除对象缓存
-    /// </summary>
-    /// <typeparam name="T">缓存数据类型</typeparam>
-    /// <param name="cacher">缓存器</param>
-    /// <param name="key">缓存key数组</param>
-    /// <returns>成功返回true；否则返回false</returns>
-    public static Task<bool> RemoveObject<T>(this ICacher cacher, string key)
-    {
-        ThrowIfNullOrEmpty(key);
-        return cacher.RemoveObject<T>([key]);
     }
     #endregion
 
@@ -122,7 +110,7 @@ public static class CacherExtensions
     public static Task<bool> AddHash<T>(this ICacher cacher, string hashKey, IList<T> datas, long? expireSeconds = null) where T : IIdentity
     {
         ThrowIfNullOrEmpty(hashKey);
-        var map = BuildCacheData(datas);
+        var map = ThrowIfNullOrEmpty(datas).ToDictionary();
         return cacher.AddHash(hashKey, map);
     }
 
@@ -139,20 +127,6 @@ public static class CacherExtensions
         ThrowIfNullOrEmpty(dataKey);
         IList<T> list = await cacher.GetHash<T>(hashKey, [dataKey]);
         return list.FirstOrDefault();
-    }
-
-    /// <summary>
-    /// 移除hash缓存的指定数据
-    /// </summary>
-    /// <typeparam name="T">缓存数据类型</typeparam>
-    /// <param name="cacher">缓存器</param>
-    /// <param name="hashKey">hash的key值；类似数据库的表名称</param>
-    /// <param name="dataKey">缓存数据key</param>
-    /// <returns>成功返回true，否则返回false</returns>
-    public static Task<bool> RemoveHash<T>(this ICacher cacher, string hashKey, string dataKey)
-    {
-        ThrowIfNullOrEmpty(dataKey);
-        return cacher.RemoveHash<T>(hashKey, [dataKey]);
     }
     #endregion
 
@@ -175,26 +149,5 @@ public static class CacherExtensions
     }
     #endregion
 
-    #endregion
-
-    #region 私有方法
-    /// <summary>
-    /// 构建缓存数据
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="datas"></param>
-    /// <returns></returns>
-    private static IDictionary<string, T> BuildCacheData<T>(IList<T> datas) where T : IIdentity
-    {
-        ThrowIfNullOrEmpty(datas);
-        IDictionary<string, T> map = new Dictionary<string, T>();
-        foreach (var data in datas)
-        {
-            ThrowIfNull(data, "data为null，无法基于IIdentity构建缓存数据");
-            string key = ThrowIfNullOrEmpty(((IIdentity)data).Id);
-            map[key] = data;
-        }
-        return map;
-    }
     #endregion
 }

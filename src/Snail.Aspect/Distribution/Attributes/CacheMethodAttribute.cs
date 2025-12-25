@@ -44,6 +44,7 @@ public abstract class CacheMethodBase : Attribute
 /// <summary>
 /// 属性标签：缓存方法，标记此方法要进行缓存操作
 /// <para>1、配合<see cref="CacheKeyAttribute"/>使用，可指定缓存数据Key </para>
+/// <para>2、配合<see cref="ExpireAttribute"/>使用，可在保存缓存时，指定缓存过期时间</para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class CacheMethodAttribute : CacheMethodBase
@@ -59,6 +60,7 @@ public sealed class CacheMethodAttribute : CacheMethodBase
 /// <summary>
 /// 属性标签：缓存方法，标记此方法要进行缓存操作
 /// <para>1、配合<see cref="CacheKeyAttribute"/>使用，可指定缓存数据Key </para>
+/// <para>2、配合<see cref="ExpireAttribute"/>使用，可在保存缓存时，指定缓存过期时间</para>
 /// </summary>
 /// <typeparam name="T">缓存数据类型；用其重写<see cref="CacheMethodAttribute.DataType"/>值</typeparam>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]

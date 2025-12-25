@@ -30,7 +30,7 @@ internal static class ListExtensions
     /// <param name="lst"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static IList<string> TryAdd(this IList<string> lst, string value)
+    public static IList<string> TryAdd(this IList<string> lst, string? value)
     {
         if (value?.Length > 0)
         {

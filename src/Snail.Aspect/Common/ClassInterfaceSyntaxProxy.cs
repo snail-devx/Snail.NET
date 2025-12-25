@@ -98,7 +98,8 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
             Key = $"{node.Identifier}_{key}";
         }
         //  类名称
-        Class = $"{Node.Identifier}_Impl";
+        //Class = $"{Node.Identifier}_Impl";
+        Class = $"{Node.Identifier}_{Namespace.AsMD5()}";
     }
     #endregion
 
@@ -167,7 +168,8 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
         }
         //  命名空间+类声明+构造方法
         {
-            builder.AppendLine($"namespace {context.DefaultNamespace}.{Namespace.Replace('.', '_')};");
+            //builder.AppendLine($"namespace {context.DefaultNamespace}.{Namespace.Replace('.', '_')};");
+            builder.AppendLine($"namespace {context.DefaultNamespace};");
             GenerateClassDeclarationCode(builder, context)
                    .AppendLine("{");
         }

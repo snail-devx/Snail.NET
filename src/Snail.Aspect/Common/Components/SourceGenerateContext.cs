@@ -17,7 +17,8 @@ internal class SourceGenerateContext
     /// <summary>
     /// 默认命名空间；有需要在此命名空间下追加
     /// </summary>
-    public readonly string DefaultNamespace = "_AspectSource_";
+    /// <remarks>1、以前的值：_AspectSource_</remarks>
+    public readonly string DefaultNamespace = "Snail.Aspect.SourceGenerator";
     /// <summary>
     /// roslyn提供的实际上下文
     /// </summary>

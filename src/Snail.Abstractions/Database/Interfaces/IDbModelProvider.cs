@@ -14,20 +14,23 @@ public interface IDbModelProvider<DbModel> : IDbProvider where DbModel : class
     /// </summary>
     /// <param name="models">数据对象集合；可变参数，至少传入一个</param>
     /// <returns>插入成功返回true；否则返回false</returns>
-    Task<bool> Insert(IList<DbModel> models);
+    Task<bool> Insert(params IList<DbModel> models);
     /// <summary>
     /// 保存数据：存在覆盖，不存在插入
     /// </summary>
     /// <param name="models">要保存的数据实体对象集合</param>
     /// <returns>保存成功返回true；否则返回false</returns>
-    Task<bool> Save(IList<DbModel> models);
+    Task<bool> Save(params IList<DbModel> models);
     /// <summary>
     /// 基于主键id值加载数据，此接口仅支持单主键
     /// </summary>
     /// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
     /// <param name="ids">要加载的数据主键id值集合</param>
     /// <returns>数据实体集合</returns>
-    /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="AsQueryable(string)"/>方法</remarks>
+    /// <remarks>
+    /// <para> 1、不支持指定数据分片路由；若需要，请使用<see cref="AsQueryable(string)"/>方法</para>
+    /// <para> 2、<paramref name="ids"/>不加params，若外部期望传入一个key时，返回值更倾向于 T，而非 List </para>
+    /// </remarks>
     Task<IList<DbModel>> Load<IdType>(IList<IdType> ids) where IdType : notnull;
     /// <summary>
     /// 基于主键id值更新数据，此接口仅支持单主键
@@ -37,7 +40,7 @@ public interface IDbModelProvider<DbModel> : IDbProvider where DbModel : class
     /// <param name="ids">要更新的数据主键id值集合</param>
     /// <returns>更新的数据条数</returns>
     /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="AsUpdatable(string)"/>方法</remarks>
-    Task<long> Update<IdType>(IDictionary<string, object?> updates, IList<IdType> ids) where IdType : notnull;
+    Task<long> Update<IdType>(IDictionary<string, object?> updates, params IList<IdType> ids) where IdType : notnull;
     /// <summary>
     /// 基于主键id值删除数据，此接口仅支持单主键
     /// </summary>

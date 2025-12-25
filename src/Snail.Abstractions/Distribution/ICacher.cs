@@ -30,6 +30,7 @@ public interface ICacher
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="keys">缓存key数组</param>
     /// <returns>缓存数据集合</returns>
+    /// <remarks><paramref name="keys"/>不加params，若外部期望传入一个key时，返回值更倾向于 T，而非 List </remarks>
     Task<IList<T>> GetObject<T>(IList<string> keys);
 
     /// <summary>
@@ -38,7 +39,7 @@ public interface ICacher
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="keys">缓存key数组</param>
     /// <returns>成功返回true；否则返回false</returns>
-    Task<bool> RemoveObject<T>(IList<string> keys);
+    Task<bool> RemoveObject<T>(params IList<string> keys);
     #endregion
 
     #region 哈希缓存
@@ -96,6 +97,7 @@ public interface ICacher
     /// <param name="hashKey">hash的key值；类似数据库的表名称</param>
     /// <param name="dataKeys">缓存数据key数组</param>
     /// <returns>缓存数据集合</returns>
+    /// <remarks><paramref name="dataKeys"/>不加params，若外部期望传入一个key时，返回值更倾向于 T，而非 List </remarks>
     Task<IList<T>> GetHash<T>(string hashKey, IList<string> dataKeys);
 
     /// <summary>
@@ -112,7 +114,7 @@ public interface ICacher
     /// <param name="hashKey">hash的key值；类似数据库的表名称</param>
     /// <param name="dataKeys">缓存数据key数组</param>
     /// <returns>成功返回true，否则返回false</returns>
-    Task<bool> RemoveHash<T>(string hashKey, IList<string> dataKeys);
+    Task<bool> RemoveHash<T>(string hashKey, params IList<string> dataKeys);
     #endregion
 
     #region SortedSet：有序列表缓存
@@ -205,7 +207,7 @@ public interface ICacher
     /// <param name="key">缓存key</param>
     /// <param name="datas">缓存数据集合</param>
     /// <returns>成功返回true；否则返回false</returns>
-    Task<bool> RemoveSortedSet<T>(string key, IList<T> datas);
+    Task<bool> RemoveSortedSet<T>(string key, params IList<T> datas);
     /// <summary>
     /// 移除SortedSet缓存下指定索引范围数据
     /// </summary>

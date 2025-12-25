@@ -5,6 +5,7 @@ namespace Snail.Aspect.Distribution.Attributes;
 /// <summary>
 /// 特性标签：并发锁方法，标记此方法中代码执行时进行并发锁控制
 /// <para>1、配合<see cref="LockAspectAttribute"/>使用，可指定并发的Key等信息 </para>
+/// <para>2、配合<see cref="ExpireAttribute"/>使用，可在加锁时指定过期时间，避免死锁</para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class LockMethodAttribute : Attribute
@@ -29,11 +30,4 @@ public sealed class LockMethodAttribute : Attribute
     /// <para>2、每次重试间隔100ms </para>
     /// </summary>
     public uint TryCount { set; get; }
-
-    /// <summary>
-    /// 锁的过期时间（单位秒）
-    /// <para>1、防止死锁 </para>
-    /// <para>2、&lt;=0 则默认10分钟 </para>
-    /// </summary>
-    public int ExpireSeconds { set; get; }
 }

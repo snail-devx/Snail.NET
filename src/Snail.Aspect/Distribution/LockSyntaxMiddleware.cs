@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Snail.Aspect.Common.Components;
 using Snail.Aspect.Common.DataModels;
@@ -7,11 +10,9 @@ using Snail.Aspect.Common.Extensions;
 using Snail.Aspect.Common.Interfaces;
 using Snail.Aspect.Distribution.Attributes;
 using Snail.Aspect.Distribution.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snail.Aspect.Distribution.Utils;
 using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
+using static Snail.Aspect.Distribution.Utils.DistributionHelper;
 
 namespace Snail.Aspect.Distribution;
 
@@ -157,10 +158,13 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
                 context.ReportError("[LockMethod]标记方法必须为异步：返回值为Task/Task<T>", method.ReturnType);
                 return null;
             }
-            if (CheckLockMethodAttr(context, attr, out key, out value, out tryCount, out expireSeconds) == false)
+            if (CheckLockMethodAttr(context, attr, out key, out value, out tryCount) == false)
             {
                 return null;
             }
+            //  分析锁过期时间
+            AttributeArgumentSyntax? expire = GetExpireSeconds(method, context);
+            expireSeconds = expire == null ? null : $"{expire.Expression}";
             //  检测参数
             ForEachMethodParametes(method, context);
         }
@@ -192,15 +196,17 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
                 lockValue = value;
             }
             //  执行加锁逻辑
-            tmpCode = string.Join(
-                ", ",
-                new List<string?> { lockKey, lockValue, NAME_LocalMethod, tryCount, expireSeconds }.Where(item => item != null)
-            );
-            _ = options.ReturnType == null
-                ? builder.Append(context.LinePrefix)
-                         .AppendLine($"RunResult rt = await _locker.Run({tmpCode});")
-                : builder.Append(context.LinePrefix)
-                         .AppendLine($"RunResult<{options.ReturnType}> rt = await _locker.Run<{options.ReturnType}>({tmpCode});");
+            {
+                List<string> parameters = [lockKey!, lockValue!, NAME_LocalMethod];
+                parameters.TryAdd(tryCount == null ? null : $"tryCount:{tryCount}");
+                parameters.TryAdd(expireSeconds == null ? null : $"expireSeconds:{expireSeconds}");
+                tmpCode = string.Join(',', parameters);
+                _ = options.ReturnType == null
+                    ? builder.Append(context.LinePrefix)
+                             .AppendLine($"RunResult rt = await _locker.Run({tmpCode});")
+                    : builder.Append(context.LinePrefix)
+                             .AppendLine($"RunResult<{options.ReturnType}> rt = await _locker.Run<{options.ReturnType}>({tmpCode});");
+            }
             //  解析执行结果，报错则throw出去
             builder.Append(context.LinePrefix).AppendLine("TryThrow(rt.Exception);");
             if (options.ReturnType != null)
@@ -263,11 +269,10 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="key">out参数：锁key</param>
     /// <param name="value">out参数：锁value</param>
     /// <param name="tryCount">out参数：尝试次数</param>
-    /// <param name="expireSeconds">out参数：失效时间</param>
     /// <returns></returns>
-    private static bool CheckLockMethodAttr(SourceGenerateContext context, AttributeSyntax attr, out string? key, out string? value, out string? tryCount, out string? expireSeconds)
+    private static bool CheckLockMethodAttr(SourceGenerateContext context, AttributeSyntax attr, out string? key, out string? value, out string? tryCount)
     {
-        key = value = tryCount = expireSeconds = null;
+        key = value = tryCount = null;
         //  LockMethod属性验证；解析出具体的值
         AttributeArgumentSyntax? keyArg = null, valueArg = null;
         foreach (var arg in attr.GetArguments())
@@ -284,9 +289,6 @@ internal class LockSyntaxMiddleware : ITypeDeclarationMiddleware
                     break;
                 case "TryCount":
                     tryCount = $"{arg.Expression}";
-                    break;
-                case "ExpireSeconds":
-                    expireSeconds = $"{arg.Expression}";
                     break;
                 default: break;
             }

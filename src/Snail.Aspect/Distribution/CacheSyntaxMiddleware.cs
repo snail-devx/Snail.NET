@@ -1,4 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Snail.Aspect.Common.Components;
 using Snail.Aspect.Common.DataModels;
@@ -10,11 +14,8 @@ using Snail.Aspect.Distribution.DataModels;
 using Snail.Aspect.Distribution.Enumerations;
 using Snail.Aspect.Distribution.Interfaces;
 using Snail.Aspect.Distribution.Utils;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
+using static Snail.Aspect.Distribution.Utils.DistributionHelper;
 
 namespace Snail.Aspect.Distribution;
 
@@ -398,7 +399,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
                 {
                     nextRunCode = context.LinePrefix;
                     context.LinePrefix = $"{context.LinePrefix}\t";
-                    GenerateSaveCodeWithNextData(builder, context, options, cacheOptions, rtOptions);
+                    GenerateSaveCodeWithNextData(method, builder, context, options, cacheOptions, rtOptions);
                     context.LinePrefix = nextRunCode;
                 }
                 builder.Append(context.LinePrefix).AppendLine("}");
@@ -572,7 +573,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         {
             //  接收nextRunCode值给cacheNextData，然后保存缓存，
             builder.Append(context.LinePrefix).AppendLine($"{options.ReturnType} cacheNextData = {nextRunCode}");
-            GenerateSaveCodeWithNextData(builder, context, options, cacheOptions, rtOptions);
+            GenerateSaveCodeWithNextData(method, builder, context, options, cacheOptions, rtOptions);
             builder.Append(context.LinePrefix).AppendLine("return cacheNextData;");
         }
         else
@@ -590,12 +591,13 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <para>2、代码逻辑：如果是DataBag类型数据，则解包cacheNextData数据得到cacheBagData；然后执行保存缓存逻辑 </para>
     /// <para>3、生成代码不包含NextCode执行赋值cacheNextData逻辑；不包含返回值；外部自己确定什么时候返回 </para>
     /// </summary>
+    /// <param name="method"></param>
     /// <param name="builder"></param>
     /// <param name="context"></param>
     /// <param name="options"></param>
     /// <param name="cacheOptions"></param>
     /// <param name="rtOptions"></param>
-    private static void GenerateSaveCodeWithNextData(StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, ReturnTypeOptions rtOptions)
+    private static void GenerateSaveCodeWithNextData(MethodDeclarationSyntax method, StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, ReturnTypeOptions rtOptions)
     {
         /*  生成代码参考：
             TestDataBag? cacheNextData = await base.SaveObject(key);
@@ -606,7 +608,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
                 await _cacher!.AddHash<TestCache>("12312", cacheBagData!);
             }
          */
-
+        AttributeArgumentSyntax? expire = GetExpireSeconds(method, context);
         //  参数准备
         cacheOptions.DeconstructType(out string cacheType, out string dataType);
         //      若返回值为数据包，则需要转成实际保存对象：cacheBagData
@@ -640,10 +642,14 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         switch (cacheOptions.Type)
         {
             case CacheType.ObjectCache:
-                runCode = $"await _cacher.AddObject<{dataType}>({dataCacheKeyMapVar ?? saveDataVar});";
+                runCode = expire == null
+                    ? $"await _cacher.AddObject<{dataType}>({dataCacheKeyMapVar ?? saveDataVar});"
+                    : $"await _cacher.AddObject<{dataType}>({dataCacheKeyMapVar ?? saveDataVar}, {expire.Expression});";
                 break;
             case CacheType.HashCache:
-                runCode = $"await _cacher.AddHash<{dataType}>({VAR_MasterKey ?? "null"}, {dataCacheKeyMapVar ?? saveDataVar});";
+                runCode = expire == null
+                    ? $"await _cacher.AddHash<{dataType}>({VAR_MasterKey ?? "null"}, {dataCacheKeyMapVar ?? saveDataVar});"
+                    : $"await _cacher.AddHash<{dataType}>({VAR_MasterKey ?? "null"}, {dataCacheKeyMapVar ?? saveDataVar}, {expire.Expression});";
                 break;
             //  还没支持的的缓存类型，先报错
             default:
