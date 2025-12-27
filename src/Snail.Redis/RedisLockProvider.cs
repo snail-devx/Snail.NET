@@ -51,7 +51,7 @@ public sealed class RedisLockProvider : ILockProvider
         {
             expireSeconds = DEFAULT_ExpireSeconds;
         }
-        TimeSpan expire = TimeSpan.FromSeconds(expireSeconds.Value);
+        TimeSpan expire = FromSeconds(expireSeconds.Value);
         RedisKey lockKey = BuildLockKey(key);
         RedisValue lockValue = value;
         IDatabase db = _manager.GetDatabase(server, dbIndex: 1);

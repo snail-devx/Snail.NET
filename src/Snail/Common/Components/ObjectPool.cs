@@ -13,12 +13,12 @@ public sealed class ObjectPool<T> : Disposable where T : class, IPoolObject
     /// <summary>
     /// 池中对象
     /// </summary>
-    private readonly LockList<T> _items = new LockList<T>();
+    private readonly LockList<T> _items = new();
+
     /// <summary>
     /// 闲置时间间隔：超过此间隔时间的闲置对象自动回收掉
     /// </summary>
-    private readonly TimeSpan _idleInterval;
-
+    public readonly TimeSpan IdleInterval;
     /// <summary>
     /// 对象数量
     /// </summary>
@@ -27,12 +27,13 @@ public sealed class ObjectPool<T> : Disposable where T : class, IPoolObject
 
     #region 构造方法
     /// <summary>
-    /// 默认无参构造方法
+    /// 构造方法
     /// </summary>
+    /// <param name="idleInterval">闲置时间间隔：超过此间隔时间的闲置对象自动回收掉</param>
     public ObjectPool(TimeSpan idleInterval)
     {
         ThrowIfFalse(idleInterval.TotalSeconds > 0, $"{nameof(idleInterval)}最小单位为秒（s）");
-        _idleInterval = idleInterval;
+        IdleInterval = idleInterval;
         InternalTimer.OnRun += OnRun_ClearIdleObject;
     }
     #endregion
@@ -55,7 +56,8 @@ public sealed class ObjectPool<T> : Disposable where T : class, IPoolObject
     public T GetOrAdd(Func<T, bool>? predicate, Func<T> addFunc, bool autoUsing = true)
     {
         ThrowIfNull(addFunc);
-        T item = _items.GetOrAdd(
+        T item = _items.GetOrAdd
+        (
             predicate: obj =>
             {
                 bool isIdle = predicate == null ? obj.IsIdle : predicate(obj);
@@ -107,10 +109,10 @@ public sealed class ObjectPool<T> : Disposable where T : class, IPoolObject
             return;
         }
         //  加锁遍历；找哪些对象需要回收
-        IList<T> deletes = new List<T>();
+        List<T> deletes = [];
         _items.RemoveAll(proxy =>
         {
-            bool needRecycle = proxy.IsIdle && DateTime.UtcNow.Subtract(proxy.IdleTime) > _idleInterval;
+            bool needRecycle = proxy.IsIdle && DateTime.UtcNow.Subtract(proxy.IdleTime) > IdleInterval;
             RunIf(needRecycle, deletes.Add, proxy);
             return needRecycle;
         });

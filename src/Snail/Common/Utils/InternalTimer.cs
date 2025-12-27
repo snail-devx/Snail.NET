@@ -24,7 +24,7 @@ internal sealed class InternalTimer
     static InternalTimer()
     {
         //  启动定时器做自动扫描，实现对象回收
-        var timer = new System.Timers.Timer(TimeSpan.FromSeconds(1))
+        var timer = new System.Timers.Timer(FromSeconds(1))
         {
             AutoReset = true,
             Enabled = true,

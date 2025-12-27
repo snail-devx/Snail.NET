@@ -24,7 +24,7 @@ public sealed class TypeProxy : PoolObject<Type>
     /// <para>1、超过5分钟不用自动清理掉 </para>
     /// <para>2、【全局单例】生命周期依赖注入，类型代理只会分析一次，以后就不会再用，始终占着没有意义 </para>
     /// </summary>
-    private static readonly ObjectPool<TypeProxy> _typePool = new ObjectPool<TypeProxy>(TimeSpan.FromMinutes(1));
+    private static readonly ObjectPool<TypeProxy> _typePool = new ObjectPool<TypeProxy>(FromMinutes(1));
 
     /// <summary>
     /// 依赖注入时，执行的构造方法

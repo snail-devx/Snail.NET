@@ -40,7 +40,7 @@ public static class ElasticHelper
         ThrowIfNullOrEmpty(action);
         if (routing?.Length > 0)
         {
-            urlParams ??= new List<string>();
+            urlParams ??= [];
             urlParams.Insert(0, $"routing={routing}");
         }
         return tableName?.Length > 0
@@ -69,12 +69,12 @@ public static class ElasticHelper
         try
         {
             Uri baseAddress = new(dbServer.Connection);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, api)
+            HttpRequestMessage request = new(HttpMethod.Post, api)
             {
                 Content = new StringContent(post, Encoding.UTF8, "application/json")
             };
-            HttpResponseMessage response = await HttpProvider.Send(baseAddress, request);
-            HttpResult hr = new HttpResult(response);
+            HttpResponseMessage response = await HttpProxy.Send(baseAddress, request);
+            HttpResult hr = new(response);
             ret = await hr.AsStringAsync;
             return ret;
         }

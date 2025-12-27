@@ -53,17 +53,14 @@ public class RabbitManager : ServerManager, IServerManager
         //  查找服务器地址，构建RabbitMQ链接
         ServerDescriptor? descriptor = (this as IServerManager).GetServer(server);
         ThrowIfNull(descriptor);
-        Action<string, string> connError = (title, reason) =>
-        {
-            App.LogErrorFile($"RabbitMQ链接异常:{title}", $"{reason}{Environment.NewLine}\t{server.ToString()}");
-        };
-        //  先获取链接对象，基于链接对象；再构建信道对象
-        FactoryProxy factory = FactoryProxy.GetFactory(descriptor!.Server);
-        ChannelProxy channel = await factory.GetChanel(isSend, connError: (string title, string reason) =>
+        void onError(string title, string reason)
         {
             title = isSend ? $"发送消息:{title}" : $"接收消息:{title}";
             App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{server.ToString()}");
-        });
+        }
+        //  先获取链接对象，基于链接对象；再构建信道对象
+        FactoryProxy factory = FactoryProxy.GetFactory(descriptor!.Server);
+        ChannelProxy channel = await factory.GetChanel(isSend, onError);
         return channel;
     }
     /// <summary>

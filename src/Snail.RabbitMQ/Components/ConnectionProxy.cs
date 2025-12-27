@@ -17,7 +17,7 @@ public sealed class ConnectionProxy : PoolObject<IConnection>, IPoolObject
     /// <summary>
     /// 信道池：空闲超过10s，自动回收
     /// </summary>
-    private readonly ObjectAsyncPool<ChannelProxy> _channelPool = new ObjectAsyncPool<ChannelProxy>(TimeSpan.FromSeconds(10));
+    private readonly ObjectAsyncPool<ChannelProxy> _channelPool = new(FromSeconds(10));
 
     /// <summary>
     /// 事件：连接异常时触发；回调参数：事件标题和异常详细信息
@@ -58,7 +58,7 @@ public sealed class ConnectionProxy : PoolObject<IConnection>, IPoolObject
         }
         catch (Exception ex)
         {
-            //  发送异常时，当前连接不可用，更新空闲时间，方便下次回收
+            //  发生异常时，当前连接不可用，更新空闲时间，方便下次回收
             IdleTime = DateTime.UtcNow;
             //  分配信道异常，忽略掉；其他异常抛出
             if (ex is ChannelAllocationException)

@@ -13,8 +13,7 @@ public sealed class FactoryProxy
     /// <summary>
     /// 链接工厂映射字典
     /// </summary>
-    private static readonly LockMap<string, FactoryProxy> _factoryMap = new LockMap<string, FactoryProxy>();
-
+    private static readonly LockMap<string, FactoryProxy> _factoryMap = new();
     /// <summary>
     /// 链接工厂
     /// </summary>
@@ -22,11 +21,11 @@ public sealed class FactoryProxy
     /// <summary>
     /// 发送消息 链接池；2小时无使用自动过期
     /// </summary>
-    private ObjectAsyncPool<ConnectionProxy> _sendPool = new ObjectAsyncPool<ConnectionProxy>(TimeSpan.FromHours(2));
+    private readonly ObjectAsyncPool<ConnectionProxy> _sendPool = new(FromHours(2));
     /// <summary>
     /// 接收消息 链接池；2小时无使用自动过期
     /// </summary>
-    private ObjectAsyncPool<ConnectionProxy> _receivePool = new ObjectAsyncPool<ConnectionProxy>(TimeSpan.FromHours(2));
+    private readonly ObjectAsyncPool<ConnectionProxy> _receivePool = new(FromHours(2));
     #endregion
 
     #region 构造方法
@@ -54,11 +53,11 @@ public sealed class FactoryProxy
             {
                 Uri = new Uri(address),
                 //  先采用系统默认，后续优化
-                //RequestedConnectionTimeout = TimeSpan.FromSeconds(60),
+                //RequestedConnectionTimeout = FromSeconds(60),
                 //RequestedChannelMax = 1000,// 每个连接的最大信道连接数
                 //AutomaticRecoveryEnabled = true,//自动重连
-                //RequestedHeartbeat = TimeSpan.FromSeconds(60),//心跳时间，秒
-                //NetworkRecoveryInterval = TimeSpan.FromSeconds(30),//网络故障恢复间隔时间
+                //RequestedHeartbeat = FromSeconds(60),//心跳时间，秒
+                //NetworkRecoveryInterval = FromSeconds(30),//网络故障恢复间隔时间
             };
             return new FactoryProxy(factory);
         });
@@ -84,7 +83,7 @@ public sealed class FactoryProxy
             addFunc: async () =>
             {
                 IConnection conn = await _factory.CreateConnectionAsync();
-                ConnectionProxy proxy = new ConnectionProxy(conn);
+                ConnectionProxy proxy = new(conn);
                 proxy.OnError += connError;
                 channel = await proxy.GetChannel();
                 return proxy;

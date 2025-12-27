@@ -57,20 +57,21 @@ public class MessageProvider : IMessageProvider
         ThrowIfNull(server);
         //  发送消息到交换机：声明交换机和消息路由；若交换机为空则为默认交换机
         ChannelProxy? channel = null;
+        void onChannelError(string title, string reason)
+        {
+            title = $"发送[{type.ToString()}]消息:{title}";
+            App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{options.AsJson()}{Environment.NewLine}\t{server.ToString()}");
+        }
         try
         {
             channel = await _manager.GetChannel(isSend: true, server);
-            channel.OnError += (title, reason) =>
-            {
-                title = $"发送[{type.ToString()}]消息:{title}";
-                App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{options.AsJson()}{Environment.NewLine}\t{server.ToString()}");
-            };
+            channel.OnError += onChannelError;
             //  定义交换机，初始化路由
             string exchange = await DeclareExchange(channel.Object, type, options);
             string routing = GetRouting(options);
             //  发送消息
             //      组装消息body
-            BasicProperties props = new BasicProperties()
+            BasicProperties props = new()
             {
                 ContentType = "text/plain",/*内容类型：文本数据*/
                 ContentEncoding = "utf-8",
@@ -114,13 +115,13 @@ public class MessageProvider : IMessageProvider
         string opName = $"接收[{type.ToString()}]消息：{options.AsJson()}";
 
         //  1、基于信道，构建交换机、队列
-        Action<string, string> onChannelError = (title, reason) =>
+        ChannelProxy? channel = null;
+        string queue;
+        void onChannelError(string title, string reason)
         {
             title = $"接收[{type.ToString()}]消息:{title}";
             App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{opName}{Environment.NewLine}\t{server.ToString()}");
-        };
-        ChannelProxy? channel = null;
-        string queue;
+        }
         try
         {
             channel = await _manager.GetChannel(isSend: false, server);
@@ -134,8 +135,8 @@ public class MessageProvider : IMessageProvider
             throw;
         }
         //  2、构建消息接收处理器
-        ReceiverProxy<T> proxy = new ReceiverProxy<T>(options.Attempt, receiver);
-        AsyncEventHandler<BasicDeliverEventArgs> onReceived = async (sender, args) =>
+        ReceiverProxy<T> proxy = new(options.Attempt, receiver);
+        async Task onReceived(object sender, BasicDeliverEventArgs args)
         {
             bool isSuccess = false, dataConverted = false;
             IChannel tmpChanel = (sender as AsyncEventingBasicConsumer)!.Channel;
@@ -170,7 +171,7 @@ public class MessageProvider : IMessageProvider
             {
                 await tmpChanel.BasicRejectAsync(args.DeliveryTag, requeue: true);
             }
-        };
+        }
         //  3、构建消息消费者，接收消息；基于并行逻辑，确保每个消息的接收器都是独立的
         try
         {
@@ -181,7 +182,7 @@ public class MessageProvider : IMessageProvider
                     channel = await _manager.GetChannel(isSend: false, server);
                     channel.OnError += onChannelError;
                 }
-                AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel.Object);
+                AsyncEventingBasicConsumer consumer = new(channel.Object);
                 consumer.ReceivedAsync += onReceived;
                 //  接收消息：每次接收1个
                 await channel.Object.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
@@ -235,7 +236,7 @@ public class MessageProvider : IMessageProvider
     protected virtual async Task<string> DeclareExchange(IChannel channel, MessageType type, IMessageOptions options)
     {
         string exchange = GetExchange(options);
-        if (string.IsNullOrEmpty(options.Exchange) == false)
+        if (IsNullOrEmpty(options.Exchange) == false)
         {
             string exchangeType = type switch
             {

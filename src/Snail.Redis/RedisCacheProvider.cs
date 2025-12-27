@@ -464,7 +464,7 @@ public class RedisCacheProvider : ICacheProvider
         expireSeconds ??= DEFAULT_ExpireSeconds;
         if (expireSeconds > 0)
         {
-            TimeSpan span = TimeSpan.FromSeconds(expireSeconds.Value);
+            TimeSpan span = FromSeconds(expireSeconds.Value);
             await db.KeyExpireAsync(key, span);
         }
         return true;

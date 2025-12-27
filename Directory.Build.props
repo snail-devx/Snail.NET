@@ -6,7 +6,7 @@
 	<!-- 项目默认属性 -->
 	<PropertyGroup>
 		<!-- 定义可全局使用变量 -->
-		<Version>1.10.14</Version>
+		<Version>1.10.15</Version>
 		<TargetFramework>net10.0</TargetFramework>
 		<!-- 固化信息-->
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -21,12 +21,14 @@
 				1587为在代码内使用/***/注释时的警告
 				RS1041，分析器项目，仅在net平台下使用，不考虑Framework平台，忽略此井盖不应在具有目标框架“.NET 8.0”的程序集中实现此编译器扩展
 				IDE0290，推荐使用 主函数 ，在某些情况下不是特别适合，先忽略掉
+				IDE0071，内插可以简化
 		-->
 		<NoWarn>
 			1587;
 			RS1041;
 			NU1903;
 			IDE0290;
+			IDE0071;
 		</NoWarn>
 		<!-- 许可授权等信息 -->
     	<PackageLicenseExpression>MIT</PackageLicenseExpression>

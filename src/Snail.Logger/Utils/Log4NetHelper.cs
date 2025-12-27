@@ -342,7 +342,7 @@ internal static class Log4NetHelper
             return;
         }
         //  定时器，每1小时执行一次
-        TimerHelper.Start(TimeSpan.FromHours(1), () =>
+        TimerHelper.Start(FromHours(1), () =>
         {
             DateTime nowDate = DateTime.Now;
             //  找到目录下的日志文件txt；

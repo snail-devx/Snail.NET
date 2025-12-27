@@ -8,3 +8,4 @@ global using static Snail.Utilities.Collections.Utils.ListHelper;
 global using static Snail.Utilities.Common.Utils.ArrayHelper;
 global using static Snail.Utilities.Common.Utils.ObjectHelper;
 global using static Snail.Utilities.Common.Utils.StringHelper;
+global using static System.TimeSpan;
