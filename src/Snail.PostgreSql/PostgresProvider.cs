@@ -14,12 +14,14 @@ using System.Text;
 namespace Snail.PostgreSql;
 
 /// <summary>
-/// <see cref="IDbModelProvider{DbModel}"/>的PostgreSQL实现
+/// <see cref="IDbModelProvider{DbModel,IdType}"/>的PostgreSQL实现
 /// <para>1、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【Postgres】作为依赖注入key值 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
-[Component(From = typeof(IDbModelProvider<>), Key = nameof(DbType.Postgres), Lifetime = LifetimeType.Transient)]
-public sealed class PostgresProvider<DbModel> : SqlProvider<DbModel>, IDbModelProvider<DbModel> where DbModel : class
+/// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
+[Component(From = typeof(IDbModelProvider<,>), Key = nameof(DbType.Postgres), Lifetime = LifetimeType.Transient)]
+public class PostgresProvider<DbModel, IdType> : SqlProvider<DbModel, IdType>, IDbModelProvider<DbModel, IdType>
+    where DbModel : class where IdType : notnull
 {
     #region 属性变量
     #endregion
@@ -103,7 +105,7 @@ public sealed class PostgresProvider<DbModel> : SqlProvider<DbModel>, IDbModelPr
     /// <param name="param">where条件参数化对象；key为参数名称，value为具体参数值</param>
     /// <param name="ids">主键id集合；支持一个或者多个id值</param>
     /// <returns>不带Where关键字的条件过滤语句，示例：id= @id 或者 id in $ids;</returns>
-    protected override string BuildIdFilter<IdType>(IList<IdType> ids, out IDictionary<string, object> param)
+    protected override string BuildIdFilter(IList<IdType> ids, out IDictionary<string, object> param)
     {
         //  需要对id值做类型处理，避免出现传值格式不对
         ThrowIfNullOrEmpty(ids, "ids为null或者空集合");
@@ -154,6 +156,27 @@ public sealed class PostgresProvider<DbModel> : SqlProvider<DbModel>, IDbModelPr
         }
         //  构建返回
         return sb.ToString();
+    }
+    #endregion
+}
+
+/// <summary>
+/// <see cref="IDbModelProvider{DbModel}"/>的PostgreSQL实现
+/// <para>1、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【Postgres】作为依赖注入key值 </para>
+/// </summary>
+/// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
+[Component(From = typeof(IDbModelProvider<>), Key = nameof(DbType.Postgres), Lifetime = LifetimeType.Transient)]
+public sealed class PostgresProvider<DbModel> : PostgresProvider<DbModel, string>, IDbModelProvider<DbModel> where DbModel : class
+{
+    #region 构造方法
+    /// <summary>
+    /// 构造方法
+    /// </summary>
+    /// <param name="app"></param>
+    /// <param name="server"></param>
+    public PostgresProvider(IApplication app, IDbServerOptions server)
+        : base(app, server)
+    {
     }
     #endregion
 }

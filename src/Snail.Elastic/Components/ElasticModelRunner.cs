@@ -20,7 +20,7 @@ namespace Snail.Elastic.Components;
 /// <summary>
 /// Elastic的数据实体执行器；负责执行具体的Elastic操作 
 /// <para>1、封装Elastic部分操作，供其他组件调用：  </para>
-/// <para>- <see cref="ElasticProvider{DbModel}"/> </para>
+/// <para>- <see cref="ElasticProvider{DbModel,IdType}"/> </para>
 /// <para>- <see cref="ElasticDeletable{DbModel}"/>、<see cref="ElasticUpdatable{DbModel}"/>、<see cref="ElasticQueryable{DbModel}"/>公共调用 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
@@ -138,7 +138,6 @@ public class ElasticModelRunner<DbModel> where DbModel : class
         ThrowIfNull(query);
         ThrowIfNull(each);
         //  构建基础参数
-        string api = BuildAction(Table.Name, "_search", routing, urlParams);
         ElasticSearchModel search = new ElasticSearchModel()
         {
             Souce = bool.FalseString,
@@ -152,7 +151,6 @@ public class ElasticModelRunner<DbModel> where DbModel : class
         while (needLoop)
         {
             //  查数据，取不到直接中断
-            needLoop = false;
             ElasticSearchResult<DbModel> ret = await Search(routing, search, urlParams);
             if (ret?.IsSourceAny() != true)
             {
@@ -234,7 +232,7 @@ public class ElasticModelRunner<DbModel> where DbModel : class
         ElasticBulkResult br = ret?.As<ElasticBulkResult>()
             ?? throw new ApplicationException("获取[_bulk]操作结果失败；返回null");
         //      针对操作Error做一些处理，如【routing_missing_exception】，这类强制报错，但【document_missing_exception】忽略掉
-        List<string> exs = new List<string>();
+        List<string> exs = [];
         foreach (var item in br.Items)
         {
             var detail = item.Create ?? item.Update ?? item.Delete ?? item.Index;
@@ -285,7 +283,7 @@ public class ElasticModelRunner<DbModel> where DbModel : class
         //      构建更新数据：需要把属性名转换成字段名
         string update;
         {
-            IDictionary<string, object?> jsonMap = new Dictionary<string, object?>();
+            Dictionary<string, object?> jsonMap = [];
             foreach (var kv in updates)
             {
                 if (FieldMap.TryGetValue(kv.Key, out DbModelField? field) == false)
@@ -333,7 +331,7 @@ public class ElasticModelRunner<DbModel> where DbModel : class
     public async Task<long> DeleteByQuery(string? routing, ElasticQueryModel query, List<string>? urlParams = null)
     {
         //  组装api地址
-        urlParams ??= new List<string>();
+        urlParams ??= [];
         urlParams.Add("refresh=true");
         //      尝试解决版本冲突 409问题：Response status code does not indicate success: 409 (Conflict)
         urlParams.Add("conflicts=proceed");

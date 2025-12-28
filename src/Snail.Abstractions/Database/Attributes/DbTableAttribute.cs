@@ -23,7 +23,7 @@ public sealed class DbTableAttribute : Attribute
     /// <summary>
     /// 是否启用数据路由分片存储
     /// <para>1、为true时，实体必须实现<see cref="IDbRouting.GetRouting"/>接口方法，且值不能为空 </para>
-    /// <para>2、具体能否实现分片存储，还得看数据库和具体<see cref="IDbModelProvider{DbModel}"/>实现类是否是否支持 </para>
+    /// <para>2、具体能否实现分片存储，还得看数据库和具体<see cref="IDbModelProvider{DbModel,IdType}"/>实现类是否是否支持 </para>
     /// </summary>
     public bool Routing { init; get; }
 }

@@ -87,7 +87,7 @@ public static class MongoHelper
         {
             throw new ApplicationException($"非MongoDB数据库类型.{dbServer.DbType}");
         }
-        IMongoClient client = new MongoClient(dbServer.Connection);
+        MongoClient client = new MongoClient(dbServer.Connection);
         return client.GetDatabase(dbServer.DbName);
     }
     /// <summary>
@@ -133,7 +133,7 @@ public static class MongoHelper
     /// 注册类型的ClassMap
     ///     1、确保在使用之前先注册，并只注册一次；否则可能导致重复注册
     ///     2、提前进行bson相关注册；并进行字段名称、主键、new重写属性等处理
-    ///     3、若在<see cref="MongoProvider{DbModel}"/>子类中使用，则会自动注册；不用重复调用
+    ///     3、若在<see cref="MongoProvider{DbModel,IdType}"/>子类中使用，则会自动注册；不用重复调用
     /// </summary>
     /// <param name="type">必须得是<see cref="DbTableAttribute"/>标记的数据库实体类型；否则会报错</param>
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -257,14 +257,14 @@ public static class MongoHelper
     public static UpdateDefinition<DbModel> BuildUpdate<DbModel>(IDictionary<string, object?> data)
     {
         ThrowIfNull(data);
-        List<UpdateDefinition<DbModel>> updates = new();
+        List<UpdateDefinition<DbModel>> updates = [];
         //  利用mongo序列化逻辑进行更新构建：DbModel已经把序列化逻辑，构建到了Bosn的BsonClassMap中
         foreach (var (fieldName, fieldValue) in data)
         {
             UpdateDefinition<DbModel> update = Builders<DbModel>.Update.Set(fieldName, fieldValue);
             updates.Add(update);
         }
-        if (updates.Any() != true)
+        if (updates.Count == 0)
         {
             string msg = "无更新值，无法构建Mongo更新文档";
             throw new ApplicationException(msg);
@@ -302,7 +302,7 @@ public static class MongoHelper
         BsonClassMap map = new(type, pMap);
         map.AutoMap();
         //  3、处理字段信息：排除无效字段；映射DbField配置
-        List<BsonMemberMap> dels = new();
+        List<BsonMemberMap> dels = [];
         foreach (var member in map.DeclaredMemberMaps)
         {
             //  成员是否在descriptor中：不在则删除掉；若在，判断定义类型是否是当前type，解决new重写时忽略父级属性需求

@@ -5,9 +5,11 @@ namespace Snail.Abstractions.Database.Interfaces;
 /// <summary>
 /// 数据库实体操作访问层接口
 /// <para>1、约束基于数据实体的CRUD操作 </para>
+/// <para>2、需显示指定数据字段</para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
-public interface IDbModelProvider<DbModel> : IDbProvider where DbModel : class
+/// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
+public interface IDbModelProvider<DbModel, IdType> : IDbProvider where DbModel : class where IdType : notnull
 {
     /// <summary>
     /// 插入数据
@@ -24,31 +26,28 @@ public interface IDbModelProvider<DbModel> : IDbProvider where DbModel : class
     /// <summary>
     /// 基于主键id值加载数据，此接口仅支持单主键
     /// </summary>
-    /// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
     /// <param name="ids">要加载的数据主键id值集合</param>
     /// <returns>数据实体集合</returns>
     /// <remarks>
     /// <para> 1、不支持指定数据分片路由；若需要，请使用<see cref="AsQueryable(string)"/>方法</para>
     /// <para> 2、<paramref name="ids"/>不加params，若外部期望传入一个key时，返回值更倾向于 T，而非 List </para>
     /// </remarks>
-    Task<IList<DbModel>> Load<IdType>(IList<IdType> ids) where IdType : notnull;
+    Task<IList<DbModel>> Load(IList<IdType> ids);
     /// <summary>
     /// 基于主键id值更新数据，此接口仅支持单主键
     /// </summary>
-    /// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
     /// <param name="updates">要更新的数据；key为DbModel的属性名称，Value为具体值</param>
     /// <param name="ids">要更新的数据主键id值集合</param>
     /// <returns>更新的数据条数</returns>
     /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="AsUpdatable(string)"/>方法</remarks>
-    Task<long> Update<IdType>(IDictionary<string, object?> updates, params IList<IdType> ids) where IdType : notnull;
+    Task<long> Update(IDictionary<string, object?> updates, params IList<IdType> ids);
     /// <summary>
     /// 基于主键id值删除数据，此接口仅支持单主键
     /// </summary>
-    /// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
     /// <param name="ids">要删除的数据主键id值集合</param>
     /// <returns>删除的数据条数</returns>
     /// <remarks>不支持指定数据分片路由；若需要，请使用<see cref="AsDeletable(string)"/>方法</remarks>
-    Task<long> Delete<IdType>(params IList<IdType> ids) where IdType : notnull;
+    Task<long> Delete(params IList<IdType> ids);
 
     /// <summary>
     /// 构建数据库查询接口；用于完成符合条件数据的查询、排序、分页等操作
@@ -69,3 +68,13 @@ public interface IDbModelProvider<DbModel> : IDbProvider where DbModel : class
     /// <returns>接口实例</returns>
     IDbDeletable<DbModel> AsDeletable(string? routing = null);
 }
+
+/// <summary>
+/// 数据库实体操作访问层接口
+/// <para>1、约束基于数据实体的CRUD操作</para>
+/// <para>2、需显示指定数据字段</para>
+/// <para>3、数据实体的IdType强制为string</para>
+/// </summary>
+/// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
+public interface IDbModelProvider<DbModel> : IDbModelProvider<DbModel, string> where DbModel : class
+{ }

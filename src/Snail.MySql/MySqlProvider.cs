@@ -10,12 +10,14 @@ using System.Text;
 namespace Snail.MySql;
 
 /// <summary>
-/// <see cref="IDbModelProvider{DbModel}"/>的MySql实现
+/// <see cref="IDbModelProvider{DbModel,IdType}"/>的MySql实现
 /// <para>1、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【MySql】作为依赖注入key值 </para>
 /// </summary>
 /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
-[Component(From = typeof(IDbModelProvider<>), Key = nameof(DbType.MySql), Lifetime = LifetimeType.Transient)]
-public class MySqlProvider<DbModel> : SqlProvider<DbModel>, IDbModelProvider<DbModel> where DbModel : class
+/// <typeparam name="IdType">主键的数据类型，确保和数据实体标记的主键字段类型一致</typeparam>
+[Component(From = typeof(IDbModelProvider<,>), Key = nameof(DbType.MySql), Lifetime = LifetimeType.Transient)]
+public class MySqlProvider<DbModel, IdType> : SqlProvider<DbModel, IdType>, IDbModelProvider<DbModel, IdType>
+    where DbModel : class where IdType : notnull
 {
     #region 构造方法
     /// <summary>
@@ -110,6 +112,28 @@ public class MySqlProvider<DbModel> : SqlProvider<DbModel>, IDbModelProvider<DbM
         }
         //  构建返回
         return sb.ToString();
+    }
+    #endregion
+}
+
+/// <summary>
+/// <see cref="IDbModelProvider{DbModel}"/>的MySql实现
+/// <para>1、强制【瞬时】生命周期，避免不同服务器之间操作实例问题，使用【MySql】作为依赖注入key值 </para>
+/// <para>2、数据实体的IdType强制为string</para>
+/// </summary>
+/// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
+[Component(From = typeof(IDbModelProvider<>), Key = nameof(DbType.MySql), Lifetime = LifetimeType.Transient)]
+public class MySqlProvider<DbModel> : MySqlProvider<DbModel, string>, IDbModelProvider<DbModel> where DbModel : class
+{
+    #region 构造方法
+    /// <summary>
+    /// 构造方法
+    /// </summary>
+    /// <param name="app"></param>
+    /// <param name="server"></param>
+    public MySqlProvider(IApplication app, IDbServerOptions server)
+        : base(app, server)
+    {
     }
     #endregion
 }
