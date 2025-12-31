@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Utilities.Collections.Utils;
 /// <summary>
@@ -55,7 +56,7 @@ public static class DictionaryHelper
     /// <typeparam name="TValue"></typeparam>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty<Tkey, TValue>(IDictionary<Tkey, TValue>? value)
+    public static bool IsNullOrEmpty<Tkey, TValue>([NotNullWhen(false)] IDictionary<Tkey, TValue>? value)
         => value == null || value.Count == 0;
     #endregion
 

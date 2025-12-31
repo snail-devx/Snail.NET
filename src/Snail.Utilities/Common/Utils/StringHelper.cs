@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Utilities.Common.Utils;
 /// <summary>
@@ -23,7 +24,7 @@ public static class StringHelper
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty(string? value)
+    public static bool IsNullOrEmpty([NotNullWhen(false)] string? value)
         => value == null || value.Length == 0;
 
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Utilities.Common.Utils;
 /// <summary>
@@ -50,7 +51,7 @@ public static class ArrayHelper
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty<T>(T[]? value)
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] T[]? value)
         => value == null || value.Length == 0;
     #endregion
 

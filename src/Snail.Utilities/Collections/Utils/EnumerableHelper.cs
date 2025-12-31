@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Utilities.Collections.Utils;
 /// <summary>
@@ -49,7 +50,7 @@ public static class EnumerableHelper
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty<T>(IEnumerable<T>? value)
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] IEnumerable<T>? value)
         => value == null || value.Any();
     #endregion
 

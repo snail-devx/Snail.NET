@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Snail.Utilities.Collections.Utils;
 /// <summary>
@@ -74,7 +75,7 @@ public static class ListHelper
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty<T>(IList<T>? value)
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] IList<T>? value)
         => value == null || value.Count == 0;
     #endregion
 

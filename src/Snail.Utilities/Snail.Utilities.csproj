@@ -4,11 +4,6 @@
 		<Description>Snail的系统扩展</Description>
 	</PropertyGroup>
 	
-	<!-- 默认配置项 -->
-	<ItemGroup>
-		
-	</ItemGroup>
-
 	<!-- 依赖三方的Nuget包 -->
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
