@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Serialization;
 using Snail.Abstractions.Database.Attributes;
 using Snail.Abstractions.Database.DataModels;
-using Snail.Database.Utils;
 
 namespace Snail.Database.Components;
 
@@ -11,9 +10,26 @@ namespace Snail.Database.Components;
 /// <para>1、进行JSON序列化和反序列化时，把DbModel的属性名映射为<see cref="DbFieldAttribute.Name"/>值 </para>
 /// <para>2、剔除掉<see cref="DbFieldAttribute.Ignored"/>为true的属性映射 </para>
 /// </summary>
-/// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
-public sealed class DbModelJsonResolver<DbModel> : DefaultContractResolver where DbModel : class
+public sealed class DbModelJsonResolver : DefaultContractResolver
 {
+    #region 属性字段
+    /// <summary>
+    /// 表信息
+    /// </summary>
+    private readonly DbModelTable _table;
+    #endregion
+
+    #region 构造方法
+    /// <summary>
+    /// 构造方法
+    /// </summary>
+    /// <param name="table"></param>
+    public DbModelJsonResolver(DbModelTable table)
+    {
+        _table = ThrowIfNull(table);
+    }
+    #endregion
+
     #region 重写方法
     /// <summary>
     /// 创建指定类型的字段属性映射
@@ -28,13 +44,12 @@ public sealed class DbModelJsonResolver<DbModel> : DefaultContractResolver where
          */
         IList<JsonProperty> pis = base.CreateProperties(type, memberSerialization);
         //  遍历DbModel类型构建的pis，剔除ignore标记属性，并进行FieldName映射
-        if (typeof(DbModel) == type)
+        if (_table.Type == type)
         {
-            DbModelTable table = DbModelHelper.GetTable(type);
             foreach (var pi in pis)
             {
                 //  取fieldmap中的数据，取不到则强制标记为ignore
-                DbModelField? field = table.Fields.FirstOrDefault(field =>
+                DbModelField? field = _table.Fields.FirstOrDefault(field =>
                     field.Property.Name == pi.PropertyName &&
                     field.Property.PropertyType == pi.PropertyType &&
                     field.Property.DeclaringType == pi.DeclaringType

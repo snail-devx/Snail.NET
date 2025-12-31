@@ -19,11 +19,11 @@ public abstract class DbUpdatable<DbModel> : IDbUpdatable<DbModel> where DbModel
     /// <summary>
     /// 过滤条件
     /// </summary>
-    protected readonly List<Expression<Func<DbModel, bool>>> Filters = new();
+    protected readonly List<Expression<Func<DbModel, bool>>> Filters = [];
     /// <summary>
     /// 更新时更新相关；key为属性名称，value为更新值
     /// </summary>
-    protected readonly Dictionary<string, object?> Updates = new();
+    protected readonly Dictionary<string, object?> Updates = [];
     #endregion
 
     #region 构造方法

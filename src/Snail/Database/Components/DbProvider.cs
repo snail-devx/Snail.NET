@@ -2,11 +2,12 @@
 using Snail.Abstractions.Database.Interfaces;
 
 namespace Snail.Database.Components;
-
 /// <summary>
-/// <see cref="IDbProvider"/>基类
+/// 数据库提供程序基类
+/// <para>1、存储数据库服务器配置等基础信息；纯粹为了复用代码</para>
+/// <para>2、不继承<see cref="IDbProvider"/>，本身不做实现，继承意义不大</para>
 /// </summary>
-public abstract class DbProvider : IDbProvider
+public abstract class DbProvider
 {
     #region 属性变量
     /// <summary>
@@ -31,12 +32,5 @@ public abstract class DbProvider : IDbProvider
         DbManager = app.ResolveRequired<IDbManager>();
         DbServer = ThrowIfNull(server);
     }
-    #endregion
-
-    #region IDbProvider
-    /// <summary>
-    /// 数据库服务器配置选项
-    /// </summary>
-    IDbServerOptions IDbProvider.DbServer => DbServer;
     #endregion
 }

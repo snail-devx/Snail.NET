@@ -18,7 +18,7 @@ public abstract class DbDeletable<DbModel> : IDbDeletable<DbModel> where DbModel
     /// <summary>
     /// 过滤条件
     /// </summary>
-    protected readonly List<Expression<Func<DbModel, bool>>> Filters = new();
+    protected readonly List<Expression<Func<DbModel, bool>>> Filters = [];
     #endregion
 
     #region 构造方法
@@ -53,14 +53,5 @@ public abstract class DbDeletable<DbModel> : IDbDeletable<DbModel> where DbModel
     /// <remarks>禁止无条件删除</remarks>
     /// <returns>删除数据条数</returns>
     public abstract Task<long> Delete();
-    #endregion
-
-    #region 继承方法
-    #endregion
-
-    #region 内部方法
-    #endregion
-
-    #region 私有方法
     #endregion
 }

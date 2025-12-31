@@ -105,7 +105,7 @@ public static class DbFilterHelper
     public static int GetSkipValueFromLastSortKey(string? lastSortKey)
     {
         Dictionary<string, int>? data = lastSortKey?.Any() == true
-            ? lastSortKey.AsBase64Decode().As<Dictionary<String, Int32>>()
+            ? lastSortKey.AsBase64Decode().As<Dictionary<string, int>>()
             : null;
         return data?.GetValueOrDefault("Skip") ?? 0;
     }

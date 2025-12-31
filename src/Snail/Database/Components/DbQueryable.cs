@@ -1,7 +1,6 @@
 ﻿using Snail.Abstractions.Database.Attributes;
 using Snail.Abstractions.Database.DataModels;
 using Snail.Abstractions.Database.Interfaces;
-using Snail.Database.Utils;
 using Snail.Utilities.Linq.Extensions;
 using System.Linq.Expressions;
 
@@ -18,12 +17,16 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     /// <summary>
     /// 调用【Select】方法写入的要返回字段信息集合
     /// </summary>
-    private readonly List<string> _needs = new List<string>();
+    private readonly List<string> _needs = [];
     /// <summary>
     /// 调用【UnSelect】方法写入的不需要返回的字段集合
     /// </summary>
-    private readonly List<string> _unNeeds = new List<string>();
+    private readonly List<string> _unNeeds = [];
 
+    /// <summary>
+    /// 数据库实体代理
+    /// </summary>
+    protected static readonly DbModelProxy Proxy = DbModelProxy.GetProxy<DbModel>();
     /// <summary>
     /// 路由分片
     /// </summary>
@@ -31,15 +34,15 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
     /// <summary>
     /// 过滤条件
     /// </summary>
-    protected readonly List<Expression<Func<DbModel, bool>>> Filters = new();
+    protected readonly List<Expression<Func<DbModel, bool>>> Filters = [];
     /// <summary>
     /// 字段排序条件；key为字段名，value为排序规则，升序还是降序
     /// </summary>
-    protected readonly List<KeyValuePair<string, bool>> Orders = new();
+    protected readonly List<KeyValuePair<string, bool>> Orders = [];
     /// <summary>
     /// 查询时，返回的字段信息；空表示返回所有字段
     /// </summary>
-    protected readonly List<string> Selects = new List<string>();
+    protected readonly List<string> Selects = [];
     /// <summary>
     /// 分页时忽略的数据量
     /// </summary>
@@ -276,7 +279,7 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
         List<KeyValuePair<string, bool>> sorts = Orders.GroupBy(order => order.Key)
                 .Select(group => new KeyValuePair<string, bool>(group.Key, group.Last().Value))
                 .ToList();
-        if (forceSortFieldName?.Length > 0)
+        if (IsNullOrEmpty(forceSortFieldName) == false)
         {
             bool bValue = sorts.Any(order => order.Key == forceSortFieldName);
             if (bValue == false)
@@ -314,7 +317,7 @@ public abstract class DbQueryable<DbModel> : IDbQueryable<DbModel> where DbModel
         else
         {
             var needs = _needs.Count == 0
-                ? DbModelHelper.GetTable<DbModel>().Fields.Select(field => field.Name)
+                ? Proxy.Table.Fields.Select(field => field.Name)
                 : _needs;
             needs.Except(_unNeeds).AppendTo(Selects);
         }
