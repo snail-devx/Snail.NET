@@ -11,9 +11,9 @@ public class ElasticUpdatable<DbModel> : DbUpdatable<DbModel>, IDbUpdatable<DbMo
 {
     #region 属性变量
     /// <summary>
-    /// Elasti运行器
+    /// 数据库访问提供程序
     /// </summary>
-    protected readonly ElasticModelRunner<DbModel> Runner;
+    protected readonly ElasticProvider Provider;
     /// <summary>
     /// 过滤条件构建器
     /// </summary>
@@ -24,13 +24,13 @@ public class ElasticUpdatable<DbModel> : DbUpdatable<DbModel>, IDbUpdatable<DbMo
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="runner">运行器</param>
+    /// <param name="provider">数据库访问提供程序</param>
     /// <param name="builder">过滤条件构建器；为null则使用默认的<see cref="ElasticFilterBuilder{DbModel}"/></param>
     /// <param name="routing">路由信息</param>
-    public ElasticUpdatable(ElasticModelRunner<DbModel> runner, ElasticFilterBuilder<DbModel>? builder, string? routing)
+    public ElasticUpdatable(ElasticProvider provider, ElasticFilterBuilder<DbModel>? builder, string? routing)
         : base(routing)
     {
-        Runner = ThrowIfNull(runner);
+        Provider = ThrowIfNull(provider);
         FilterBuilder = builder ?? ElasticFilterBuilder<DbModel>.Default;
     }
     #endregion
@@ -49,13 +49,12 @@ public class ElasticUpdatable<DbModel> : DbUpdatable<DbModel>, IDbUpdatable<DbMo
          */
         //  遍历符合条件数据，遍历时，不需要具体的数据，仅需返回Source字段值即可
         ElasticQueryModel query = FilterBuilder.BuildFilter(Filters);
-        List<string> urlParams = ["_source=false"];
-        long total = await Runner.ForEachDatas(Routing, query, async ret =>
+        long total = await Provider.ForEachDatas<DbModel>(Routing, query, async ret =>
         {
             //  取到id和routing值
             IDictionary<string, string?> idRoutingMap = ret.Hits!.Hits!.ToDictionary(hit => hit.Id, hit => hit.Routing)!;
-            await Runner.Updates(Routing, idRoutingMap, Updates);
-        }, urlParams);
+            await Provider.Updates<DbModel, string>(Routing, idRoutingMap, Updates);
+        }, urlParams: ["_source=false"]);
         return total;
     }
     #endregion

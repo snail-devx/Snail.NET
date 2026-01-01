@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
+using Snail.Abstractions.Database.Extensions;
 using Snail.Database.Components;
 using Snail.Database.Utils;
 using Snail.Elastic.DataModels;
 using Snail.Elastic.Extensions;
-using Snail.Utilities.Common.Extensions;
 using Snail.Utilities.Linq.Extensions;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using static Snail.Elastic.Utils.ElasticBuilder;
+using static Snail.Elastic.Utils.ElasticHelper;
 
 namespace Snail.Elastic.Components;
 
@@ -26,6 +26,10 @@ public class ElasticFilterBuilder<DbModel> where DbModel : class
     /// 默认的筛选条件过滤器
     /// </summary>
     public static readonly ElasticFilterBuilder<DbModel> Default = new ElasticFilterBuilder<DbModel>(formatter: null);
+    /// <summary>
+    /// 数据实体代理类
+    /// </summary>
+    protected static readonly DbModelProxy Proxy = DbModelProxy.GetProxy<DbModel>();
 
     /// <summary>
     /// 过滤条件格式化器
@@ -203,7 +207,7 @@ public class ElasticFilterBuilder<DbModel> where DbModel : class
     {
         //  基于比较类型分发，确保各数据库相同条件返回值一致；屏蔽数据库差异；照着【SqlDbFilterBuilder】翻译，可能会有一些冗余，但代码可读性高
         /*      ElasticSearch中Null体现为 不存在*/
-        string field = GetDbFieldName(leftMember);
+        string field = Proxy.GetField(leftMember).Name;
         string? value = ConvertToString(rightConst.Value);
         switch (compareType)
         {
@@ -257,7 +261,7 @@ public class ElasticFilterBuilder<DbModel> where DbModel : class
     {
         /*  这里就不验证必须是字符串了和最小参数，若不是，则说明格式化没做好*/
         //  1、分析like值、是否忽略大小写、验证方法调用是否合法；分析出字段名
-        string field = GetDbFieldName(member);
+        string field = Proxy.GetField(member).Name;
         string? value = DbFilterHelper.GetLikeQueryValue(methodExpress, out bool ignoreCase);
         //  2、进行分发调用
         switch (value)
@@ -303,7 +307,7 @@ public class ElasticFilterBuilder<DbModel> where DbModel : class
             : JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(valuesT))
                 ?.Select(ConvertToString)
                 ?.ToList();
-        string field = GetDbFieldName(member!);
+        string field = Proxy.GetField(member).Name;
         //  分发构建查询：根据null和values分发处理；查询条件可能会有一些冗余，但代码可读性高
         /*      利用 |、switch分发，减少if、else if、else if、else的使用
          *      0|0 =0(无null，无有效值)  1|0 =1(仅有null值)；0|10 =10(仅有效值) 1|10=11(有null，有in值)*/
@@ -339,21 +343,6 @@ public class ElasticFilterBuilder<DbModel> where DbModel : class
         }
         ;
         return query!;
-    }
-
-    /// <summary>
-    /// 构建成员的数据字段名：为空报错
-    /// </summary>
-    /// <param name="member"></param>
-    /// <returns></returns>
-    protected string GetDbFieldName(MemberExpression member)
-    {
-        if (ElasticModelRunner<DbModel>.FieldMap.TryGetValue(member.Member.Name, out var field) == false)
-        {
-            string msg = $"无法查找成员{member.Member.Name}对应的数据库字段名称";
-            throw new KeyNotFoundException(msg);
-        }
-        return field.Name;
     }
     #endregion
 

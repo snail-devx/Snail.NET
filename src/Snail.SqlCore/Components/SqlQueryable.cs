@@ -1,9 +1,8 @@
-﻿using Snail.Abstractions.Database.DataModels;
+﻿using System.Reflection;
+using Snail.Abstractions.Database.DataModels;
 using Snail.Database.Components;
 using Snail.Database.Utils;
 using Snail.SqlCore.Enumerations;
-using Snail.SqlCore.Interfaces;
-using System.Reflection;
 
 namespace Snail.SqlCore.Components;
 
@@ -23,9 +22,9 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     /// </summary>
     protected readonly SqlFilterBuilder<DbModel> FilterBuilder;
     /// <summary>
-    /// sql数据库运行器
+    /// 数据库提供程序
     /// </summary>
-    protected readonly ISqlDbRunner Runner;
+    protected readonly SqlProvider Provider;
     #endregion
 
     #region 构造方法
@@ -33,14 +32,14 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     /// 构造方法
     /// </summary>
     /// <param name="pkProperty">主键属性</param>
-    /// <param name="runner">运行器</param>
+    /// <param name="provider">数据库提供程序</param>
     /// <param name="builder">过滤条件构建器/></param>
     /// <param name="routing">路由信息</param>
-    public SqlQueryable(PropertyInfo pkProperty, ISqlDbRunner runner, SqlFilterBuilder<DbModel> builder, string? routing)
+    public SqlQueryable(PropertyInfo pkProperty, SqlProvider provider, SqlFilterBuilder<DbModel> builder, string? routing)
         : base(routing)
     {
         PKProperty = ThrowIfNull(pkProperty);
-        Runner = ThrowIfNull(runner);
+        Provider = ThrowIfNull(provider);
         FilterBuilder = ThrowIfNull(builder);
     }
     #endregion
@@ -54,7 +53,7 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     public override async Task<long> Count()
     {
         string sql = BuildQuery(SelectUsageType.Count, out IDictionary<string, object> param, sorts: out _);
-        long count = await Runner.RunDbActionAsync(conn => conn.ExecuteScalarAsync<Int64>(sql, param), true, false);
+        long count = await Provider.RunDbActionAsync(conn => conn.ExecuteScalarAsync<long>(sql, param), isReadAction: true, needTransaction: false);
         return count;
     }
     /// <summary>
@@ -66,7 +65,7 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     {
         //  强制值需要1条数据；先使用DbModel做泛型转换，后续考虑做一些其他逻辑处理，如select 1 这类操作
         string sql = BuildQuery(SelectUsageType.Any, out IDictionary<string, object> param, sorts: out _, take: 1);
-        IEnumerable<DbModel> ret = await Runner.RunDbActionAsync(con => con.QueryAsync<DbModel>(sql, param), true, false);
+        IEnumerable<DbModel> ret = await Provider.RunDbActionAsync(con => con.QueryAsync<DbModel>(sql, param), isReadAction: true, needTransaction: false);
         return ret.Any();
     }
 
@@ -79,7 +78,7 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     {
         //  强制值需要1条数据；
         string sql = BuildQuery(SelectUsageType.Data, out IDictionary<string, object> param, sorts: out _, take: 1);
-        DbModel? data = await Runner.RunDbActionAsync(con => con.QueryFirstOrDefaultAsync(sql, param), true, false);
+        DbModel? data = await Provider.RunDbActionAsync(con => con.QueryFirstOrDefaultAsync(sql, param), isReadAction: true, needTransaction: false);
         return data;
     }
     /// <summary>
@@ -91,7 +90,7 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     public override async Task<IList<DbModel>> ToList()
     {
         string sql = BuildQuery(SelectUsageType.Data, out IDictionary<string, object> param, sorts: out _);
-        IEnumerable<DbModel> result = await Runner.RunDbActionAsync(con => con.QueryAsync<DbModel>(sql, param), true, false);
+        IEnumerable<DbModel> result = await Provider.RunDbActionAsync(con => con.QueryAsync<DbModel>(sql, param), isReadAction: true, needTransaction: false);
         return result?.ToList() ?? [];
     }
     /// <summary>
@@ -103,7 +102,7 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
     public async override Task<DbQueryResult<DbModel>> ToResult()
     {
         string sql = BuildQuery(SelectUsageType.Data, out IDictionary<string, object> param, out var sorts, needSortField: true);
-        IEnumerable<DbModel> datas = await Runner.RunDbActionAsync(con => con.QueryAsync<DbModel>(sql, param), true, false);
+        IEnumerable<DbModel> datas = await Provider.RunDbActionAsync(con => con.QueryAsync<DbModel>(sql, param), isReadAction: true, needTransaction: false);
         //  使用【BuildLastSortKeyFilter】会有问题，目前没想到好的解决方式；还是使用skip逻辑；
         //return new DbQueryResult<DbModel>(datas).BuildLastSortKey(sorts);
         DbQueryResult<DbModel> ret = new DbQueryResult<DbModel>(datas?.ToArray());
@@ -168,16 +167,16 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
                      */
                     if (LastSortKey?.Length > 0)
                     {
-                        Int32 skip = DbFilterHelper.GetSkipValueFromLastSortKey(LastSortKey);
+                        int skip = DbFilterHelper.GetSkipValueFromLastSortKey(LastSortKey);
                         (this as IDbQueryable<DbModel>).Skip(skip);
                     }
-                    return Runner.BuildQuerySql(usageType, filterSql, selectFields, sorts, Skip, take);
+                    return Provider.BuildQuerySql<DbModel>(usageType, filterSql, selectFields, sorts, Skip, take);
                 }
             //  获取数据总量：仅构建Where条件查询
             case SelectUsageType.Count:
                 {
                     sorts = null;
-                    return Runner.BuildQuerySql(SelectUsageType.Count, filterSql);
+                    return Provider.BuildQuerySql<DbModel>(SelectUsageType.Count, filterSql);
                 }
             //  不支持，直接报错
             default:

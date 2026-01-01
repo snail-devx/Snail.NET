@@ -11,9 +11,9 @@ public class ElasticDeletable<DbModel> : DbDeletable<DbModel>, IDbDeletable<DbMo
 {
     #region 属性变量
     /// <summary>
-    /// Elasti运行器
+    /// 数据库访问提供程序
     /// </summary>
-    protected readonly ElasticModelRunner<DbModel> Runner;
+    protected readonly ElasticProvider Provider;
     /// <summary>
     /// 过滤条件构建器
     /// </summary>
@@ -24,13 +24,13 @@ public class ElasticDeletable<DbModel> : DbDeletable<DbModel>, IDbDeletable<DbMo
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="runner">运行器</param>
+    /// <param name="provider">数据库访问提供程序</param>
     /// <param name="builder">过滤条件构建器；为null则使用默认的<see cref="ElasticFilterBuilder{DbModel}"/></param>
     /// <param name="routing">路由信息</param>
-    public ElasticDeletable(ElasticModelRunner<DbModel> runner, ElasticFilterBuilder<DbModel>? builder, string? routing)
+    public ElasticDeletable(ElasticProvider provider, ElasticFilterBuilder<DbModel>? builder, string? routing)
         : base(routing)
     {
-        Runner = ThrowIfNull(runner);
+        Provider = ThrowIfNull(provider);
         FilterBuilder = builder ?? ElasticFilterBuilder<DbModel>.Default;
     }
     #endregion
@@ -44,7 +44,7 @@ public class ElasticDeletable<DbModel> : DbDeletable<DbModel>, IDbDeletable<DbMo
     public async override Task<long> Delete()
     {
         ElasticQueryModel query = FilterBuilder.BuildFilter(Filters);
-        return await Runner.DeleteByQuery(Routing, query);
+        return await Provider.DeleteByQuery<DbModel>(Routing, query);
     }
     #endregion
 }

@@ -1,15 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 using Snail.Abstractions.Database.DataModels;
+using Snail.Abstractions.Database.Extensions;
 using Snail.Database.Components;
-using Snail.Database.Utils;
 using Snail.Elastic.DataModels;
 using Snail.Elastic.Extensions;
-using Snail.Utilities.Collections.Extensions;
-using Snail.Utilities.Common.Extensions;
 using static Snail.Elastic.Utils.ElasticHelper;
 
 namespace Snail.Elastic.Components;
-
 /// <summary>
 /// <see cref="IDbQueryable{DbModel}"/>接口的Elastic实现
 /// </summary>
@@ -20,7 +17,7 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
     /// <summary>
     /// Elasti运行器
     /// </summary>
-    protected readonly ElasticModelRunner<DbModel> Runner;
+    protected readonly ElasticProvider Provider;
     /// <summary>
     /// 过滤条件构建器
     /// </summary>
@@ -28,16 +25,17 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
     #endregion
 
     #region 构造方法
+
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="runner">运行器</param>
+    /// <param name="provider">运行器</param>
     /// <param name="builder">过滤条件构建器；为null则使用默认的<see cref="ElasticFilterBuilder{DbModel}"/></param>
     /// <param name="routing">路由信息</param>
-    public ElasticQueryable(ElasticModelRunner<DbModel> runner, ElasticFilterBuilder<DbModel>? builder, string? routing)
+    public ElasticQueryable(ElasticProvider provider, ElasticFilterBuilder<DbModel>? builder, string? routing)
         : base(routing)
     {
-        Runner = ThrowIfNull(runner);
+        Provider = ThrowIfNull(provider);
         FilterBuilder = builder ?? ElasticFilterBuilder<DbModel>.Default;
     }
     #endregion
@@ -52,8 +50,8 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
     {
         //  _发送count查询请求
         ElasticSearchModel search = BuildFilter();
-        string api = BuildAction(ElasticModelRunner<DbModel>.Table.Name, "_count", Routing);
-        string? ret = await Runner.Post(isReadonly: true, title: "Count", api, search.AsJson());
+        string api = BuildAction(Proxy.TableName, "_count", Routing);
+        string? ret = await Provider.Post(isReadonly: true, title: "Count", api, search.AsJson());
         //  解析count值
         /*  { "count": 1, "_shards": {...} } */
         long? count = JToken.Parse(ret ?? "{}")["count"]?.Value<long>();
@@ -67,8 +65,7 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
     public override async Task<bool> Any()
     {
         //  构建全量查询条件，包括排序分页等；但强制仅取1条数据，且只要_id值，仅用作判断存在性使用
-        IList<string> urlParam = ["filter_path=hits.hits._id"];
-        ElasticSearchResult<DbModel> ret = await ToSearch(needSelect: false, search => search.Size = 1, urlParam);
+        ElasticSearchResult<DbModel> ret = await ToSearch(needSelect: false, search => search.Size = 1, ["filter_path=hits.hits._id"]);
         return ret?.Hits?.Hits?.Count == 1;
     }
 
@@ -80,8 +77,7 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
     public override async Task<DbModel?> FirstOrDefault()
     {
         //  构建全量查询条件，包括分页排序等；但要强制仅取1条数据，且仅要source值，其他的不要
-        IList<string> urlParams = [PARAM_OnlySource];
-        ElasticSearchResult<DbModel> ret = await ToSearch(needSelect: true, init: search => search.Size = 1, urlParams);
+        ElasticSearchResult<DbModel> ret = await ToSearch(needSelect: true, init: search => search.Size = 1, [PARAM_OnlySource]);
         return ret?.Hits?.Hits?.FirstOrDefault()?.Source;
     }
     /// <summary>
@@ -93,8 +89,7 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
     public override async Task<IList<DbModel>> ToList()
     {
         //  构建全量查询条件，包括分页排序等；且仅要source值，其他的不要
-        List<string> urlParams = [PARAM_OnlySource];
-        ElasticSearchResult<DbModel> ret = await ToSearch(needSelect: true, init: null, urlParams: urlParams);
+        ElasticSearchResult<DbModel> ret = await ToSearch(needSelect: true, init: null, urlParams: [PARAM_OnlySource]);
         // 无数据，给默认空集合，和mongodb数据库保持一致
         return ret?.ToSource()?.ToList() ?? [];
     }
@@ -142,14 +137,10 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
         ElasticSearchModel search = BuildFilter();
         search.Souce = needSource == false ? bool.FalseString : null;
         //  2、排序：强制加上_id排序，避免分页时出现唯一性判断摇摆的问题
-        search.Sort = GetSorts(ElasticModelRunner<DbModel>.Table.PKField.Property.Name)
+        search.Sort = GetSorts(Proxy.PKField.Property.Name)
               .Select(kv =>
               {
-                  if (ElasticModelRunner<DbModel>.FieldMap.TryGetValue(kv.Key, out DbModelField? field) == false)
-                  {
-                      string msg = $"{nameof(BuildSearch)}：未找到排序中[{kv.Key}]对应的数据字段信息；{typeof(DbModel)}";
-                      throw new KeyNotFoundException(msg);
-                  }
+                  DbModelField field = Proxy.GetField(kv.Key, $"排序中[{kv.Key}]");
                   return new ElasticSortModel(field.Name, kv.Value);
               })
               .ToList();
@@ -176,7 +167,7 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
                 string msg = $"Skip+Take模式下，Skip+Take不能超过1w。Skip:{Skip}; Take:{Take}";
                 throw new ArgumentException(msg);
             }
-#pragma  warning restore CS0618
+#pragma warning restore CS0618
         }
         //      若明确指定了不需要取数据，则强制不要Source数据
         search.Souce = search.Size == 0 ? bool.FalseString : null;
@@ -199,16 +190,15 @@ public class ElasticQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMo
         //      Selects： 将selects字段值转换成实际的数据库字段名称
         if (needSelect == true && Selects.Count > 0)
         {
-            DbModelTable table = DbModelHelper.GetTable<DbModel>();
             string selectFields = Selects
-                .Select(pName => ElasticModelRunner<DbModel>.FieldMap.GetValueOrDefault(pName)?.Name)
+                .Select(pName => Proxy.FieldMap.GetValueOrDefault(pName)?.Name)
                 .Where(field => field != null)
                 .AsString(",");
             urlParams ??= [];
             urlParams.Add($"_source_includes={selectFields}");
         }
         //  发送查询API逻辑
-        return Runner.Search(Routing, search, urlParams);
+        return Provider.Search<DbModel>(Routing, search, urlParams);
     }
     #endregion
 }
