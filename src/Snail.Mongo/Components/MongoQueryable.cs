@@ -116,7 +116,7 @@ public class MongoQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbMode
     protected IFindFluent<DbModel, DbModel> BuildFindFluent(bool needProject, out List<KeyValuePair<string, bool>> sorts, bool needSortField = false)
     {
         //  1、准备工作：梳理排序字段，方便后续LastSortKey和排序使用：强制补位加上主键id升序
-        sorts = GetSorts(DbModelHelper.GetTable<DbModel>().PKField.Property.Name);
+        sorts = GetSorts(Proxy.PKField.Property.Name);
         //  2、基于筛选条件，构建IFindFluent<DbModel, DbModel>
         IFindFluent<DbModel, DbModel> fluent;
         {

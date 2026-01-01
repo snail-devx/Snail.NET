@@ -1,7 +1,8 @@
 ﻿using Snail.Abstractions.Database.DataModels;
-using Snail.Database.Utils;
 using Snail.Mongo.Components;
-using System.Runtime.CompilerServices;
+using Snail.Utilities.Threading.Extensions;
+using System.Text.RegularExpressions;
+using static Snail.Database.Components.DbModelProxy;
 
 namespace Snail.Mongo.Utils;
 
@@ -11,6 +12,11 @@ namespace Snail.Mongo.Utils;
 public static class MongoHelper
 {
     #region 属性变量
+    /// <summary>
+    /// 加锁对象
+    /// </summary>
+    private static object _lock = new object();
+
     /// <summary>
     /// 主键Id字段名
     /// </summary>
@@ -110,10 +116,7 @@ public static class MongoHelper
     /// <param name="dbServer">数据库服务器配置</param>
     /// <returns></returns>
     public static IMongoCollection<DbModel> CreateCollection<DbModel>(DbServerDescriptor dbServer) where DbModel : class
-    {
-        DbModelTable table = DbModelHelper.GetTable<DbModel>();
-        return CreateCollection<DbModel>(dbServer, table.Name);
-    }
+        => CreateCollection<DbModel>(dbServer, GetProxy<DbModel>().TableName);
     /// <summary>
     /// 基于数据库的数据实体对象构建基于BsonDocument对象的数据库连接
     ///     1、分析出DbModel对应的特性标签，从而分析出数据表名称
@@ -122,55 +125,110 @@ public static class MongoHelper
     /// <param name="dbServer">数据库服务器配置</param>
     /// <returns></returns>
     public static IMongoCollection<BsonDocument> CreateBsonCollection<DbModel>(DbServerDescriptor dbServer) where DbModel : class
-    {
-        DbModelTable table = DbModelHelper.GetTable<DbModel>();
-        return CreateCollection<BsonDocument>(dbServer, table.Name);
-    }
+        => CreateCollection<BsonDocument>(dbServer, GetProxy<DbModel>().TableName);
     #endregion
 
     #region BsonClassMap、BsonMemberMap相关
     /// <summary>
-    /// 注册类型的ClassMap
-    ///     1、确保在使用之前先注册，并只注册一次；否则可能导致重复注册
-    ///     2、提前进行bson相关注册；并进行字段名称、主键、new重写属性等处理
-    ///     3、若在<see cref="MongoProvider{DbModel,IdType}"/>子类中使用，则会自动注册；不用重复调用
+    /// 尝试注册类型的ClassMap
+    /// <para>1、确保在使用之前先注册，并只注册一次；否则可能导致重复注册</para>
+    /// <para>2、提前进行bson相关注册；并进行字段名称、主键、new重写属性等处理</para>
     /// </summary>
-    /// <param name="type">必须得是<see cref="DbTableAttribute"/>标记的数据库实体类型；否则会报错</param>
-    [MethodImpl(MethodImplOptions.Synchronized)]
-    public static DbModelTable RegisterClassMap(Type type)
+    /// <typeparam name="DbModel"></typeparam>
+    public static void TryRegisterClassMap<DbModel>() where DbModel : class
     {
         /*  MongoDB默认BsonClassMap.LookupClassMap无法对new重写属性做排除
          *  解决方式：自定义构建ClassMap然后做注册；构建时自动把无效字段（忽略、new重写）排除掉
          */
-
-        //  1、判断类型是否合法：必须得是DbModel有效类型
-        DbModelHelper.IsDbModel(type, true);
-        DbModelTable table = DbModelHelper.GetTable(type);
-        //  2、构建ClassMap进行注册：验证是否注册了，若已经注册了则直接报错
-        if (BsonClassMap.IsClassMapRegistered(type) == true)
+        Type type = typeof(DbModel);
+        if (BsonClassMap.IsClassMapRegistered(type) == false)
         {
-            /*
-             *  先不报错也不判断。能进入此判断条件，仅限于
-             *      1、同一个DbModel被多个 DbProvider注册，如先使用默认Provider，再使用自定义Provider
-             *          这种情况，不用管，直接返回即可。
-             *      2、同一个DbModel先使用MongDB自带驱动操作数据，再使用DbProvider操作数据
-             *          这种情况则可能出现错误
-             *              1、类型有new操作进行属性重写
-             *              2、数据库中字段在C#类中不存在
-             *      整体先不报错，出现概率较小，出错了再排查即可
-             */
-            return table;
-            //throw new ApplicationException($"MongoHelper.RegisterClassMap：重复注册了。type：{type.FullName}");
+            lock (_lock)
+            {
+                if (BsonClassMap.IsClassMapRegistered(type) == false)
+                {
+                    BsonClassMap classMap = BuildClassMap(type, GetProxy<DbModel>().Table)!;
+                    //  忽略扩展属性：解决反序列化时，class不存在对应字段/属性时报错的情况
+                    classMap.SetIgnoreExtraElements(true);
+                    classMap.SetIgnoreExtraElementsIsInherited(true);
+                    //  注册
+                    BsonClassMap.RegisterClassMap(classMap);
+                }
+            }
         }
-        BsonClassMap classMap = BuildClassMap(type, table)!;
-        //      忽略扩展属性：解决反序列化时，class不存在对应字段/属性时报错的情况
-        classMap.SetIgnoreExtraElements(true);
-        classMap.SetIgnoreExtraElementsIsInherited(true);
-        //      注册
-        BsonClassMap.RegisterClassMap(classMap);
-        //  3、返回数据库描述器对象
-        return table;
     }
+    /// <summary>
+    /// 尝试注册类型的ClassMap
+    /// <para>1、确保在使用之前先注册，并只注册一次；否则可能导致重复注册</para>
+    /// <para>2、提前进行bson相关注册；并进行字段名称、主键、new重写属性等处理</para>
+    /// </summary>
+    /// <param name="type"></param>
+    public static void TryRegisterClassMap(Type type)
+    {
+        /*  MongoDB默认BsonClassMap.LookupClassMap无法对new重写属性做排除
+         *  解决方式：自定义构建ClassMap然后做注册；构建时自动把无效字段（忽略、new重写）排除掉
+         */
+        if (BsonClassMap.IsClassMapRegistered(type) == false)
+        {
+            lock (_lock)
+            {
+                if (BsonClassMap.IsClassMapRegistered(type) == false)
+                {
+                    DbModelTable table = GetProxy(type).Table;
+                    BsonClassMap classMap = BuildClassMap(type, table)!;
+                    //  忽略扩展属性：解决反序列化时，class不存在对应字段/属性时报错的情况
+                    classMap.SetIgnoreExtraElements(true);
+                    classMap.SetIgnoreExtraElementsIsInherited(true);
+                    //  注册
+                    BsonClassMap.RegisterClassMap(classMap);
+                }
+            }
+        }
+    }
+
+    //  使用  public static void RegisterClassMap<DbModel>() where DbModel : class 替换了 
+    ///// <summary>
+    ///// 注册类型的ClassMap
+    /////     1、确保在使用之前先注册，并只注册一次；否则可能导致重复注册
+    /////     2、提前进行bson相关注册；并进行字段名称、主键、new重写属性等处理
+    /////     3、若在<see cref="MongoProvider{DbModel,IdType}"/>子类中使用，则会自动注册；不用重复调用
+    ///// </summary>
+    ///// <param name="type">必须得是<see cref="DbTableAttribute"/>标记的数据库实体类型；否则会报错</param>
+    //[MethodImpl(MethodImplOptions.Synchronized)]
+    //public static DbModelTable RegisterClassMap(Type type)
+    //{
+    //    /*  MongoDB默认BsonClassMap.LookupClassMap无法对new重写属性做排除
+    //     *  解决方式：自定义构建ClassMap然后做注册；构建时自动把无效字段（忽略、new重写）排除掉
+    //     */
+
+    //    //  1、判断类型是否合法：必须得是DbModel有效类型
+    //    DbModelHelper.IsDbModel(type, true);
+    //    DbModelTable table = DbModelHelper.GetTable(type);
+    //    //  2、构建ClassMap进行注册：验证是否注册了，若已经注册了则直接报错
+    //    if (BsonClassMap.IsClassMapRegistered(type) == true)
+    //    {
+    //        /*
+    //         *  先不报错也不判断。能进入此判断条件，仅限于
+    //         *      1、同一个DbModel被多个 DbProvider注册，如先使用默认Provider，再使用自定义Provider
+    //         *          这种情况，不用管，直接返回即可。
+    //         *      2、同一个DbModel先使用MongDB自带驱动操作数据，再使用DbProvider操作数据
+    //         *          这种情况则可能出现错误
+    //         *              1、类型有new操作进行属性重写
+    //         *              2、数据库中字段在C#类中不存在
+    //         *      整体先不报错，出现概率较小，出错了再排查即可
+    //         */
+    //        return table;
+    //        //throw new ApplicationException($"MongoHelper.RegisterClassMap：重复注册了。type：{type.FullName}");
+    //    }
+    //    BsonClassMap classMap = BuildClassMap(type, table)!;
+    //    //      忽略扩展属性：解决反序列化时，class不存在对应字段/属性时报错的情况
+    //    classMap.SetIgnoreExtraElements(true);
+    //    classMap.SetIgnoreExtraElementsIsInherited(true);
+    //    //      注册
+    //    BsonClassMap.RegisterClassMap(classMap);
+    //    //  3、返回数据库描述器对象
+    //    return table;
+    //}
 
     /// <summary>
     /// 基于C#成员名称，推断类型中的最符合条件的成员信息
@@ -226,6 +284,118 @@ public static class MongoHelper
     }
     #endregion
 
+    #region 查询条件构建
+    /// <summary>
+    /// 恒true
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <remarks>_id始终存在，构建 _id !=null 为恒true条件</remarks>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> All<DbModel>() where DbModel : class
+        => FilterDefinition<DbModel>.Empty;
+    /// <summary>
+    /// 恒false
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> None<DbModel>() where DbModel : class
+        => Eq<DbModel>("_id", null!);
+
+    /// <summary>
+    /// 等于
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Eq<DbModel>(string field, object? value) where DbModel : class
+        => new BsonDocument(field, BsonValue.Create(value));
+    /// <summary>
+    /// 不等于
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Ne<DbModel>(string field, object? value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$ne", BsonValue.Create(value)));
+
+    /// <summary>
+    /// 大于
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Gt<DbModel>(string field, object value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$gt", BsonValue.Create(value)));
+    /// <summary>
+    /// 大于等于
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Gte<DbModel>(string field, object value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$gte", BsonValue.Create(value)));
+    /// <summary>
+    /// 小于
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Lt<DbModel>(string field, object value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$lt", BsonValue.Create(value)));
+    /// <summary>
+    /// 小于等于
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Lte<DbModel>(string field, object value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$lte", BsonValue.Create(value)));
+
+    /// <summary>
+    /// In
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> In<DbModel>(string field, object value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$in", BsonArray.Create(value)));
+    /// <summary>
+    /// Not In
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="value">字段值</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Nin<DbModel>(string field, object value) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$nin", BsonArray.Create(value)));
+
+    /// <summary>
+    /// Like
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="regex">正则匹配</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Like<DbModel>(string field, Regex regex) where DbModel : class
+        => new BsonDocument(field, new BsonRegularExpression(regex));
+    /// <summary>
+    /// Not Like
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">数据库字段名</param>
+    /// <param name="regex">正则匹配</param>
+    /// <returns></returns>
+    public static FilterDefinition<DbModel> Nlike<DbModel>(string field, Regex regex) where DbModel : class
+        => new BsonDocument(field, new BsonDocument("$not", regex));
+    #endregion
+
     #region 数据操作相关
     /// <summary>
     /// 构建指定字段的过滤条件；
@@ -239,7 +409,7 @@ public static class MongoHelper
         ThrowIfNull(dbField);
         ThrowIfNullOrEmpty(fieldValues, "fieldValues为null或者空数组");
         BsonValue[] values = fieldValues
-            .Select(value => BsonValue.Create(DbModelHelper.BuildFieldValue(value!, dbField)))
+            .Select(value => BsonValue.Create(ConvertToDbValue(value!, dbField)))
             .ToArray();
         string fieldName = dbField.PK == true ? PK_FIELDNAME : dbField.Name;
         //  单个和多个的区别

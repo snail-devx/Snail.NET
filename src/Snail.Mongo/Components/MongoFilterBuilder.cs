@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Snail.Database.Components;
 using Snail.Database.Utils;
-using Snail.Mongo.Utils;
 using Snail.Utilities.Collections.Extensions;
 using Snail.Utilities.Linq.Extensions;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using static Snail.Mongo.Utils.MongoBuilder;
+using static Snail.Mongo.Utils.MongoHelper;
 
 namespace Snail.Mongo.Components;
 
@@ -363,7 +362,7 @@ public class MongoFilterBuilder<DbModel> where DbModel : class
     /// <returns></returns>
     protected string GetDbFieldName(string propertyName)
     {
-        string? dbFieldName = MongoHelper.InferBsonMemberMap(typeof(DbModel), propertyName)?.ElementName;
+        string? dbFieldName = InferBsonMemberMap(typeof(DbModel), propertyName)?.ElementName;
         if (string.IsNullOrEmpty(dbFieldName) == true)
         {
             dbFieldName = $"无法查找成员{propertyName}对应的数据库字段名称";

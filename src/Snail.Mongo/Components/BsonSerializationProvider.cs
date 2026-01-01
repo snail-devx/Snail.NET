@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Serializers;
-using Snail.Database.Utils;
 using Snail.Mongo.Utils;
+using static Snail.Database.Components.DbModelProxy;
 
 namespace Snail.Mongo.Components;
 
@@ -36,9 +36,10 @@ internal sealed class BsonSerializationProvider : BsonSerializationProviderBase
         //  这里判断一下，如果是DbModel，则看看是否注册了BsonClassMap，没注册则做一下兜底
         //      解决问题：部分apiModel返回值中用到了DbModel，此时dbModel若没注册，则会走mongo自带序列化逻辑，可能导致new、dbfield特性失效
         //      这里进做兜底注册，不管序列化器示例构建，交给mongo自己处理
-        _ = DbModelHelper.IsDbModel(type) && BsonClassMap.IsClassMapRegistered(type) == false
-                ? MongoHelper.RegisterClassMap(type)
-                : null;
+        if (IsDbModel(type) == true)
+        {
+            MongoHelper.TryRegisterClassMap(type);
+        }
 
         //  DbModel采用新的ClassMap注册方式，不用在这里注册自定义序列化器去解决序列化和反序列化的问题
         /**  详细参照 <see cref="MongoHelper.RegisterClassMap(Type)"/>*/

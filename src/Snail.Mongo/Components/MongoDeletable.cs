@@ -17,7 +17,6 @@ public class MongoDeletable<DbModel> : DbDeletable<DbModel>, IDbDeletable<DbMode
     /// 过滤条件构建器
     /// </summary>
     protected readonly MongoFilterBuilder<DbModel> FilterBuilder;
-
     #endregion
 
     #region 构造方法

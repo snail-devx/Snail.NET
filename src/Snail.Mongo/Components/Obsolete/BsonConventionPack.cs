@@ -1,9 +1,9 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 using Snail.Abstractions.Database.DataModels;
-using Snail.Database.Utils;
 using Snail.Mongo.Utils;
 using System.Reflection;
+using static Snail.Database.Components.DbModelProxy;
 
 namespace Snail.Mongo.Components.Obsolete;
 
@@ -79,8 +79,8 @@ internal sealed class BsonConventionPack : IConventionPack
             classMap.SetIgnoreExtraElements(true);
             classMap.SetIgnoreExtraElementsIsInherited(true);
             //  遍历现有的成员信息，进行DbFieldAttribute标记处理：字段名、主键、忽略属性逻辑。需要对DbModel做特定逻辑
-            DbModelTable? descriptor = DbModelHelper.IsDbModel(classMap.ClassType) == true
-                    ? DbModelHelper.GetTable(classMap.ClassType)
+            DbModelTable? descriptor = IsDbModel(classMap.ClassType) == true
+                    ? GetProxy(classMap.ClassType).Table
                     : null;
             foreach (string memberName in classMap.DeclaredMemberMaps.Select(item => item.MemberName).ToList())
             {
