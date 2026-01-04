@@ -13,10 +13,10 @@ public sealed class HttpMethodAttribute : Attribute
     /// <summary>
     /// 请求方法：Get、Post、、、
     /// </summary>
-    public Enumerations.HttpMethodType Method { set; get; } = Enumerations.HttpMethodType.Get;
+    public Enumerations.HttpMethodType Method { init; get; } = Enumerations.HttpMethodType.Get;
 
     /// <summary>
     /// 请求Url地址，目标服务器<see cref="HttpAspectAttribute"/>
     /// </summary>
-    public required string Url { set; get; }
+    public required string Url { init; get; }
 }

@@ -13,5 +13,5 @@ public sealed class ExpireAttribute : Attribute
     /// <summary>
     /// 多少秒后过期
     /// </summary>
-    public int Seconds { set; get; }
+    public int Seconds { init; get; }
 }
