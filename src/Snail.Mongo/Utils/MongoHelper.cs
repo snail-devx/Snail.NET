@@ -409,7 +409,7 @@ public static class MongoHelper
         ThrowIfNull(dbField);
         ThrowIfNullOrEmpty(fieldValues, "fieldValues为null或者空数组");
         BsonValue[] values = fieldValues
-            .Select(value => BsonValue.Create(ConvertToDbValue(value!, dbField)))
+            .Select(value => BsonValue.Create(BuildDbFieldValue(dbField, value!)))
             .ToArray();
         string fieldName = dbField.PK == true ? PK_FIELDNAME : dbField.Name;
         //  单个和多个的区别

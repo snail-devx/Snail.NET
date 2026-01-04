@@ -300,7 +300,7 @@ public class ElasticProvider : DbProvider, IDbProvider
                 throw new ArgumentException(routing);
             }
             //  解析主键Id值
-            string? idValue = GetDbValue(model, proxy.PKField)?.ToString();
+            string? idValue = ExtractDbFieldValue(proxy.PKField, model)?.ToString();
             if (IsNullOrEmpty(idValue) == true)
             {
                 idValue = $"分析出来的主键Id值为空，Model：{model.AsJson()}";

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Snail.Abstractions.Database.Attributes;
 using Snail.Abstractions.Database.DataModels;
+using Snail.Database.Attributes;
 using Snail.Utilities.Collections;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
@@ -13,19 +14,28 @@ public sealed class DbModelProxy
 {
     #region 属性变量
     /// <summary>
+    /// 无效基类
+    /// </summary>
+    private static readonly ReadOnlyCollection<Type> _assignableFromTypes = new ReadOnlyCollection<Type>([
+        typeof(Array),
+        typeof(Enum),
+        typeof(string),
+    ]);
+    /// <summary>
     /// 数据库实体代理缓存
     /// <para>1、key为数据库类型，需采用<see cref="DbTableAttribute"/>标注；value为实体相关信息</para>
     /// </summary>
     private static readonly LockMap<Type, DbModelProxy> _proxyMap = new();
     /// <summary>
-    /// 无效基类
+    /// 字段值集合处理代理字典
+    /// <para>1、key为字段的type值，value为字段值构建代理委托</para>
+    /// <para>2、用于把传入数据转成对应集合数据，满足pgsql等不能直接给参数赋值object，得是具体类型值的需求</para>
     /// </summary>
-    private static readonly List<Type> _assignableFromTypes = new List<Type>()
-    {
-        typeof(Array),
-        typeof(Enum),
-        typeof(string),
-    };
+    private static readonly LockMap<Type, Delegate> _fvsProxyMap = new LockMap<Type, Delegate>();
+    /// <summary>
+    /// 字段值集合处理代理方法
+    /// </summary>
+    private static readonly MethodInfo _fvsProxyMethod;
 
     /// <summary>
     /// 数据库实体表信息
@@ -48,9 +58,21 @@ public sealed class DbModelProxy
     /// 数据库实体对应的Json序列化设置
     /// </summary>
     public required JsonSerializerSettings JsonSetting { init; get; }
+
+    /// <summary>
+    /// 数据库缓存标签
+    /// </summary>
+    public required DbCacheAttribute? CacheOptions { get; init; }
     #endregion
 
     #region 构造方法
+    /// <summary>
+    /// 构造方法
+    /// </summary>
+    static DbModelProxy()
+    {
+        _fvsProxyMethod = typeof(DbModelProxy).GetMethod(nameof(ConvertFieldValues), BindingFlags.Static | BindingFlags.NonPublic)!;
+    }
     /// <summary>
     /// 私有构造方法
     /// </summary>
@@ -60,7 +82,7 @@ public sealed class DbModelProxy
 
     #region 公共方法
 
-    #region 静态方法
+    #region DbModel判断处理
     /// <summary>
     /// 判断指定类型是否是DbModel
     /// </summary>
@@ -96,97 +118,9 @@ public sealed class DbModelProxy
     /// <returns></returns>
     public static DbModelProxy GetProxy(Type type)
         => _proxyMap.GetOrAdd(ThrowIfNull(type), BuildProxy);
-
-    /// <summary>
-    /// 构建数据库字段值
-    /// </summary>
-    /// <param name="instance">实例值</param>
-    /// <param name="field">字段信息</param>
-    /// <returns></returns>
-    public static object? GetDbValue(object instance, DbModelField field)
-    {
-        ThrowIfNull(field);
-        object? pValue = field.Property.GetValue(instance);
-        //  值为null和非null做区分；非null做值类型检测和转换
-        object? newValue;
-        if (pValue == null)
-        {
-            newValue = null;
-        }
-        else if (pValue.GetType() == field.Type)
-        {
-            newValue = pValue;
-        }
-        //  为可空类型时，做特例处理
-        else
-        {
-            field.Type.IsNullable(out Type? type);
-            type ??= field.Type;
-            try { newValue = Convert.ChangeType(pValue, type); }
-            catch (Exception ex)
-            {
-                string msg = $"转换{field.Name}字段值失败：fieldType：{type}；value：{pValue.GetType()}";
-                throw new ApplicationException(msg, ex);
-            }
-        }
-        //  主键字段做验证
-        if (field.PK == true)
-        {
-            ThrowIfNull(newValue, "主键字段值不能为null");
-            if (newValue is string str)
-            {
-                ThrowIfNullOrEmpty(str, "主键字段值不能为空字符串");
-            }
-        }
-        //  返回
-        return newValue;
-    }
-    /// <summary>
-    /// 构建数据库字段值；将传入属性值转换成数据库字段类型值
-    /// </summary>
-    /// <param name="pValue">属性值</param>
-    /// <param name="field">字段信息</param>
-    /// <returns></returns>
-    public static object? ConvertToDbValue(object? pValue, DbModelField field)
-    {
-        ThrowIfNull(field);
-        //  值为null和非null做区分；非null做值类型检测和转换
-        object? newValue;
-        if (pValue == null)
-        {
-            newValue = null;
-        }
-        else if (pValue.GetType() == field.Type)
-        {
-            newValue = pValue;
-        }
-        //  为可空类型时，做特例处理
-        else
-        {
-            field.Type.IsNullable(out Type? type);
-            type ??= field.Type;
-            try { newValue = Convert.ChangeType(pValue, type); }
-            catch (Exception ex)
-            {
-                string msg = $"转换{field.Name}字段值失败：fieldType：{type}；value：{pValue.GetType()}";
-                throw new ApplicationException(msg, ex);
-            }
-        }
-        //  主键字段做验证
-        if (field.PK == true)
-        {
-            ThrowIfNull(newValue, "主键字段值不能为null");
-            if (newValue is string str)
-            {
-                ThrowIfNullOrEmpty(str, "主键字段值不能为空字符串");
-            }
-        }
-        //  返回
-        return newValue;
-    }
     #endregion
 
-    #region 实例方法
+    #region 属性字段处理
     /// <summary>
     /// 获取数据库字段信息；获取失败报错
     /// <para>1、报错信息格式：“无法查找<paramref name="title"/> ?? <paramref name="propertyName"/>对应的数据库字段信息”</para>
@@ -214,6 +148,66 @@ public sealed class DbModelProxy
     {
         ThrowIfNull(member);
         return GetField(member.Member.Name, $"成员[{member.Member.Name}]");
+    }
+
+    /// <summary>
+    /// 提取数据库字段值
+    /// <para>从<paramref name="model"/>中取传入字段<see cref="DbModelField.Property"/>对应的属性值</para>
+    /// </summary>
+    /// <param name="field">字段信息</param>
+    /// <param name="model">模型实例</param>
+    /// <returns></returns>
+    public static object? ExtractDbFieldValue<DbModel>(DbModelField field, DbModel model) where DbModel : class
+    {
+        ThrowIfNull(field);
+        ThrowIfNull(model);
+        object? pValue = field.Property.GetValue(model);
+        return ConvertFieldValue(field.Type, pValue, field.PK);
+    }
+    /// <summary>
+    /// 提取数据库字段值
+    /// <para>1、从传入的数据实体集合中提取指定字段值</para>
+    /// <para>2、用于把传入数据转成对应集合数据，满足pgsql等不能直接给参数赋值object，得是具体类型值的需求</para>
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="field">要提取值的数据字段，基于<see cref="DbModelField.Type"/>转换数据类型</param>
+    /// <param name="models"></param>
+    /// <returns>提取的数据字段值集合，不知道具体数据类型，这里用object代替，实际上为 <see cref="List{Type}"/></returns>
+    public static object ExtractDbFieldValues<DbModel>(DbModelField field, IList<DbModel> models) where DbModel : class
+    {
+        object[] values = models.Select(model => field.Property.GetValue(model)).ToArray()!;
+        return BuildDbFieldValues(field, values);
+    }
+    /// <summary>
+    /// 构建数据库字段值
+    /// <para>1、将传入的<paramref name="value"/>值转成符合字段<see cref="DbModelField.Type"/>类型的值</para>
+    /// </summary>
+    /// <param name="field">字段信息</param>
+    /// <param name="value">要转换的值</param>
+    /// <returns></returns>
+    public static object? BuildDbFieldValue(DbModelField field, object? value)
+    {
+        ThrowIfNull(field);
+        return ConvertFieldValue(field.Type, value, field.PK);
+    }
+    /// <summary>
+    /// 批量构建数据库字段值
+    /// <para>1、遍历传入的<paramref name="values"/>值转成符合字段<see cref="DbModelField.Type"/>类型的值</para>
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="values"></param>
+    /// <returns></returns>
+    public static object BuildDbFieldValues(DbModelField field, object[] values)
+    {
+        ThrowIfNull(field);
+        ThrowIfNullOrEmpty(values);
+        //  构建泛型方法，转换成泛型委托
+        Delegate @delegate = _fvsProxyMap.GetOrAdd(field.Type, type => Delegate.CreateDelegate
+        (
+            typeof(Func<,,>).MakeGenericType(typeof(IList<object?>), typeof(bool), typeof(IList<>).MakeGenericType(type)),
+            _fvsProxyMethod.MakeGenericMethod(type)
+        ));
+        return @delegate.DynamicInvoke(values, field.PK)!;
     }
     #endregion
 
@@ -348,7 +342,72 @@ public sealed class DbModelProxy
                 //  通过反射创建
                 ContractResolver = new DbModelJsonResolver(table),
             },
+            //  特性标签分析
+            CacheOptions = type.GetCustomAttribute<DbCacheAttribute>(),
         };
+    }
+
+    /// <summary>
+    /// 将字段值<paramref name="value"/>转换成指定的类型<paramref name="targetType"/>
+    /// </summary>
+    /// <param name="targetType">目标数据类型</param>
+    /// <param name="value">要转换的字段值</param>
+    /// <param name="isPK">是否是主键字段，为true时强制非空、字符串非空</param>
+    /// <returns></returns>
+    private static object? ConvertFieldValue(Type targetType, object? value, bool isPK)
+    {
+        //  值为null和非null做区分；非null做值类型检测和转换
+        object? newValue;
+        if (value == null)
+        {
+            newValue = null;
+        }
+        else if (value.GetType() == targetType)
+        {
+            newValue = value;
+        }
+        //  为可空类型时，做特例处理
+        else
+        {
+            targetType.IsNullable(out Type? type);
+            type ??= targetType;
+            try { newValue = Convert.ChangeType(value, type); }
+            catch (Exception ex)
+            {
+                string msg = $"转换{targetType.Name}字段值失败：fieldType：{type}；value：{value.GetType()}";
+                throw new ApplicationException(msg, ex);
+            }
+        }
+        //  主键字段做验证
+        if (isPK == true)
+        {
+            ThrowIfNull(newValue, "主键字段值不能为null");
+            if (newValue is string str)
+            {
+                ThrowIfNullOrEmpty(str, "主键字段值不能为空字符串");
+            }
+        }
+        //  返回
+        return newValue;
+    }
+    /// <summary>
+    /// 将字段值<paramref name="values"/>批量转换成指定的类型<typeparamref name="FieldType"/>
+    /// </summary>
+    /// <typeparam name="FieldType">字段值类型</typeparam>
+    /// <param name="values"></param>
+    /// <param name="isPK">是否是主键字段，为true时强制非空、字符串非空</param>
+    /// <returns></returns>
+    private static IList<FieldType> ConvertFieldValues<FieldType>(IList<object?> values, bool isPK)
+    {
+        List<FieldType> newValues = [];
+        Type targetType = typeof(FieldType);
+        for (var index = 0; index < values.Count; index++)
+        {
+            //  这里先忽略null的情况
+            FieldType newValue = (FieldType)ConvertFieldValue(targetType, values[index], isPK)!;
+            newValues.Add(newValue);
+        }
+        return newValues;
     }
     #endregion
 }

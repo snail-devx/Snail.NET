@@ -4,7 +4,6 @@ using Snail.Database.Components;
 using Snail.SqlCore.Components;
 using Snail.SqlCore.Enumerations;
 using Snail.SqlCore.Interfaces;
-using Snail.SqlCore.Utils;
 using Snail.Utilities.Collections.Extensions;
 using System.Data;
 using System.Data.Common;
@@ -81,13 +80,14 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
         ThrowIfHasNull(models!);
         //  先删除，后新增
         DbModelField pkField = GetProxy<DbModel>().PKField;
-        object ids = SqlHelper.ExtractDbFieldValues(pkField, models);
+        object ids = ExtractDbFieldValues(pkField, models);
         string deleteSql = deleteSql = BuildDeleteSql<DbModel>(BuildInFilter<DbModel>(pkField, ids, out var param));
         string insertSql = BuildInsertSql<DbModel>();
         await RunDbActionAsync(async conn =>
         {
             await conn.ExecuteAsync(deleteSql, param);
-            return conn.ExecuteAsync(insertSql, models);
+            //  这里需要强制await，避免pgsql等报错：Npgsql.NpgsqlOperationInProgressException:“A command is already in progress:
+            return await conn.ExecuteAsync(insertSql, models);
         }, isReadAction: false, needTransaction: true);
         return true;
     }
