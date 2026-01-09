@@ -53,11 +53,11 @@ public sealed class FactoryProxy
             {
                 Uri = new Uri(address),
                 //  先采用系统默认，后续优化
-                //RequestedConnectionTimeout = FromSeconds(60),
-                //RequestedChannelMax = 1000,// 每个连接的最大信道连接数
-                //AutomaticRecoveryEnabled = true,//自动重连
-                //RequestedHeartbeat = FromSeconds(60),//心跳时间，秒
-                //NetworkRecoveryInterval = FromSeconds(30),//网络故障恢复间隔时间
+                //RequestedConnectionTimeout = FromSeconds(60),//   链接超时时间，默认30s
+                //RequestedChannelMax = 1000,// 每个连接的最大信道连接数；默认为2047
+                //AutomaticRecoveryEnabled = true,//自动重连；默认为true
+                RequestedHeartbeat = FromSeconds(10),// 心跳时间改为10，默认为60s
+                //NetworkRecoveryInterval = FromSeconds(30),//网络故障恢复间隔时间；默认为5s
             };
             return new FactoryProxy(factory);
         });

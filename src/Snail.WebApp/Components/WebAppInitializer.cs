@@ -46,7 +46,7 @@ public class WebAppInitializer : IInitializer<WebApplication>
 
         };
         //  监听OnBuild事件，完成web应用内置中间件集成
-        application.OnBuild += (app, services) =>
+        application.OnBuilded += (app, services) =>
         {
             //  启用 请求提交数据 重复读取功能：解决actionfilter取不到request.Body数据的问题
             app.UseRereadRequestBody();

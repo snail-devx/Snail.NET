@@ -9,6 +9,7 @@ using Snail.Abstractions.Web.Interfaces;
 using Snail.RabbitMQ.Components;
 using Snail.RabbitMQ.Exceptions;
 using Snail.Utilities.Common.Extensions;
+using static System.Environment;
 
 namespace Snail.RabbitMQ;
 
@@ -59,8 +60,8 @@ public class MessageProvider : IMessageProvider
         ChannelProxy? channel = null;
         void onChannelError(string title, string reason)
         {
-            title = $"发送[{type.ToString()}]消息:{title}";
-            App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{options.AsJson()}{Environment.NewLine}\t{server.ToString()}");
+            title = $"发送[{type}]消息：{title}";
+            App.LogErrorFile(title, $"消息配置：{options.GetString()} ；服务器：{server}{NewLine}\t{reason}");
         }
         try
         {
@@ -111,16 +112,12 @@ public class MessageProvider : IMessageProvider
         ThrowIfNull(receiver);
         ThrowIfNull(options);
         ThrowIfNull(server);
-        string logTitle = $"Received.Start   Server:{server.ToString()}";
-        string opName = $"接收[{type.ToString()}]消息：{options.AsJson()}";
-
         //  1、基于信道，构建交换机、队列
         ChannelProxy? channel = null;
         string queue;
         void onChannelError(string title, string reason)
         {
-            title = $"接收[{type.ToString()}]消息:{title}";
-            App.LogErrorFile(title, $"{reason}{Environment.NewLine}\t{opName}{Environment.NewLine}\t{server.ToString()}");
+            App.LogErrorFile($"接收[{type}]消息：{title}", $"消息配置：{options.GetString()} ；服务器：{server}{NewLine}\t{reason}{NewLine}");
         }
         try
         {
@@ -131,11 +128,11 @@ public class MessageProvider : IMessageProvider
         }
         catch (Exception ex)
         {
-            App.LogErrorFile(logTitle, opName, ex);
+            App.LogErrorFile($"接收[{type}]消息：初始化消息队列失败", $"消息配置：{options.GetString()} ；服务器：{server}", ex);
             throw;
         }
         //  2、构建消息接收处理器
-        ReceiverProxy<T> proxy = new(options.Attempt, receiver);
+        ReceiverProxy<T> proxy = new ReceiverProxy<T>(options.Attempt, receiver);
         async Task onReceived(object sender, BasicDeliverEventArgs args)
         {
             bool isSuccess = false, dataConverted = false;
@@ -159,7 +156,8 @@ public class MessageProvider : IMessageProvider
             //  若是转换消息数据失败，则强制成功
             if (dataConverted == false)
             {
-                App.LogErrorFile(opName, $"转换数据失败，消息强制成功。目标类型：{typeof(T).FullName}。数据：{dataStr}");
+                string content = $"消息配置：{options.GetString()} ；服务器：{server}{NewLine}\t目标类型：{typeof(T).FullName}。数据：{dataStr}";
+                App.LogErrorFile($"接收[{type}]消息：转换数据失败，消息强制成功消费", content);
                 isSuccess = true;
             }
             //  消息处理是否成功
@@ -184,16 +182,21 @@ public class MessageProvider : IMessageProvider
                 }
                 AsyncEventingBasicConsumer consumer = new(channel.Object);
                 consumer.ReceivedAsync += onReceived;
-                //  接收消息：每次接收1个
+                //  接收消息：每次接收1个；强制约束 consumerTag，避免自动重连时发生变化，影响关闭时销毁
                 await channel.Object.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
-                await channel.Object.BasicConsumeAsync(queue, autoAck: false, consumer);
-                //  执行完成后，将信道清理掉，方便下次循环使用
-                channel = null;
+                string consumerTag = Guid.NewGuid().ToString();
+                await channel.Object.BasicConsumeAsync(queue, autoAck: false, consumerTag: consumerTag, consumer: consumer);
+                //  接收应用程序关闭事件，停止继续接收消息
+                App.OnStop += async () =>
+                {
+                    await channel.Object.BasicCancelAsync(consumerTag);
+                    (channel as IPoolObject).Used();
+                };
             }
         }
         catch (Exception ex)
         {
-            App.LogErrorFile(logTitle, opName, ex);
+            App.LogErrorFile($"接收[{type}]消息：启动消息接收失败", $"消息配置：{options.GetString()} ；服务器：{server}", ex);
             throw;
         }
         //  无错误返回true，表示接收逻辑执行成功

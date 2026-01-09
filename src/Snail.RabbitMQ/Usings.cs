@@ -1,6 +1,7 @@
 ﻿//  基础通用
 global using Snail.Abstractions.Dependency.Extensions;
 global using Snail.Abstractions.Message.Enumerations;
+global using Snail.Abstractions.Message.Extensions;
 global using Snail.Abstractions.Message.Interfaces;
 //  引入静态助手类方法
 global using static Snail.Abstractions.ConstString;

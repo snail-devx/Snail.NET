@@ -13,11 +13,11 @@ public static class ConstString
     /// <summary>
     /// 字符串：true
     /// </summary>
-    public const string STR_True = "true";
+    public const string STR_True = "True";
     /// <summary>
     /// 字符串：false
     /// </summary>
-    public const string STR_False = "false";
+    public const string STR_False = "False";
     /// <summary>
     /// 字符串：分隔符，用于切割和拼接字符串
     /// </summary>
@@ -54,12 +54,7 @@ public static class ConstString
     public const string MIDDLEWARE_RunContext = "RunContext";
     #endregion
 
-    #region 上下文
-    /// <summary>
-    /// 上下文Key：禁用日志
-    /// </summary>
-    public const string CONTEXT_DisableLog = "_DISABLE_LOG_";
-
+    #region 上下文和特定Key值
     /// <summary>
     /// 上下文Key：trace_id
     /// </summary>
@@ -68,6 +63,14 @@ public static class ConstString
     /// 上下文Key：parent_span_id
     /// </summary>
     public const string CONTEXT_ParentSpanId = "X-Parent-Span-ID";
+
+    /// <summary>
+    /// Key：是否已记录数据
+    /// <para>1、接收数据时，有此标记，说明发送方已经记录了请求数据了，接收后不用重复记录</para>
+    /// <para>2、发送请求时，若已经记录了发送数据，则上下文加上此标记，避免接收方重复记录</para>
+    /// <para>在http请求的发送时，加上</para>
+    /// </summary>
+    public const string KEY_RecordData = "X-Record-Data";
     #endregion
 
     #region 依赖注入Key值

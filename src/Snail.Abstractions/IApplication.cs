@@ -46,13 +46,19 @@ public interface IApplication
     /// </summary>
     event Action<IDIManager>? OnRegistered;
     /// <summary>
-    /// 事件：程序运行时触发
+    /// 事件：程序运行时
     /// <para>1、触发时机：app配置完成，准备启动前触发</para>
     /// <para>2、用途说明：用于启动依赖的相关服务，如启动mq接收消息</para>
     /// <para>3、参数说明：</para>
     /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
     /// </summary>
     event Action<IDIManager>? OnRun;
+    /// <summary>
+    /// 事件：程序停止时
+    /// <para>1、触发时机：程序关闭时触发</para>
+    /// <para>2、用途说明：实现程序关闭前的资源销毁等处理，若内部为异步任务，则返回Task，否则返回null</para>
+    /// </summary>
+    event Func<Task?>? OnStop;
 
     /// <summary>
     /// 应用根目录；默认exe所在目录，从<see cref="AppContext.BaseDirectory"/>取值
@@ -76,13 +82,13 @@ public interface IApplication
     IDIManager ScopeServices { get; }
 
     /// <summary>
-    /// 运行应用程序，执行顺序
-    /// <para>1、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="OnScan"/>事件</para>
-    /// <para>2、读取应用程序配置，外部通过<see cref="ISettingManager.Use"/>使用配置 </para>
-    /// <para>3、自定义服务注册；触发<see cref="OnRegister"/>事件，用于完成个性化di替换等</para>
-    /// <para>4、自定义服务注册完成；触发<see cref="OnRegistered"/>事件，用于进行一些服务、组件预热</para>
-    /// <para>5、服务启动；触发<see cref="OnRun"/>事件</para>
+    /// 运行应用程序
     /// </summary>
     void Run();
+    /// <summary>
+    /// 停止应用程序
+    /// </summary>
+    /// <returns>任务对象；若内部存在异步处理，则返回Task，方便外部等待优雅退出</returns>
+    Task? Stop();
     #endregion
 }

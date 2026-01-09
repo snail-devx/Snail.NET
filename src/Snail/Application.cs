@@ -10,24 +10,18 @@ using System.Diagnostics;
 using System.Runtime.Loader;
 
 namespace Snail;
-
 /// <summary>
-/// 应用程序；泛型，支持<see cref="OnBuild"/>事件
+/// 应用程序：启动<see cref="IApplication.Run"/>时，执行顺序如下
+/// <para>1、内置服务注册（在app构造方法执行）</para>
+/// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
+/// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
+/// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
+/// <para>5、自定义服务注册完成；触发<see cref="IApplication.OnRegistered"/>事件，用于进行一些服务、组件预热</para>
+/// <para>6、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
 /// </summary>
-/// <typeparam name="App">应用程序类型</typeparam>
-public abstract class Application<App> : IApplication where App : class
+public class Application : IApplication
 {
-    #region 事件、属性变量
-    /// <summary>
-    /// 事件：配置Web应用时；
-    /// <para>1、触发时机：<see cref="OnRun"/>之前执行</para>
-    /// <para>2、用途说明：区别于OnRun，暴露构建完的app实例做一些专有配置，如WebApi配置app中间件等；</para>
-    /// <para>3、参数说明：</para>
-    /// <para>- <see cref="Application{App}"/>的泛型类型App的实例；如WebAPI项目的 WebApplicationBuilder</para>
-    /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
-    /// </summary>
-    public event Action<App, IDIManager>? OnBuild;
-
+    #region 属性变量
     /// <summary>
     /// 依赖注入根服务
     /// </summary>
@@ -100,6 +94,12 @@ public abstract class Application<App> : IApplication where App : class
     /// <para>- <see cref="IDIManager"/> 为根服务注入实例</para>
     /// </summary>
     public event Action<IDIManager>? OnRun;
+    /// <summary>
+    /// 事件：程序停止时
+    /// <para>1、触发时机：程序关闭时触发</para>
+    /// <para>2、用途说明：实现程序关闭前的资源销毁等处理，若内部为异步任务，则返回Task，否则返回null</para>
+    /// </summary>
+    public event Func<Task?>? OnStop;
 
     /// <summary>
     /// 应用配置 管理器
@@ -117,52 +117,73 @@ public abstract class Application<App> : IApplication where App : class
     IDIManager IApplication.ScopeServices => DIManager.TrySetCurrent(RootServices.New);
 
     /// <summary>
-    /// 运行应用程序，执行顺序
-    /// <para>1、内置服务注册（在app构造方法执行）</para>
-    /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
-    /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
-    /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
-    /// <para>5、自定义服务注册完成；触发<see cref="OnRegistered"/>事件，用于进行一些服务、组件预热</para>
-    /// <para>6、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
-    /// <para>7、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
+    /// 运行应用程序
     /// </summary>
-    void IApplication.Run() => Run(appBuilder: null);
+    public void Run()
+    {
+        //  1、启用应用程序构建
+        StartBuild();
+        //  2、启动应用
+        OnRun?.Invoke(RootServices);
+        OnRun = null;
+    }
+    /// <summary>
+    /// 停止应用程序
+    /// </summary>
+    /// <returns>异步任务；若内部存在异步处理，则返回Task，方便外部等待优雅退出</returns>
+    public Task? Stop()
+    {
+        if (OnStop == null)
+        {
+            return null;
+        }
+        //  触发停止事件
+        List<Task> tasks = [];
+        foreach (Func<Task?> stop in OnStop.GetInvocationList().Cast<Func<Task?>>())
+        {
+            stop.Invoke()?.AddTo(tasks);
+        }
+        return tasks.Count > 1 ? Task.WhenAll(tasks) : tasks.FirstOrDefault();
+    }
     #endregion
 
     #region 继承方法
+    //  暂时不对外开放，意义不大
+    ///// <summary>
+    ///// 启动应用程序
+    ///// <para>1、应用程序构建：执行<see cref="StartBuild"/>方法，完成应用程序构建逻辑</para>
+    ///// <para>2、触发<see cref="OnRun"/>事件，完成程序程序</para>
+    ///// </summary>
+    //protected virtual void Start()
+    //{
+    //    //  1、启用应用程序构建
+    //    StartBuild();
+    //    //  2、启动应用
+    //    OnRun?.Invoke(RootServices);
+    //    OnRun = null;
+    //}
     /// <summary>
-    /// 运行程序
+    /// 启动应用构建
+    /// <para>1、启动应用扫描：执行<see cref="StartScan"/>完成内置服务注册</para>
+    /// <para>2、应用配置构建：加载 App_Setting 下的应用程序配置文件，执行<see cref="ISettingManager.Run"/></para>
+    /// <para>3、启动服务注册：触发<see cref="OnRegister"/>、<see cref="OnRegistered"/>事件，完成自定义服务注册和内置服务替换</para>
     /// </summary>
-    /// <param name="appBuilder">应用程序构建委托</param>
-    protected void Run(Func<App>? appBuilder)
+    protected virtual void StartBuild()
     {
-        /*  执行应用程序集扫描，然后触发各个层级事件    */
-        //  1、自定义【依赖注入】、服务信息注册；触发服务注册事件，交给外部进行自定义服务注册
+        //  1、启动服务扫描
         if (OnScan != null)
         {
             StartScan(this, OnScan);
             OnScan = null;
         }
+        //  2、应用配置构建
         ((IApplication)this).Setting.Run();
-        //      组件服务注册
-        {
-            OnRegister?.Invoke(RootServices);
-            OnRegister = null;
-            OnRegistered?.Invoke(RootServices);
-            OnRegistered = null;
-        }
-        //  2、程序启动；启动自定义服务，触发【OnRun】事件，交给外部进行自定义服务启动
-        if (appBuilder != null)
-        {
-            var app = appBuilder.Invoke();
-            ThrowIfNull(app, $"{nameof(appBuilder)}委托返回的App对象为null");
-            OnBuild?.Invoke(app, RootServices);
-            OnBuild = null;
-        }
-        OnRun?.Invoke(RootServices);
-        OnRun = null;
+        //  3、服务注册
+        OnRegister?.Invoke(RootServices);
+        OnRegister = null;
+        OnRegistered?.Invoke(RootServices);
+        OnRegistered = null;
     }
-
     /// <summary>
     /// 启动应用扫描
     /// <para>注意事项： </para>
@@ -173,7 +194,7 @@ public abstract class Application<App> : IApplication where App : class
     /// </summary>
     /// <param name="app">应用程序实例，会自动扫描对应的<see cref="IApplication.RootDirectory"/>目录下程序集做补偿</param>
     /// <param name="callback">扫描程序集后，遍历<see cref="Type"/>的回调方法</param>
-    protected void StartScan(IApplication app, in Action<IDIManager, Type, ReadOnlySpan<Attribute>> callback)
+    protected virtual void StartScan(IApplication app, in Action<IDIManager, Type, ReadOnlySpan<Attribute>> callback)
     {
         ThrowIfNull(callback);
         //  获取需要扫描的程序集
@@ -401,25 +422,5 @@ public abstract class Application<App> : IApplication where App : class
         }
         types.TryAddRange(aspectTypes);
     }
-    #endregion
-}
-
-/// <summary>
-/// 应用程序
-/// </summary>
-public class Application : Application<Application>, IApplication
-{
-    #region IApplication
-    /// <summary>
-    /// 运行应用程序，执行顺序
-    /// <para>1、内置服务注册（在app构造方法执行）</para>
-    /// <para>2、扫描程序集，扫描<see cref="Type"/>完成特定<see cref="Attribute"/>分析注册，触发<see cref="IApplication.OnScan"/>事件</para>
-    /// <para>3、读取应用程序配置，外部通过<see cref="ISettingManager.Use(in bool, in string, SettingUserDelegate)"/>使用配置</para>
-    /// <para>4、自定义服务注册；触发<see cref="IApplication.OnRegister"/>事件，用于完成个性化di替换等</para>
-    /// <para>5、自定义服务注册完成；触发<see cref="IApplication.OnRegistered"/>事件，用于进行一些服务、组件预热</para>
-    /// <para>6、应用构建；触发<see cref="Application{T}.OnBuild"/> 完成应用启动前自定义配置</para>
-    /// <para>7、服务启动；触发<see cref="IApplication.OnRun"/>，运行WebApp应用</para>
-    /// </summary>
-    public void Run() => Run(appBuilder: () => this);
     #endregion
 }
