@@ -35,7 +35,7 @@ public sealed class CookieMiddleware : IMiddleware
     Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
     {
         /*  未识别的Cookie值举例 _SHARE_KEY_CHAIN_ key 值不会被识别
-         *      _SHARE_KEY_CHAIN_=  {"key1":"123","key3":"value2"};_LOGSENDDATA_=True
+         *      _SHARE_KEY_CHAIN_=  {"key1":"123","key3":"value2"}
          *  实现思路，将特定的关键字，进行url编码；然后再赋值给header
          *      如下为微软CookieHeaderParserShared中对cookie值的有效性做的判断 
                      if (c < 0x21 || c > 0x7E)

@@ -9,15 +9,6 @@ public static class RunContextExtensions
     {
         #region 扩展属性
         /// <summary>
-        /// 当前上下文是否禁用日志
-        /// </summary>
-        public bool DisableLog
-        {
-            get => STR_True.IsEqual(context.Get<string>(CONTEXT_DisableLog), ignoreCase: true);
-            set => context.Add<string>(CONTEXT_DisableLog, value.ToString());
-        }
-
-        /// <summary>
         /// trace_id；追踪Id 
         /// </summary>
         /// <para>1、分布式系统中用于唯一标识一次完整请求调用链路的全局唯一标识符</para>

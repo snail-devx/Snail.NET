@@ -73,6 +73,22 @@ public static class DictionaryExtensions
             return dictionary;
         }
         /// <summary>
+        /// 尝试为字典设置Key-Value值；不存在添加，存在覆盖
+        /// </summary>
+        /// <param name="condition">为true时设置字典值</param>
+        /// <param name="key">key值</param>
+        /// <param name="value">value值</param>
+        /// <returns>字典本身；方便实现链式调用</returns>
+        public IDictionary<TKey, TValue> TrySet(in bool condition, in TKey key, in TValue value)
+        {
+            if (condition == true)
+            {
+                dictionary.Set(key, value);
+            }
+            return dictionary;
+        }
+
+        /// <summary>
         /// 字典合并
         /// <para>1、将指定的多个字典对象合并给当前字典 </para>
         /// <para>2、key存在则覆盖，不存在添 </para>

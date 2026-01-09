@@ -83,7 +83,7 @@ internal static class Log4NetHelper
                 builder.Append(PREFIX_EmptyTab).AppendLine($"操作Id：{scope.ContextId}；父级Id：{scope.ParentId ?? "null"}");
             }
             //  日志标签
-            if (descriptor.LogTag != null)
+            if (string.IsNullOrEmpty(descriptor.LogTag) == false)
             {
                 builder.Append(PREFIX_EmptyTab)
                        .AppendLine($"日志标签：{descriptor.LogTag}");

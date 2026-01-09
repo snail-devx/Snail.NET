@@ -82,10 +82,8 @@ public sealed class Logger : ILogger
     /// <returns>可用返回true；否则返回false</returns>
     public bool IsEnable(LogLevel level, bool forceLog = false)
     {
-        /*  强制日志，不管级别是啥都记录；非强制日志：1、日志等级匹配，2、未全局禁用日志 */
-        return forceLog == true
-            ? true
-            : (RunContext.Current.DisableLog == false && level >= _level);
+        /*  强制日志，不管级别是啥都记录；非强制日志：1、日志等级匹配 */
+        return forceLog == true ? true : level >= _level;
     }
 
     /// <summary>

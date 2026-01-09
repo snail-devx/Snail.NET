@@ -57,13 +57,12 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <returns></returns>
     async Task<bool> ISendMiddleware.Send(MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server, SendDelegate next)
     {
-        //  初始化遥测追踪数据，记录日志
+        //  初始化遥测追踪数据，记录日志，并将【KEY_RecordData】标记传入到消息上下文中
         {
             string parentSpanId = IdGenerator.NewId("MessageLog");
-            InitializeSend(message, RunContext.Current, parentSpanId);
-            //  记录日志，并将【_LOGSENDDATA_】标记传入到消息上下文中
             message.Context ??= new Dictionary<string, string>();
-            message.Context["_LOGSENDDATA_"] = "True";
+            message.Context.Set(KEY_RecordData, STR_True);
+            InitializeSend(message, RunContext.Current, parentSpanId);
             Logger.Log(new MessageSendLogDescriptor(isForce: true)
             {
                 Title = $"发送{type}消息：{message.Name}",
@@ -111,9 +110,8 @@ public class TelemetryMiddleware : IMessageMiddleware
             InitializeReceive(message, RunContext.Current);
             //  若发送方标记了已经记录了消息数据，则这里不再重复记录了
             bool logData = true;
-            if (message.Context?.ContainsKey("_LOGSENDDATA_") == true)
+            if (message.Context?.Remove(KEY_RecordData, out string? tmpString) == true)
             {
-                message.Context.Remove("_LOGSENDDATA_", out string? tmpString);
                 logData = bool.TrueString.IsEqual(tmpString, ignoreCase: true) != true;
             }
             Logger.Log(new LogDescriptor(forceLog: true)

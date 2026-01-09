@@ -5,6 +5,7 @@ using Snail.Abstractions.Web.Attributes;
 using Snail.Abstractions.Web.Delegates;
 using Snail.Abstractions.Web.Interfaces;
 using Snail.Utilities.Common.Utils;
+using Snail.Utilities.Web.Extensions;
 using Snail.Web.DataModels;
 using System.Diagnostics;
 
@@ -55,15 +56,11 @@ public class TelemetryMiddleware : IHttpMiddleware
         //  初始化，记录发送日志：查询日志记录标签，null走默认值
         DiagnosticsHelper.GetEntryMethod(typeof(TelemetryMiddleware), out HttpLogAttribute? attr);
         attr ??= new HttpLogAttribute();
+        request.Headers.TrySet(attr.Send, KEY_RecordData, STR_True);
         //  初始化遥测追踪数据，记录日志
         {
             string parentSpanId = IdGenerator.NewId("HttpLog");
             Initialize(request, RunContext.Current, parentSpanId);
-
-            if (attr.Send == true)
-            {
-                request.Headers.Add("Cookie", $"_LOGSENDDATA_=True");
-            }
             Logger.Log(new SendLogDescriptor(true)
             {
                 Title = $"HTTP请求开始：{GetRequestUrl(request)}",
