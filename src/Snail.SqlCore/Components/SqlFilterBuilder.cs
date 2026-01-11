@@ -60,7 +60,7 @@ public class SqlFilterBuilder<DbModel> where DbModel : class
         ThrowIfNullOrEmpty(filters);
         ThrowIfHasNull(filters!);
         param = new Dictionary<string, object>();
-        IList<string> whereSqls = new List<string>();
+        List<string> whereSqls = [];
         //  遍历过滤条件，构建查询sql语句
         foreach (Expression<Func<DbModel, bool>> filter in filters)
         {
@@ -261,10 +261,10 @@ public class SqlFilterBuilder<DbModel> where DbModel : class
     /// <returns></returns>
     protected virtual string BuildMemberLikeFilter(MemberExpression member, MethodCallExpression methodExpress, bool isTrue, IDictionary<string, object> param)
     {
-        /*  这里就不验证必须是字符串了和最小参数，若不是，则说明格式化没做好*/
+        /*  这里就不验证必须是字符串了和最小参数，若不是，则说明格式化没做好；是否区分大小写，和数据库配置有关系*/
         //  1、分析like值、是否忽略大小写、验证方法调用是否合法；分析出字段名
         string field = GetDbFieldName(member.Member.Name);
-        string? value = DbFilterHelper.GetLikeQueryValue(methodExpress, out bool ignoreCase);
+        string? value = DbFilterHelper.GetLikeQueryValue(methodExpress, out _);
         //  2、进行分发调用
         switch (value)
         {

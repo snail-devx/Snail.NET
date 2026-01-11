@@ -1,5 +1,5 @@
-﻿using Snail.Database.Attributes;
-using Snail.Database.Interfaces;
+﻿using Snail.Abstractions.Database.Attributes;
+using Snail.Abstractions.Database.Interfaces;
 using static Snail.Database.Components.DbModelProxy;
 
 namespace Snail.Database.Components;
@@ -24,7 +24,7 @@ public class DbCacheAnalyzer : IDbCacheAnalyzer
     /// <param name="proxy"></param>
     /// <param name="masterKey">特性标签指定的<see cref="DbCacheAttribute.MasterKey"/>值</param>
     /// <returns></returns>
-    string IDbCacheAnalyzer.GetMasterKey<DbModel>(DbModelProxy proxy, string? masterKey)
+    string IDbCacheAnalyzer.GetMasterKey<DbModel>(IDbModelProxy proxy, string? masterKey)
     {
         if (IsNullOrEmpty(masterKey) == true)
         {
@@ -42,10 +42,10 @@ public class DbCacheAnalyzer : IDbCacheAnalyzer
     /// <param name="model">数据实体实例</param>
     /// <param name="dataKeyPrefix">特性标签指定的<see cref="DbCacheAttribute.DataKeyPrefix"/>值</param>
     /// <returns></returns>
-    string IDbCacheAnalyzer.GetDataKey<DbModel>(DbModelProxy proxy, DbModel model, string? dataKeyPrefix)
+    string IDbCacheAnalyzer.GetDataKey<DbModel>(IDbModelProxy proxy, DbModel model, string? dataKeyPrefix)
     {
         string? idValue = ExtractDbFieldValue(proxy.PKField, model)?.ToString();
-        return GetDataKey(proxy, idValue, dataKeyPrefix);
+        return GetDataKey(idValue, dataKeyPrefix);
     }
     /// <summary>
     /// 获取数据key
@@ -56,10 +56,10 @@ public class DbCacheAnalyzer : IDbCacheAnalyzer
     /// <param name="id">数据主键id</param>
     /// <param name="dataKeyPrefix">特性标签指定的<see cref="DbCacheAttribute.DataKeyPrefix"/>值</param>
     /// <returns></returns>
-    string IDbCacheAnalyzer.GetDataKey<DbModel, IdType>(DbModelProxy proxy, IdType id, string? dataKeyPrefix)
+    string IDbCacheAnalyzer.GetDataKey<DbModel, IdType>(IDbModelProxy proxy, IdType id, string? dataKeyPrefix)
     {
         string? idValue = BuildDbFieldValue(proxy.PKField, id)?.ToString();
-        return GetDataKey(proxy, idValue, dataKeyPrefix);
+        return GetDataKey(idValue, dataKeyPrefix);
     }
     #endregion
 
@@ -67,12 +67,11 @@ public class DbCacheAnalyzer : IDbCacheAnalyzer
     /// <summary>
     /// 获取数据key
     /// </summary>
-    /// <param name="proxy"></param>
     /// <param name="idValue"></param>
     /// <param name="dataKeyPrefix"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    private static string GetDataKey(DbModelProxy proxy, string? idValue, string? dataKeyPrefix)
+    private static string GetDataKey(string? idValue, string? dataKeyPrefix)
     {
         if (IsNullOrEmpty(idValue) == true)
         {

@@ -1,0 +1,90 @@
+<Solution>
+  <Folder Name="/🎵 使用说明/">
+    <File Path="Compose.yaml" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/💎 系统扩展/">
+    <Project Path="src/Snail.Utilities/Snail.Utilities.csproj" />
+  </Folder>
+  <Folder Name="/📌 抽象层/">
+    <Project Path="src/Snail.Abstractions/Snail.Abstractions.csproj">
+      <BuildDependency Project="src/Snail.Utilities/Snail.Utilities.csproj" />
+    </Project>
+    <Project Path="src/Snail.Aspect/Snail.Aspect.csproj" />
+  </Folder>
+  <Folder Name="/📦 实现类库/">
+    <Project Path="src/Snail.Logger/Snail.Logger.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+    </Project>
+    <Project Path="src/Snail.RabbitMQ/Snail.RabbitMQ.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+    <Project Path="src/Snail.Redis/Snail.Redis.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+    <Project Path="src/Snail.WebApp/Snail.WebApp.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+    <Project Path="src/Snail/Snail.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail.Aspect/Snail.Aspect.csproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/🗄️ 数据库实现/">
+    <Project Path="src/Snail.Elastic/Snail.Elastic.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+    <Project Path="src/Snail.Mongo/Snail.Mongo.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+    <Project Path="src/Snail.MySql/Snail.MySql.csproj">
+      <BuildDependency Project="src/Snail.SqlCore/Snail.SqlCore.csproj" />
+    </Project>
+    <Project Path="src/Snail.PostgreSql/Snail.PostgreSql.csproj">
+      <BuildDependency Project="src/Snail.SqlCore/Snail.SqlCore.csproj" />
+    </Project>
+    <Project Path="src/Snail.SqlCore/Snail.SqlCore.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/🧰 测试类库/">
+    <Project Path="test/Snail.Test/Snail.Test.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail.Aspect/Snail.Aspect.csproj" />
+      <BuildDependency Project="src/Snail.Elastic/Snail.Elastic.csproj" />
+      <BuildDependency Project="src/Snail.Logger/Snail.Logger.csproj" />
+      <BuildDependency Project="src/Snail.Mongo/Snail.Mongo.csproj" />
+      <BuildDependency Project="src/Snail.MySql/Snail.MySql.csproj" />
+      <BuildDependency Project="src/Snail.PostgreSql/Snail.PostgreSql.csproj" />
+      <BuildDependency Project="src/Snail.RabbitMQ/Snail.RabbitMQ.csproj" />
+      <BuildDependency Project="src/Snail.Redis/Snail.Redis.csproj" />
+      <BuildDependency Project="src/Snail.SqlCore/Snail.SqlCore.csproj" />
+      <BuildDependency Project="src/Snail.Utilities/Snail.Utilities.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+    <Project Path="test/Snail.WebApiTest/Snail.WebApiTest.csproj">
+      <BuildDependency Project="src/Snail.Abstractions/Snail.Abstractions.csproj" />
+      <BuildDependency Project="src/Snail.Aspect/Snail.Aspect.csproj" />
+      <BuildDependency Project="src/Snail.Elastic/Snail.Elastic.csproj" />
+      <BuildDependency Project="src/Snail.Logger/Snail.Logger.csproj" />
+      <BuildDependency Project="src/Snail.Mongo/Snail.Mongo.csproj" />
+      <BuildDependency Project="src/Snail.MySql/Snail.MySql.csproj" />
+      <BuildDependency Project="src/Snail.PostgreSql/Snail.PostgreSql.csproj" />
+      <BuildDependency Project="src/Snail.RabbitMQ/Snail.RabbitMQ.csproj" />
+      <BuildDependency Project="src/Snail.Redis/Snail.Redis.csproj" />
+      <BuildDependency Project="src/Snail.SqlCore/Snail.SqlCore.csproj" />
+      <BuildDependency Project="src/Snail.Utilities/Snail.Utilities.csproj" />
+      <BuildDependency Project="src/Snail.WebApp/Snail.WebApp.csproj" />
+      <BuildDependency Project="src/Snail/Snail.csproj" />
+    </Project>
+  </Folder>
+  <Properties Name="Visual Studio">
+    <Property Name="MinimumVersion" Value="18.0.11205.157" />
+  </Properties>
+</Solution>

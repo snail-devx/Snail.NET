@@ -41,7 +41,7 @@ public class MongoProvider : DbProvider, IDbProvider
     async Task<bool> IDbProvider.Insert<DbModel>(params IList<DbModel> models) where DbModel : class
     {
         ThrowIfNullOrEmpty(models, "models为null或者空集合");
-        IList<BsonDocument> documents = models.Select(BuildDocument).ToList();
+        IEnumerable<BsonDocument> documents = models.Select(BuildDocument);
         await CreateBsonCollection<DbModel>(false).InsertManyAsync(documents);
         return true;
     }

@@ -86,11 +86,8 @@ public class PostgresProvider : SqlProvider, IDbProvider
     public override SqlFilterBuilder<DbModel> GetFilterBuilder<DbModel>() where DbModel : class
     {
         // 使用自定义的过滤条件构建器
-        return new PostgresFilterBuilder<DbModel>(
-            formatter: null,
-            dbFieldNameFunc: pName => GetDbFieldName<DbModel>(pName, title: "dbFieldNameFunc"),
-            parameterToken: ParameterToken
-        );
+        string DbFieldNameFunc(string pName) => GetDbFieldName<DbModel>(pName, title: "dbFieldNameFunc");
+        return new PostgresFilterBuilder<DbModel>(formatter: null, dbFieldNameFunc: DbFieldNameFunc, parameterToken: ParameterToken);
     }
     #endregion
 

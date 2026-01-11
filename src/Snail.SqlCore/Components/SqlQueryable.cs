@@ -1,8 +1,8 @@
-﻿using System.Reflection;
-using Snail.Abstractions.Database.DataModels;
+﻿using Snail.Abstractions.Database.DataModels;
 using Snail.Database.Components;
 using Snail.Database.Utils;
 using Snail.SqlCore.Enumerations;
+using System.Reflection;
 
 namespace Snail.SqlCore.Components;
 
@@ -161,7 +161,7 @@ public class SqlQueryable<DbModel> : DbQueryable<DbModel>, IDbQueryable<DbModel>
                         selectFields = Selects;
                     }
                     //  组装查询sql：skip和take做默认值处理，lastsortkey模式下，skip强制为0
-                    take = take ?? Take;
+                    take ??= Take;
                     /*  使用【BuildLastSortKeyFilter】会有问题，目前没想到好的解决方式；还是使用skip逻辑；
                     Int32? skip = LastSortKey?.Length > 0 ? null : Skip;
                      */

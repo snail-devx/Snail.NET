@@ -76,7 +76,6 @@ public static class DbProviderExtensions
         public Task<long> Update<DbModel>(string id, IDictionary<string, object?> updates) where DbModel : class
             => provider.Update<DbModel, string>([id], updates);
 
-
         /// <summary>
         /// 删除数据
         /// <para>1、主键id为字符串</para>

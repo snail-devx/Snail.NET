@@ -59,11 +59,8 @@ public class MongoFilterBuilder<DbModel> where DbModel : class
             //return new ExpressionFilterDefinition<DbModel>(filter);
 
             //  格式化过滤表达式；验证格式化后的表达式有效性
-            Expression? newFilter = Formatter.Visit(filter);
-            if (newFilter == null)
-            {
-                throw new ApplicationException($"格式化后，过滤表达式为null。源表达式：{filter}");
-            }
+            Expression newFilter = Formatter.Visit(filter)
+                ?? throw new ApplicationException($"格式化后，过滤表达式为null。源表达式：{filter}");
             if (newFilter is Expression<Func<DbModel, bool>> != true)
             {
                 string msg = $"{_typeNotMatchMessage}。源表达式：{filter}；格式化后：{newFilter}";
@@ -148,7 +145,7 @@ public class MongoFilterBuilder<DbModel> where DbModel : class
             if (right.Type != typeof(bool))
             {
                 string msg = $"左侧为方法时，右侧必须是Boolean类型：{binary}";
-                throw new NotSupportedException();
+                throw new NotSupportedException(msg);
             }
             //     1、分析是方法调用结果成立，还是不成立。==true !=true ==false !=false
             bool isTrue = right.GetConstValue<bool>() switch

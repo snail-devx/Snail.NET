@@ -15,7 +15,7 @@ public static class MongoHelper
     /// <summary>
     /// 加锁对象
     /// </summary>
-    private static object _lock = new object();
+    private static readonly Lock _lock = new Lock();
 
     /// <summary>
     /// 主键Id字段名

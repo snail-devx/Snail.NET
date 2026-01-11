@@ -1,10 +1,8 @@
 ﻿using Snail.Abstractions.Database.Attributes;
+using Snail.Abstractions.Database.Enumerations;
 using Snail.Abstractions.Database.Interfaces;
 using Snail.Abstractions.Distribution;
 using Snail.Abstractions.Identity.Extensions;
-using Snail.Aspect.Distribution.Enumerations;
-using Snail.Database.Attributes;
-using Snail.Database.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using static Snail.Database.Components.DbModelProxy;
 
@@ -163,6 +161,17 @@ public class DbProviderCacheProxy : IDbProviderProxy
 
     #region 继承方法
     /// <summary>
+    /// 是否需要缓存
+    /// </summary>
+    /// <typeparam name="DbModel"></typeparam>
+    /// <param name="proxy"></param>
+    /// <returns></returns>
+    protected static bool NeedCache<DbModel>([NotNullWhen(true)] out DbModelProxy? proxy) where DbModel : class
+    {
+        proxy = GetProxy<DbModel>();
+        return proxy.CacheOptions != null;
+    }
+    /// <summary>
     /// 获取缓存分析器
     /// <para>1、指定了解析器，DI注入失败则则报错</para>
     /// </summary>
@@ -170,17 +179,6 @@ public class DbProviderCacheProxy : IDbProviderProxy
     /// <returns></returns>
     protected IDbCacheAnalyzer GetAnalyzer(DbCacheAttribute attr)
         => IsNullOrEmpty(attr.Analyzer) ? DbCacheAnalyzer.DEFAULT : App.ResolveRequired<IDbCacheAnalyzer>(attr.Analyzer);
-    /// <summary>
-    /// 是否需要缓存
-    /// </summary>
-    /// <typeparam name="DbModel"></typeparam>
-    /// <param name="proxy"></param>
-    /// <returns></returns>
-    protected bool NeedCache<DbModel>([NotNullWhen(true)] out DbModelProxy? proxy) where DbModel : class
-    {
-        proxy = GetProxy<DbModel>();
-        return proxy.CacheOptions != null;
-    }
 
     /// <summary>
     /// 保存缓存
@@ -193,7 +191,7 @@ public class DbProviderCacheProxy : IDbProviderProxy
     protected virtual async Task SaveCache<DbModel>(DbModelProxy proxy, IList<DbModel> models) where DbModel : class
     {
         IDbCacheAnalyzer analyzer = GetAnalyzer(proxy.CacheOptions!);
-        Dictionary<string, DbModel> map = new();
+        Dictionary<string, DbModel> map = [];
         foreach (DbModel model in models)
         {
             string idValue = analyzer.GetDataKey(proxy, model, proxy.CacheOptions!.DataKeyPrefix);
@@ -201,10 +199,10 @@ public class DbProviderCacheProxy : IDbProviderProxy
         }
         switch (proxy.CacheOptions!.Type)
         {
-            case CacheType.ObjectCache:
+            case DbCacheType.ObjectCache:
                 await Cacher.AddObject(map, proxy.CacheOptions.ExpireSeconds);
                 break;
-            case CacheType.HashCache:
+            case DbCacheType.HashCache:
                 string masterKey = analyzer.GetMasterKey<DbModel>(proxy, proxy.CacheOptions.MasterKey);
                 await Cacher.AddHash(masterKey, map, proxy.CacheOptions.ExpireSeconds);
                 break;
@@ -227,9 +225,9 @@ public class DbProviderCacheProxy : IDbProviderProxy
         List<string> dataKeys = ids.Select(id => analyzer.GetDataKey<DbModel, IdType>(proxy, id, proxy.CacheOptions!.DataKeyPrefix)).ToList();
         switch (proxy.CacheOptions!.Type)
         {
-            case CacheType.ObjectCache:
+            case DbCacheType.ObjectCache:
                 return await Cacher.GetObject<DbModel>(dataKeys);
-            case CacheType.HashCache:
+            case DbCacheType.HashCache:
                 string masterKey = analyzer.GetMasterKey<DbModel>(proxy, proxy.CacheOptions.MasterKey);
                 return await Cacher.GetHash<DbModel>(masterKey, dataKeys);
             default:
@@ -251,10 +249,10 @@ public class DbProviderCacheProxy : IDbProviderProxy
         List<string> dataKeys = ids.Select(id => analyzer.GetDataKey<DbModel, IdType>(proxy, id, proxy.CacheOptions!.DataKeyPrefix)).ToList();
         switch (proxy.CacheOptions!.Type)
         {
-            case CacheType.ObjectCache:
+            case DbCacheType.ObjectCache:
                 await Cacher.RemoveObject<DbModel>(dataKeys);
                 break;
-            case CacheType.HashCache:
+            case DbCacheType.HashCache:
                 string masterKey = analyzer.GetMasterKey<DbModel>(proxy, proxy.CacheOptions.MasterKey);
                 await Cacher.RemoveHash<DbModel>(masterKey, dataKeys);
                 break;

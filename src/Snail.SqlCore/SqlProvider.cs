@@ -399,7 +399,10 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
     {
         ThrowIfNull(dbAction);
         //  读操作，不需要事务，做强制false
-        if (isReadAction == true) needTransaction = false;
+        if (isReadAction == true)
+        {
+            needTransaction = false;
+        }
         //  构建连接，执行dbAction
         using DbConnection connection = CreateConnection(isReadAction);
         bool openInThis = false;
@@ -447,7 +450,10 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
     {
         ThrowIfNull(dbAction);
         //  读操作不需要事务，做强制false
-        if (isReadAction == true) needTransaction = false;
+        if (isReadAction == true)
+        {
+            needTransaction = false;
+        }
         //  构建连接，执行dbAction，注意是异步的
         //  ！！！后期考虑把里面部分异步换成同步，太多异步也不好，只在执行dbAction时做成异步的
         using DbConnection connection = CreateConnection(isReadAction);
@@ -465,12 +471,18 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
                 transaction = await connection.BeginTransactionAsync();
             }
             T retValue = await dbAction(connection);
-            transaction?.Commit();
+            if (transaction != null)
+            {
+                await transaction.CommitAsync();
+            }
             return retValue;
         }
         catch
         {
-            transaction?.Rollback();
+            if (transaction != null)
+            {
+                await transaction.RollbackAsync();
+            }
             throw;
         }
         finally
@@ -488,12 +500,8 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
     /// <returns></returns>
     public virtual SqlFilterBuilder<DbModel> GetFilterBuilder<DbModel>() where DbModel : class
     {
-        return new SqlFilterBuilder<DbModel>
-        (
-            formatter: null,
-            dbFieldNameFunc: pName => GetProxy<DbModel>().GetField(pName, title: "dbFieldNameFunc").Name,
-            parameterToken: ParameterToken
-        );
+        string DbFieldNameFunc(string pName) => GetDbFieldName<DbModel>(pName, title: "dbFieldNameFunc");
+        return new SqlFilterBuilder<DbModel>(formatter: null, dbFieldNameFunc: DbFieldNameFunc, parameterToken: ParameterToken);
     }
     #endregion
 

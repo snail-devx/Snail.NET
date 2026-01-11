@@ -1,22 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.ObjectModel;
+using System.Linq.Expressions;
+using Newtonsoft.Json;
 using Snail.Abstractions.Database.Attributes;
 using Snail.Abstractions.Database.DataModels;
-using Snail.Database.Attributes;
+using Snail.Abstractions.Database.Interfaces;
 using Snail.Utilities.Collections;
-using System.Collections.ObjectModel;
-using System.Linq.Expressions;
 
 namespace Snail.Database.Components;
 /// <summary>
 /// 数据库实体 代理类
 /// </summary>
-public sealed class DbModelProxy
+public sealed class DbModelProxy : IDbModelProxy
 {
     #region 属性变量
     /// <summary>
     /// 无效基类
     /// </summary>
-    private static readonly ReadOnlyCollection<Type> _assignableFromTypes = new ReadOnlyCollection<Type>([
+    private static readonly ReadOnlyCollection<Type> _assignableFromTypes = new([
         typeof(Array),
         typeof(Enum),
         typeof(string),
@@ -204,7 +204,7 @@ public sealed class DbModelProxy
         //  构建泛型方法，转换成泛型委托
         Delegate @delegate = _fvsProxyMap.GetOrAdd(field.Type, type => Delegate.CreateDelegate
         (
-            typeof(Func<,,>).MakeGenericType(typeof(IList<object?>), typeof(bool), typeof(IList<>).MakeGenericType(type)),
+            typeof(Func<,,>).MakeGenericType(typeof(IList<object?>), typeof(bool), typeof(List<>).MakeGenericType(type)),
             _fvsProxyMethod.MakeGenericMethod(type)
         ));
         return @delegate.DynamicInvoke(values, field.PK)!;
@@ -223,14 +223,14 @@ public sealed class DbModelProxy
     private static bool IsValidDbModelType(Type type, bool throwEx = false)
     {
         ThrowIfNull(type);
-        var dealError = (string exMessage) =>
+        bool dealError(string exMessage)
         {
             if (throwEx == true)
             {
                 throw new ApplicationException($"{type}不是有效的DbModel类型：{exMessage}");
             }
             return false;
-        };
+        }
         //  进行类型判断：class+非值类型
         if (type.IsClass != true)
         {
@@ -274,8 +274,8 @@ public sealed class DbModelProxy
         DbTableAttribute tableAttr = type.GetCustomAttribute<DbTableAttribute>()
             ?? throw new ApplicationException($"{type}必须标记DbTableAttribute特性；");
         //  分析字段属性：默认取继承属性
-        List<DbModelField> fields = new List<DbModelField>();
-        Dictionary<string, DbModelField> map = new Dictionary<string, DbModelField>();
+        List<DbModelField> fields = [];
+        Dictionary<string, DbModelField> map = [];
         DbModelField? pkField = null;
         int pkCount = 0;
         foreach (PropertyInfo pi in type.GetProperties(BINDINGFLAGS_InsPublic))
@@ -397,7 +397,7 @@ public sealed class DbModelProxy
     /// <param name="values"></param>
     /// <param name="isPK">是否是主键字段，为true时强制非空、字符串非空</param>
     /// <returns></returns>
-    private static IList<FieldType> ConvertFieldValues<FieldType>(IList<object?> values, bool isPK)
+    private static List<FieldType> ConvertFieldValues<FieldType>(IList<object?> values, bool isPK)
     {
         List<FieldType> newValues = [];
         Type targetType = typeof(FieldType);
