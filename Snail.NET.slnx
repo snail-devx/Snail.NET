@@ -1,6 +1,7 @@
 <Solution>
-  <Folder Name="/🎵 使用说明/">
+  <Folder Name="/🎵 系统资源/">
     <File Path="Compose.yaml" />
+    <File Path="Directory.Build.props" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/💎 系统扩展/">

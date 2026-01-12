@@ -106,7 +106,6 @@ public sealed class HttpProxy : PoolObject<HttpClient>, IPoolObject
         );
         //ThrowIfNull(proxy, $"ObjectPool<HttpClientProxy>返回null；无法发送HTTP请求。URI：{baseAddress}");
         //  发送HTTP请求，进行请求计数处理
-        //  发送请求，进行请求计数处理
         Interlocked.Increment(ref proxy._usingCount);
         try
         {

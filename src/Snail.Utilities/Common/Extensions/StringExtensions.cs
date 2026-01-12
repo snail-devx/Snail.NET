@@ -276,4 +276,19 @@ public static class StringExtensions
     #endregion
 
     #endregion
+
+    #region 验证处理
+    /// <summary>
+    /// 对超出长度的文本部分做省略号处理
+    /// </summary>
+    /// <param name="str"></param>
+    /// <param name="maxLength">最大长度，超过此长度的文本使用“...”替换</param>
+    /// <returns></returns>
+    public static string Ellipsis(this string str, int maxLength)
+    {
+        return str != null && str.Length > maxLength
+            ? $"{str.Substring(0, maxLength)}..."
+            : str!;
+    }
+    #endregion
 }

@@ -6,6 +6,7 @@ using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting.Extensions;
 using Snail.Abstractions.Web.Interfaces;
+using Snail.Message.Components;
 using Snail.RabbitMQ.Components;
 using Snail.RabbitMQ.Exceptions;
 using Snail.Utilities.Common.Extensions;
@@ -29,7 +30,11 @@ public class MessageProvider : IMessageProvider
     /// <summary>
     /// RabbitMQ管理器
     /// </summary>
-    private readonly RabbitManager _manager;
+    protected readonly RabbitManager Manager;
+    /// <summary>
+    /// 消息序列化器
+    /// </summary>
+    protected readonly IMessageSerializer Serializer;
     #endregion
 
     #region 构造方法
@@ -39,7 +44,9 @@ public class MessageProvider : IMessageProvider
     public MessageProvider(IApplication app)
     {
         App = ThrowIfNull(app);
-        _manager = app.ResolveRequired<RabbitManager>();
+        Manager = app.ResolveRequired<RabbitManager>();
+        //  消息序列化器：若为空则使用默认的
+        Serializer = app.Resolve<IMessageSerializer>() ?? new MessageSerializer();
     }
     #endregion
 
@@ -65,7 +72,7 @@ public class MessageProvider : IMessageProvider
         }
         try
         {
-            channel = await _manager.GetChannel(isSend: true, server);
+            channel = await Manager.GetChannel(isSend: true, server);
             channel.OnError += onChannelError;
             //  定义交换机，初始化路由
             string exchange = await DeclareExchange(channel.Object, type, options);
@@ -78,8 +85,7 @@ public class MessageProvider : IMessageProvider
                 ContentEncoding = "utf-8",
                 DeliveryMode = DeliveryModes.Persistent,/*交付模式：持久化*/
             };
-            string dataStr = message?.AsJson() ?? "null";/*兼容发送消息为null的情况*/
-            byte[] body = dataStr.AsBytes();
+            byte[] body = Serializer.Serialize(message);
             await channel.Object.BasicPublishAsync(exchange, routing, mandatory: false, props, body);
         }
         finally
@@ -121,7 +127,7 @@ public class MessageProvider : IMessageProvider
         }
         try
         {
-            channel = await _manager.GetChannel(isSend: false, server);
+            channel = await Manager.GetChannel(isSend: false, server);
             channel.OnError += onChannelError;
             await DeclareExchange(channel.Object, type, options);
             queue = await DeclareQueue(channel.Object, type, options);
@@ -140,8 +146,7 @@ public class MessageProvider : IMessageProvider
             string? dataStr = null;
             try
             {
-                dataStr = args.Body.ToArray().AsString();
-                T message = BuildMessage<T>(dataStr);
+                T message = Serializer.Deserialize<T>(args.Body.ToArray());
                 dataConverted = true;
                 //  执行消息接收；做好异常拦截
                 isSuccess = await proxy.OnReceive(message);
@@ -177,7 +182,7 @@ public class MessageProvider : IMessageProvider
             {
                 if (channel == null)
                 {
-                    channel = await _manager.GetChannel(isSend: false, server);
+                    channel = await Manager.GetChannel(isSend: false, server);
                     channel.OnError += onChannelError;
                 }
                 AsyncEventingBasicConsumer consumer = new(channel.Object);
@@ -212,7 +217,7 @@ public class MessageProvider : IMessageProvider
     /// <remarks>开发环境下，加【机器名】后缀，做到区分分发</remarks>
     /// <returns></returns>
     protected virtual string GetExchange(IMessageOptions options)
-        => _manager.ReBuildNameByEnvironment(options.Exchange);
+        => Manager.ReBuildNameByEnvironment(options.Exchange);
     /// <summary>
     /// 获取路由名称
     /// </summary>
@@ -220,7 +225,7 @@ public class MessageProvider : IMessageProvider
     /// <remarks>开发环境下，加【机器名】后缀，做到区分分发</remarks>
     /// <returns></returns>
     protected virtual string GetRouting(IMessageOptions options)
-        => _manager.ReBuildNameByEnvironment(options.Routing);
+        => Manager.ReBuildNameByEnvironment(options.Routing);
     /// <summary>
     /// 获取队列名称
     /// </summary>
@@ -228,7 +233,7 @@ public class MessageProvider : IMessageProvider
     /// <remarks>开发环境下，加【机器名】后缀，做到区分分发</remarks>
     /// <returns></returns>
     protected virtual string GetQueue(IReceiveOptions options)
-        => _manager.ReBuildNameByEnvironment(options.Queue);
+        => Manager.ReBuildNameByEnvironment(options.Queue);
 
     /// <summary>
     /// 定义交换机
@@ -279,19 +284,6 @@ public class MessageProvider : IMessageProvider
         }
 
         return queueName;
-    }
-
-    /// <summary>
-    /// 基于消息数据反序列化构建消息实体对象
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="messageBody"></param>
-    /// <returns></returns>
-    protected virtual T BuildMessage<T>(string messageBody)
-    {
-        return string.IsNullOrEmpty(messageBody)
-            ? default!
-            : messageBody.As<T>();
     }
     #endregion
 }
