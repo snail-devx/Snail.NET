@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Timers;
 
 namespace Snail.Common.Utils;
 
@@ -29,7 +28,7 @@ internal sealed class InternalTimer
             AutoReset = true,
             Enabled = true,
         };
-        timer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+        timer.Elapsed += (sender, e) =>
         {
             var events = OnRun?.GetInvocationList();
             if (events?.Any() != true)

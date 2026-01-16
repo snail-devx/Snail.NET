@@ -60,7 +60,7 @@ public sealed class TypeProxy : PoolObject<Type>
         }
         //  2、选举需要注入的字段：仅要可写的引用类型
         {
-            IList<FieldInfo> fields = new List<FieldInfo>();
+            List<FieldInfo> fields = [];
             foreach (var field in type.GetFields(BINDINGFLAGS))
             {
                 var injectField = field.IsInitOnly || field.FieldType.IsValueType || field.HasInjectAttribute(out _) == false
@@ -72,7 +72,7 @@ public sealed class TypeProxy : PoolObject<Type>
         }
         //  3、选举属性：仅要可写的引用类型
         {
-            IList<PropertyInfo> properties = new List<PropertyInfo>();
+            List<PropertyInfo> properties = [];
             foreach (var pi in type.GetProperties(BINDINGFLAGS))
             {
                 var injectProperty = pi.CanWrite == false || pi.PropertyType.IsValueType || pi.HasInjectAttribute(out _) == false
@@ -84,7 +84,7 @@ public sealed class TypeProxy : PoolObject<Type>
         }
         //  4、选举需要执行的注入方法
         {
-            IList<MethodInfo> methods = new List<MethodInfo>();
+            List<MethodInfo> methods = [];
             foreach (var method in type.GetMethods(BINDINGFLAGS))
             {
                 var injectMethod = method.HasInjectAttribute(out _) ? method : null;
@@ -245,7 +245,7 @@ public sealed class TypeProxy : PoolObject<Type>
         ParameterInfo[] pis = method.GetParameters();
         object?[]? paramValues = pis.Any() ? new object[pis.Length] : null;
         //  构建需要已有参数列表，方便命中后直接移除，避免多次名称
-        IList<IParameter> parameters = extParams?.ToList() ?? new List<IParameter>();
+        IList<IParameter> parameters = extParams?.ToList() ?? [];
         //  遍历属性，从外部传入的parameters优先取值，娶不到进行构建；确保parameters只会被用一次
         for (int index = 0; index < pis.Length; index++)
         {

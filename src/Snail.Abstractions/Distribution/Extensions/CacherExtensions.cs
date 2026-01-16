@@ -111,7 +111,7 @@ public static class CacherExtensions
     {
         ThrowIfNullOrEmpty(hashKey);
         var map = ThrowIfNullOrEmpty(datas).ToDictionary();
-        return cacher.AddHash(hashKey, map);
+        return cacher.AddHash(hashKey, map, expireSeconds);
     }
 
     /// <summary>

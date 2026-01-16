@@ -55,7 +55,7 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <param name="server">消息服务器地址消息发送哪里</param>
     /// <param name="next">下一个消息处理委托</param>
     /// <returns></returns>
-    async Task<bool> ISendMiddleware.Send(MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server, SendDelegate next)
+    async Task<bool> ISendMiddleware.Send(MessageType type, MessageDescriptor message, ISendOptions options, IServerOptions server, SendDelegate next)
     {
         //  初始化遥测追踪数据，记录日志，并将【KEY_RecordData】标记传入到消息上下文中
         {

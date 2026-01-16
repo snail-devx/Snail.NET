@@ -64,7 +64,7 @@ public sealed class AsyncLock
         /// <summary>
         /// 销毁
         /// </summary>
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             OnDestroy?.Invoke();
             OnDestroy = null;

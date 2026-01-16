@@ -16,7 +16,7 @@ public interface IMessageProvider
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机等信息</param>
     /// <param name="server">消息服务器地址：消息发送哪里</param>
     /// <returns>处理使用成功，成功返回true，否则返回false</returns>
-    Task<bool> Send<T>(MessageType type, T message, IMessageOptions options, IServerOptions server);
+    Task<bool> Send<T>(MessageType type, T message, ISendOptions options, IServerOptions server);
 
     /// <summary>
     /// 接收消息

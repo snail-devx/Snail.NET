@@ -23,27 +23,33 @@ public static class MessengerExtensions
     /// <param name="message">消息名称；基于此自动构建<see cref="IMessageOptions"/></param>
     /// <param name="data">消息附带数据</param>
     /// <param name="context">消息附带上下文</param>
+    /// <param name="compress">是否压缩消息数据，默认不压缩</param>
+    /// <param name="disableMiddleware">进行消息处理时，禁用消息中间件</param>
     /// <returns></returns>
-    public static Task<bool> Send<T>(this IMessenger messenger, MessageType type, string message, T? data, IDictionary<string, string>? context = null)
+    public static Task<bool> Send<T>(this IMessenger messenger, MessageType type, string message, T? data, IDictionary<string, string>? context = null, bool compress = false, bool disableMiddleware = false)
     {
         ThrowIfNullOrEmpty(message);
-        MessageOptions options;
+        SendOptions options;
         switch (type)
         {
             //  MQ消息：发送消息到默认交换机，路由采用消息名称
             case MessageType.MQ:
-                options = new MessageOptions()
+                options = new SendOptions()
                 {
                     Exchange = null,
                     Routing = message,
+                    Compress = compress,
+                    DisableMiddleware = disableMiddleware,
                 };
                 break;
             //  PubSub消息：发送到交换机，路由默认null
             case MessageType.PubSub:
-                options = new MessageOptions()
+                options = new SendOptions()
                 {
                     Exchange = message,
                     Routing = null,
+                    Compress = compress,
+                    DisableMiddleware = disableMiddleware,
                 };
                 break;
             default:
@@ -63,8 +69,9 @@ public static class MessengerExtensions
     /// <param name="name">接收器名称；PubSub时必传，和<paramref name="message"/>合并构建<see cref="IReceiveOptions.Queue"/></param>
     /// <param name="message">消息名称；基于此自动构建<see cref="IMessageOptions"/></param>
     /// <param name="receiver">消息处理委托</param>
+    /// <param name="disableMiddleware">进行消息处理时，禁用消息中间件</param>
     /// <returns></returns>
-    public static Task<bool> Receive(this IMessenger messenger, MessageType type, string? name, string message, Func<MessageDescriptor, Task<bool>> receiver)
+    public static Task<bool> Receive(this IMessenger messenger, MessageType type, string? name, string message, Func<MessageDescriptor, Task<bool>> receiver, bool disableMiddleware = false)
     {
         ThrowIfNullOrEmpty(message);
         ThrowIfNull(receiver);
@@ -80,6 +87,7 @@ public static class MessengerExtensions
                     Exchange = null,
                     Attempt = 3,
                     Concurrent = 1,
+                    DisableMiddleware = disableMiddleware,
                 };
                 break;
             //  PubSub消息：构建唯一队列，确保消息被不同接收器消费
@@ -92,6 +100,7 @@ public static class MessengerExtensions
                     Exchange = message,
                     Attempt = 3,
                     Concurrent = 1,
+                    DisableMiddleware = disableMiddleware,
                 };
                 break;
             default:

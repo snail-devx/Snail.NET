@@ -1,21 +1,25 @@
 ﻿using Snail.Abstractions.Message.Interfaces;
 
 namespace Snail.Abstractions.Message.DataModels;
-
 /// <summary>
-/// 消息配置选项
+/// 发送消息配置选项
 /// </summary>
-public class MessageOptions : IMessageOptions
+public sealed class SendOptions : ISendOptions
 {
     /// <summary>
     /// 消息交换机名称
     /// </summary>
     public string? Exchange { init; get; }
-
     /// <summary>
     /// 消息交换机和队列之间的路由
     /// </summary>
     public string? Routing { init; get; }
+
+    /// <summary>
+    /// 是否压缩发送的消息
+    /// <para>1、为true时，使用LZ进行消息数据压缩</para>
+    /// </summary>
+    public bool Compress { init; get; }
 
     /// <summary>
     ///  进行消息处理时，禁用消息中间件

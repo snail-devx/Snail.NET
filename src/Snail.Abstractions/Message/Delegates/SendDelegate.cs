@@ -13,4 +13,4 @@ namespace Snail.Abstractions.Message.Delegates;
 /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机等信息</param>
 /// <param name="server">消息服务器地址：接收的消息来自哪里；消息发送哪里</param>
 /// <returns>处理使用成功，成功返回true，否则返回false</returns>
-public delegate Task<bool> SendDelegate(MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server);
+public delegate Task<bool> SendDelegate(MessageType type, MessageDescriptor message, ISendOptions options, IServerOptions server);

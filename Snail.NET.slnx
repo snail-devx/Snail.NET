@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/🎵 系统资源/">
+    <File Path=".gitignore" />
     <File Path="Compose.yaml" />
     <File Path="Directory.Build.props" />
     <File Path="README.md" />

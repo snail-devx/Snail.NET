@@ -59,7 +59,7 @@ public static class MessageManagerExtensions
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            SendDelegate sender = (MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server)
+            Task<bool> sender(MessageType type, MessageDescriptor message, ISendOptions options, IServerOptions server)
                 => middleware.Send(type, message, options, server, next);
             return sender;
         });
@@ -71,7 +71,7 @@ public static class MessageManagerExtensions
     /// <param name="manager"></param>
     /// <param name="middleware"></param>
     /// <returns></returns>
-    public static IMessageManager Use(this IMessageManager manager, Action<MessageType, MessageDescriptor, IMessageOptions, IServerOptions> middleware)
+    public static IMessageManager Use(this IMessageManager manager, Action<MessageType, MessageDescriptor, ISendOptions, IServerOptions> middleware)
         => Use(manager, name: null, middleware);
     /// <summary>
     /// 使用【发送消息】中间件
@@ -80,16 +80,16 @@ public static class MessageManagerExtensions
     /// <param name="name">中间件名称</param>
     /// <param name="middleware"></param>
     /// <returns></returns>
-    public static IMessageManager Use(this IMessageManager manager, string? name, Action<MessageType, MessageDescriptor, IMessageOptions, IServerOptions> middleware)
+    public static IMessageManager Use(this IMessageManager manager, string? name, Action<MessageType, MessageDescriptor, ISendOptions, IServerOptions> middleware)
     {
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            SendDelegate sender = (MessageType type, MessageDescriptor message, IMessageOptions options, IServerOptions server) =>
+            Task<bool> sender(MessageType type, MessageDescriptor message, ISendOptions options, IServerOptions server)
             {
                 middleware.Invoke(type, message, options, server);
                 return next.Invoke(type, message, options, server);
-            };
+            }
             return sender;
         });
         return manager;
@@ -125,7 +125,7 @@ public static class MessageManagerExtensions
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            ReceiveDelegate receiver = (MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server)
+            Task<bool> receiver(MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server)
                 => middleware.Receive(type, message, options, server, next);
             return receiver;
         });
@@ -151,11 +151,11 @@ public static class MessageManagerExtensions
         ThrowIfNull(middleware);
         manager.Use(name, next =>
         {
-            ReceiveDelegate receiver = (MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server) =>
+            Task<bool> receiver(MessageType type, MessageDescriptor message, IReceiveOptions options, IServerOptions server)
             {
                 middleware.Invoke(type, message, options, server);
                 return next.Invoke(type, message, options, server);
-            };
+            }
             return receiver;
         });
         return manager;

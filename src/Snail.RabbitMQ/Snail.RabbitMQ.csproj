@@ -20,6 +20,7 @@
 	
 	<!-- 依赖三方的Nuget包 -->
 	<ItemGroup>
+		<PackageReference Include="K4os.Compression.LZ4" Version="1.3.8" />
 		<PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
 	</ItemGroup>
 </Project>

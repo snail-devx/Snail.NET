@@ -25,7 +25,7 @@ public sealed class LockList<T> : Disposable, IDisposable where T : notnull
     /// <summary>
     /// 实际存储数据的列表
     /// </summary>
-    private readonly List<T> _items = new();
+    private readonly List<T> _items = [];
 
     /// <summary>
     /// 列表长度

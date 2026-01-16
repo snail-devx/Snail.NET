@@ -18,7 +18,7 @@ public interface IMessenger
     /// <param name="message">消息描述器：</param>
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机等信息</param>
     /// <returns>发送成功，返回true；否则false</returns>
-    Task<bool> Send(MessageType type, MessageDescriptor message, IMessageOptions options);
+    Task<bool> Send(MessageType type, MessageDescriptor message, ISendOptions options);
 
     /// <summary>
     /// 接收消息

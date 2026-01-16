@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using K4os.Compression.LZ4;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Snail.Abstractions;
 using Snail.Abstractions.Common.Interfaces;
@@ -59,7 +60,7 @@ public class MessageProvider : IMessageProvider
     /// <param name="options">消息相关信息描述器，如消息名称、路由、队列、交换机等信息</param>
     /// <param name="server">消息服务器地址：消息发送哪里</param>
     /// <returns>处理使用成功，成功返回true，否则返回false</returns>
-    async Task<bool> IMessageProvider.Send<T>(MessageType type, T message, IMessageOptions options, IServerOptions server)
+    async Task<bool> IMessageProvider.Send<T>(MessageType type, T message, ISendOptions options, IServerOptions server)
     {
         ThrowIfNull(options);
         ThrowIfNull(server);
@@ -86,6 +87,15 @@ public class MessageProvider : IMessageProvider
                 DeliveryMode = DeliveryModes.Persistent,/*交付模式：持久化*/
             };
             byte[] body = Serializer.Serialize(message);
+            //      压缩消息数据
+            if (options.Compress == true)
+            {
+                body = Compress(body, out string format);
+                props.Headers = new Dictionary<string, object?>()
+                {
+                    ["compress"] = format ?? string.Empty,
+                };
+            }
             await channel.Object.BasicPublishAsync(exchange, routing, mandatory: false, props, body);
         }
         finally
@@ -146,9 +156,19 @@ public class MessageProvider : IMessageProvider
             string? dataStr = null;
             try
             {
-                T message = Serializer.Deserialize<T>(args.Body.ToArray());
+                byte[] body = args.Body.ToArray();
+                //  进行解压缩处理 compress
+                if (args.BasicProperties?.Headers?.TryGetValue("compress", out object? compress) == true)
+                {
+                    string? format = compress is byte[] bytes ? bytes.AsString() : null;
+                    if (IsNullOrEmpty(format) == false)
+                    {
+                        body = Decompress(body, format);
+                    }
+                }
+                //  执行消息接收：进行数据转换，做好异常拦截
+                T message = Serializer.Deserialize<T>(body);
                 dataConverted = true;
-                //  执行消息接收；做好异常拦截
                 isSuccess = await proxy.OnReceive(message);
             }
             catch (ForceAskException)
@@ -284,6 +304,36 @@ public class MessageProvider : IMessageProvider
         }
 
         return queueName;
+    }
+
+    /// <summary>
+    /// 压缩消息数据
+    /// </summary>
+    /// <param name="body"></param>
+    /// <param name="format">使用的压缩格式</param>
+    /// <returns></returns>
+    protected virtual byte[] Compress(in byte[] body, out string format)
+    {
+        format = "lz4";
+        return LZ4Pickler.Pickle(body);
+    }
+    /// <summary>
+    /// 解压缩消息数据
+    /// </summary>
+    /// <param name="body"></param>
+    /// <param name="format">压缩格式</param>
+    /// <returns></returns>
+    protected virtual byte[] Decompress(in byte[] body, in string format)
+    {
+        switch (format)
+        {
+            //  LZ4 格式解压缩
+            case "lz4":
+                return LZ4Pickler.Unpickle(body);
+            //  其他格式，默认不支持
+            default:
+                throw new NotSupportedException($"不支持的压缩格式：{format}");
+        }
     }
     #endregion
 }
