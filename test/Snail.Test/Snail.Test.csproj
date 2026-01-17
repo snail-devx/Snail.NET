@@ -1,0 +1,69 @@
+﻿<!-- 部分公共配置信息，走解决方案根目录下的【Directory.Build.props】文件 -->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<IsPackable>false</IsPackable>
+		<!-- 输出编译时生成的源码：代码分析器生成的源码输入到Generated目录下，方便查看生成结果 -->
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!-- 特定警告忽略：1587为在代码内使用/***/注释时的警告 -->
+		<NoWarn>1587;1570;CS0162;CS1591;CS0649</NoWarn>
+	</PropertyGroup>
+
+	<!-- 默认配置项-->
+	<ItemGroup>
+		<!-- 1、程序集的特性标签，最终输出到【AssemblyInfo.cs】中，如[assembly: AppScan(Order = -5000)]-->
+		<AssemblyAttribute Include="Snail.Abstractions.Common.Attributes.AppScanAttribute">
+			<Order>1000</Order>
+			<Order_TypeName>System.Int32</Order_TypeName>
+		</AssemblyAttribute>
+		<!-- 2、同项目包依赖:使用项目依赖；直接nuget包依赖也行，但生成项目时，同解决方案下先后关系混乱冗余报错-->
+		<!-- <PackageReference Include="Snail.Abstractions" Version="$(Version)" />
+		<PackageReference Include="Snail.Aspect" Version="$(Version)" />
+		<PackageReference Include="Snail" Version="$(Version)" />
+		<PackageReference Include="Snail.Logger" Version="$(Version)" />
+		<PackageReference Include="Snail.RabbitMQ" Version="$(Version)" />
+		<PackageReference Include="Snail.Redis" Version="$(Version)" />
+		<PackageReference Include="Snail.Elastic" Version="$(Version)" />
+		<PackageReference Include="Snail.Mongo" Version="$(Version)" />
+		<PackageReference Include="Snail.MySql" Version="$(Version)" />
+		<PackageReference Include="Snail.PostgreSql" Version="$(Version)" /> -->
+		<ProjectReference Include="..\..\src\Snail.Abstractions\Snail.Abstractions.csproj" />
+		<ProjectReference Include="..\..\src\Snail.Aspect\Snail.Aspect.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\src\Snail\Snail.csproj" />
+		<ProjectReference Include="..\..\src\Snail.Logger\Snail.Logger.csproj" />
+		<ProjectReference Include="..\..\src\Snail.RabbitMQ\Snail.RabbitMQ.csproj" />
+		<ProjectReference Include="..\..\src\Snail.Redis\Snail.Redis.csproj" />
+		<ProjectReference Include="..\..\src\Snail.Elastic\Snail.Elastic.csproj" />
+		<ProjectReference Include="..\..\src\Snail.Mongo\Snail.Mongo.csproj" />
+		<ProjectReference Include="..\..\src\Snail.MySql\Snail.MySql.csproj" />
+		<ProjectReference Include="..\..\src\Snail.PostgreSql\Snail.PostgreSql.csproj" />
+		<!-- 3、配置文件强制始终更新到输出目录-->
+		<None Include="App_Setting\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="App_Setting\*\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="App_Setting\*\*\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	
+	<!-- 依赖三方的Nuget包 -->
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+		<PackageReference Include="NUnit" Version="4.4.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="4.11.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="NUnit3TestAdapter" Version="5.2.0" />
+		<PackageReference Include="SharpCompress" Version="0.41.0" />
+	</ItemGroup>
+</Project>

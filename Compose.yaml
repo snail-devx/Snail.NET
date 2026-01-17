@@ -1,0 +1,144 @@
+name: snail
+services:
+  # -------------------------------------------------    👉👉  基础 服务  ------------------------------------------------- 
+  redis:
+    image: redis:6.2.14
+    container_name: redis
+    restart: unless-stopped
+    # 网络端口配置：开发机器6379被占用，这里让位改为6378
+    networks: 
+      - snail-net
+    ports: 
+      - "6378:6379"
+    # 环境变量配置
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=C.UTF-8
+    # 启动命令配置：开启 AOF 持久化；自定义密码
+    command: 
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - jaAED7zUngPJHyTe
+  rabbitmq:
+    image: rabbitmq:3.6.2-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    # 网络端口配置
+    networks: 
+      - snail-net
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    # 环境变量配置：指定用户和密码
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=C.UTF-8
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=jaAED7zUngPJHyTe
+  # -------------------------------------------------    👉👉  数据库 服务  ------------------------------------------------- 
+  mysql:
+    image: mysql:5.7.36
+    container_name: mysql
+    restart: unless-stopped
+    # 网络端口配置
+    networks: 
+      - snail-net
+    ports: 
+      - "3306:3306"
+    # 环境变量配置：指定root用户密码
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=C.UTF-8
+      - MYSQL_ROOT_PASSWORD=jaAED7zUngPJHyTe
+    # 启动命令配置：强制所有环节使用 utf8mb4 避免插入中文字符显示为 ?
+    command: 
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+  postgres:
+    image: postgres:14.12
+    container_name: postgres
+    restart: unless-stopped
+    # 网络端口配置
+    networks: 
+      - snail-net
+    ports: 
+      - "5432:5432"
+    # 环境变量配置：指定root用户和密码
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=C.UTF-8
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=jaAED7zUngPJHyTe
+  mongo:
+    image: mongo:4.0.27
+    container_name: mongo
+    restart: unless-stopped
+    # 网络端口配置
+    ports: 
+      - "27017:27017"
+    networks: 
+      - snail-net
+    # 环境变量配置：指定root用户和密码
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=C.UTF-8
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=jaAED7zUngPJHyTe
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.4.3
+    container_name: elasticsearch
+    restart: unless-stopped
+    # 网络端口配置
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks: 
+      - snail-net
+    # 环境变量配置：指定elastic用户密码等
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=jaAED7zUngPJHyTe
+      # 2G堆内存（根据宿主机内存调整）
+      - ES_JAVA_OPTS=-Xmx2g
+      # 禁用 GeoIP 数据库自动下载；需要时才下载
+      - ingest.geoip.downloader.enabled=false
+      # 在 单节点 + 自动安全模式下，不要显式设置以下参数： 若显式设置了，则需要提供证书路径
+      # - xpack.security.enabled=true
+      # - xpack.security.http.ssl.enabled=true
+      # - xpack.security.transport.ssl.enabled=true
+    # 资源配置：限制内存等
+    mem_limit: 4g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  # -------------------------------------------------    👉👉  可选服务，默认不放开  ------------------------------------------------- 
+  ##    使用前，先进行 kibana_system 账号密码设置，然后再解注释下面服务 
+  ##    启动ElasticSearch后，执行命令： docker exec -it elasticsearch /usr/share/elasticsearch/bin/elasticsearch-reset-password -u kibana_system -i
+  ##    参考资料：https://www.yuque.com/snail-devx/dev/qi6zds#e3Ghs
+  #kibana: 
+  #  image: docker.elastic.co/kibana/kibana:8.4.3
+  #  container_name: kibana
+  #  restart: unless-stopped
+  #  depends_on:
+  #    - elasticsearch
+  #  # 网络端口配置
+  #  networks: 
+  #    - snail-net
+  #  ports: 
+  #    - "5601:5601"
+  #  # 环境变量配置：配置ElasticSearch数据库连接相关配置
+  #  environment:
+  #    - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+  #    - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
+  #    - SERVER_SSL_ENABLED=false
+  #    - ELASTICSEARCH_USERNAME=kibana_system
+  #    - ELASTICSEARCH_PASSWORD=jaAED7zUngPJHyTe
+  #    - i18n.locale=zh-CN
+# 统一网络，服务内部可通过服务名直接访问
+networks:
+  snail-net:
+    driver: bridge

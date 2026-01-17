@@ -1,0 +1,6 @@
+@Snail.WebApiTest_HostAddress = http://localhost:5068
+
+GET {{Snail.WebApiTest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -6,7 +6,6 @@ obj/
 packages/
 
 # 自定义 测试代码先不提交，设计账号密码；后续基于docker一键部署环境后再说
-test/
 TestResults/
 *.xlsx
 desktop.ini
