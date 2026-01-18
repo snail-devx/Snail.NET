@@ -5,10 +5,10 @@
 public interface ISendOptions : IMessageOptions
 {
     /// <summary>
-    /// 是否压缩发送的消息
+    /// 消息数据是否可压缩
     /// <para>1、为true时，使用LZ进行消息数据压缩</para>
     /// </summary>
-    bool Compress { get; }
+    bool Compressible { get; }
 
     /// <summary>
     ///  进行消息处理时，禁用消息中间件

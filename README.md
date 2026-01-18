@@ -1,8 +1,29 @@
-# .net
+> .net开源项目，一些基础类库项目
+> 项目下所有类库共用一个README.md文件，具体类库参照项目介绍
 
-.net开源项目，一些基础类库项目
+1. 项目文档：[https://www.yuque.com/snail-devx/.net](https://www.yuque.com/snail-devx/.net)
+2. 更新说明：[https://www.yuque.com/snail-devx/.net/stqfep9vlhtaswnb](https://www.yuque.com/snail-devx/.net/stqfep9vlhtaswnb)
+3. 仓库地址：[https://github.com/snail-devx/Snail.NET](https://github.com/snail-devx/Snail.NET)
 
-# 运行环境初始化
+# 一、项目介绍
+
+| 分类         | 项目                                                                      | 简介                    | 备注                                                                                |
+| ------------ | ------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| 系统扩展     | [Snail.Utilities](https://www.yuque.com/snail-devx/.net/dfm91h7ygn0s0xf5)    | 工具类库                | 对系统功能的二次扩展和助手类                                                        |
+| 抽象层       | [Snail.Abstractions](https://www.yuque.com/snail-devx/.net/div7ulgpr9v61mna) | 抽象层                  | Snail项目的功能的抽象层和所需实体，包含接口扩展方法等                               |
+|              | [Snail.Aspect](https://www.yuque.com/snail-devx/.net/azws2yt3bpqeknkg)       | 切面层                  | 面向切面编程逻辑，实现方法拦截，参数验证；并针对Cache、Lock、Http等提供代码自动生成 |
+| 实现层       | [Snail](https://www.yuque.com/snail-devx/.net/yllxpbqqa4100bzk)              | 实现库                  | Snail.Abstractions的默认实现                                                        |
+|              | [Snail.Logger](https://www.yuque.com/snail-devx/.net/zcr5bl6nlxmp23r8)       | 日志库                  | Snail.Abstractions中Logging日志中的ILogProvider具体实现，默认Log4Net                |
+|              | [Snail.RabbitMQ](https://www.yuque.com/snail-devx/.net/rh7kadziropcmd5t)     | 针对RabbitMQ封装        | Snail.Abstractions中Message消息中的IMessageProvider的RabbitMQ实现                   |
+|              | [Snail.Redis](https://www.yuque.com/snail-devx/.net/mv3b586wb61vubes)        | 针对Redis封装           | Snail.Abstractions中分布式缓存、分布式并发锁的Redis实现                             |
+|              | [Snail.WebApp](https://www.yuque.com/snail-devx/.net/zwnzqgmq3gisaoz5)       | WebApp应用库            | Snail.Abstractions中IApplication接口针对WebApi应用实现，提供基础过滤器、中间件等    |
+| 数据库实现层 | [Snail.Elastic](https://www.yuque.com/snail-devx/.net/usgo5nc1z97rkxac)      | ElasticSearch数据库封装 | Snail.Abstractions中Database数据库IDbProvider相关实现                               |
+|              | [Snail.Mongo](https://www.yuque.com/snail-devx/.net/zu4olawwcec8rvli)        | MongoDb数据库封装       | Snail.Abstractions中Database数据库IDbProvider相关实现                               |
+|              | [Snail.SqlCore](https://www.yuque.com/snail-devx/.net/ynoz3k5ssq25w19z)      | 关系型数据库核心封装    | Snail.Abstractions中Database数据库IDbProvider相关实现                               |
+|              | [Snail.MySql](https://www.yuque.com/snail-devx/.net/mxmy9wpheo8rr60e)        | MySql数据库封装         | Snail.Abstractions中Database数据库IDbProvider相关实现                               |
+|              | [Snail.PostgreSql](https://www.yuque.com/snail-devx/.net/snggdgag3om6giy7)   | PostgreSql数据库封装    | Snail.Abstractions中Database数据库IDbProvider相关实现                               |
+
+# 二、运行环境
 
 > 进行功能验证时，需要使用到一些三方服务；可使用提供的 `Compose.yaml` 进行一键部署
 

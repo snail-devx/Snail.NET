@@ -19,7 +19,7 @@ public sealed class SendOptions : ISendOptions
     /// 是否压缩发送的消息
     /// <para>1、为true时，使用LZ进行消息数据压缩</para>
     /// </summary>
-    public bool Compress { init; get; }
+    public bool Compressible { init; get; }
 
     /// <summary>
     ///  进行消息处理时，禁用消息中间件

@@ -147,7 +147,7 @@ namespace Snail.Test.Message
             {
                 Exchange = "Snail.TestPubSub.Message",
                 Routing = null,
-                Compress = index % 2 == 0
+                Compressible = index % 2 == 0
             });
         }
         #endregion

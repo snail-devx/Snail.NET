@@ -6,17 +6,26 @@
 	<!-- 项目默认属性 -->
 	<PropertyGroup>
 		<!-- 定义可全局使用变量 -->
-		<Version>1.10.21</Version>
+		<Version>1.10.22</Version>
 		<TargetFramework>net10.0</TargetFramework>
-		<!-- 固化信息-->
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<!-- 项目版权作者信息-->
+		<Authors>snail_dev@163.com</Authors>
+		<Copyright>Copyright （c） snail-devx</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<ProjectUrl>https://www.yuque.com/snail-devx/.net</ProjectUrl>
+		<RepositoryUrl>https://github.com/snail-devx</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryBranch>main</RepositoryBranch>
 		<!-- 生成nuget包（.nupkg)；包含调试信息pdf包（.snupkg）-->
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    	<IncludeSymbols>true</IncludeSymbols>
-    	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<!-- 特定警告忽略：
 				1587为在代码内使用/***/注释时的警告
 				RS1041，分析器项目，仅在net平台下使用，不考虑Framework平台，忽略此井盖不应在具有目标框架“.NET 8.0”的程序集中实现此编译器扩展
@@ -33,11 +42,12 @@
 			IDE0290;
 			IDE0305;
 		</NoWarn>
-		<!-- 许可授权等信息 -->
-    	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Authors>snail_dev@163.com</Authors>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<None Include="../../README.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
+	
 	<!-- 项目构建时，针对Nuget包做处理：复制到统一目录下 -->
 	<!--	项目构建前，先将之前的nuget包删除掉-->
 	<Target Name="CleanupBeforeBuild" BeforeTargets="BeforeBuild">

@@ -25,6 +25,10 @@ public class MessageProvider : IMessageProvider
 {
     #region 属性变量
     /// <summary>
+    /// Key值：压缩类型
+    /// </summary>
+    protected const string KEY_CompressionType = "compression.type";
+    /// <summary>
     /// 应用程序实例
     /// </summary>
     protected readonly IApplication App;
@@ -88,12 +92,12 @@ public class MessageProvider : IMessageProvider
             };
             byte[] body = Serializer.Serialize(message);
             //      压缩消息数据
-            if (options.Compress == true)
+            if (options.Compressible == true)
             {
                 body = Compress(body, out string format);
                 props.Headers = new Dictionary<string, object?>()
                 {
-                    ["compress"] = format ?? string.Empty,
+                    [KEY_CompressionType] = format ?? string.Empty,
                 };
             }
             await channel.Object.BasicPublishAsync(exchange, routing, mandatory: false, props, body);
@@ -158,7 +162,7 @@ public class MessageProvider : IMessageProvider
             {
                 byte[] body = args.Body.ToArray();
                 //  进行解压缩处理 compress
-                if (args.BasicProperties?.Headers?.TryGetValue("compress", out object? compress) == true)
+                if (args.BasicProperties?.Headers?.TryGetValue(KEY_CompressionType, out object? compress) == true)
                 {
                     string? format = compress is byte[] bytes ? bytes.AsString() : null;
                     if (IsNullOrEmpty(format) == false)

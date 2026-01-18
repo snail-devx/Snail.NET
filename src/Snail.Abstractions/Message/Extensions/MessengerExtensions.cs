@@ -23,10 +23,10 @@ public static class MessengerExtensions
     /// <param name="message">消息名称；基于此自动构建<see cref="IMessageOptions"/></param>
     /// <param name="data">消息附带数据</param>
     /// <param name="context">消息附带上下文</param>
-    /// <param name="compress">是否压缩消息数据，默认不压缩</param>
+    /// <param name="compressible">是否压缩消息数据，默认不压缩</param>
     /// <param name="disableMiddleware">进行消息处理时，禁用消息中间件</param>
     /// <returns></returns>
-    public static Task<bool> Send<T>(this IMessenger messenger, MessageType type, string message, T? data, IDictionary<string, string>? context = null, bool compress = false, bool disableMiddleware = false)
+    public static Task<bool> Send<T>(this IMessenger messenger, MessageType type, string message, T? data, IDictionary<string, string>? context = null, bool compressible = false, bool disableMiddleware = false)
     {
         ThrowIfNullOrEmpty(message);
         SendOptions options;
@@ -38,7 +38,7 @@ public static class MessengerExtensions
                 {
                     Exchange = null,
                     Routing = message,
-                    Compress = compress,
+                    Compressible = compressible,
                     DisableMiddleware = disableMiddleware,
                 };
                 break;
@@ -48,7 +48,7 @@ public static class MessengerExtensions
                 {
                     Exchange = message,
                     Routing = null,
-                    Compress = compress,
+                    Compressible = compressible,
                     DisableMiddleware = disableMiddleware,
                 };
                 break;
