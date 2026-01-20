@@ -5,7 +5,7 @@
 		<!-- 输出编译时生成的源码：代码分析器生成的源码输入到Generated目录下，方便查看生成结果 -->
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<!-- 特定警告忽略：1587为在代码内使用/***/注释时的警告 -->
-		<NoWarn>1587;1570;CS0162;CS1591;CS0649</NoWarn>
+		<NoWarn>1587;1570;CS0162;CS1591;CS0649;NUnit2010;CA1860;IDE0090</NoWarn>
 	</PropertyGroup>
 
 	<!-- 默认配置项-->

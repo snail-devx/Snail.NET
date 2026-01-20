@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
-using Snail.Common.Components;
 using Snail.Utilities.Collections;
+using Snail.Utilities.Common;
 
 namespace Snail.RabbitMQ.Components;
 

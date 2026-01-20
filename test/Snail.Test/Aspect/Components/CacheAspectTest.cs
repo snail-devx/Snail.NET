@@ -1,7 +1,7 @@
-﻿using Snail.Abstractions.Common.Interfaces;
-using Snail.Aspect.Distribution.Attributes;
+﻿using Snail.Aspect.Distribution.Attributes;
 using Snail.Aspect.Distribution.Enumerations;
 using Snail.Test.Aspect.DataModels;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Test.Aspect.Components
 {
@@ -174,48 +174,48 @@ namespace Snail.Test.Aspect.Components
         }
         #endregion
 
-        #region 测试数据包-单个对象：只有object缓存测试即可，涉及类型转换的代码都是公共的
+        #region 测试载荷数据对象-单个对象：只有object缓存测试即可，涉及类型转换的代码都是公共的
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Load)]
-        public abstract Task<TestDataBag2> LoadDataBagAbstract([CacheKey] string key);
+        public abstract Task<TestPayload2> LoadPayloadAbstract([CacheKey] string key);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Load)]
-        public abstract Task<TestDataBag<TestCache>> LoadDataBagAbstract([CacheKey] string[] key, string bagData);
+        public abstract Task<TestPayload<TestCache>> LoadPayloadAbstract([CacheKey] string[] key, string payload);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.LoadSave)]
-        public virtual async Task<TestDataBag<TestCache>> LoadDataBag([CacheKey] string key)
+        public virtual async Task<TestPayload<TestCache>> LoadPayload([CacheKey] string key)
         {
             await Task.Yield();
-            var bag = new TestDataBag<TestCache>();
-            bag.SetData(new TestCache() { Id = key });
+            var bag = new TestPayload<TestCache>();
+            bag.Payload = new TestCache() { Id = key };
             return bag;
         }
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Delete)]
-        public abstract Task DeleteDataBagAbstract([CacheKey] string key);
+        public abstract Task DeletePayloadAbstract([CacheKey] string key);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Delete)]
-        public abstract Task<TestDataBag<TestCache>> DeleteDataBagAbstract2([CacheKey] string key);
+        public abstract Task<TestPayload<TestCache>> DeletePayloadAbstract2([CacheKey] string key);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Delete)]
-        public async virtual Task<TestDataBag<TestCache>> DeleteDataBagAbstract3([CacheKey] string key)
+        public async virtual Task<TestPayload<TestCache>> DeletePayloadAbstract3([CacheKey] string key)
         {
             await Task.Yield();
-            var bag = new TestDataBag<TestCache>();
-            bag.SetData(new TestCache() { Id = key, Name = "SaveDataBag" });
+            var bag = new TestPayload<TestCache>();
+            bag.Payload = new TestCache() { Id = key, Name = "SavePayload" };
             return bag;
         }
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Save)]
-        public virtual async Task<TestDataBag<TestCache>> SaveDataBag(string key)
+        public virtual async Task<TestPayload<TestCache>> SavePayload(string key)
         {
             await Task.Yield();
-            var bag = new TestDataBag<TestCache>();
-            bag.SetData(new TestCache() { Id = key, Name = "SaveDataBag" });
+            var bag = new TestPayload<TestCache>();
+            bag.Payload = new TestCache() { Id = key, Name = "SavePayload" };
             return bag;
         }
         #endregion
 
-        #region 数据包-list：：只有object缓存测试即可，涉及类型转换的代码都是公共的
+        #region 载荷数据对象-list：：只有object缓存测试即可，涉及类型转换的代码都是公共的
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Load)]
-        public abstract Task<TestDataBag<List<TestCache>>> LoadBagListAbstract([CacheKey] params List<string> keys);
+        public abstract Task<TestPayload<List<TestCache>>> LoadPayloadListAbstract([CacheKey] params List<string> keys);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Load)]
-        public abstract Task<TestDataBag<List<TestCache>>> LoadBagListAbstract([CacheKey] string key);
+        public abstract Task<TestPayload<List<TestCache>>> LoadPayloadListAbstract([CacheKey] string key);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.LoadSave)]
-        public virtual async Task<TestDataBag<ListChild2<TestCache>>> LoadBagList([CacheKey] params List<string> keys)
+        public virtual async Task<TestPayload<ListChild2<TestCache>>> LoadPayloadList([CacheKey] params List<string> keys)
         {
             await Task.Yield();
             ListChild2<TestCache> lsg = new ListChild2<TestCache>();
@@ -223,31 +223,31 @@ namespace Snail.Test.Aspect.Components
             {
                 lsg.Add(new TestCache() { Id = key });
             }
-            var bags = new TestDataBag<ListChild2<TestCache>>();
-            bags.SetData(lsg);
+            var bags = new TestPayload<ListChild2<TestCache>>();
+            bags.Payload = lsg;
             return bags;
         }
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Delete)]
-        public abstract Task<TestDataBag<List<TestCache>>> DeleteBagListAbstract([CacheKey] params List<string> keys);
+        public abstract Task<TestPayload<List<TestCache>>> DeletePayloadListAbstract([CacheKey] params List<string> keys);
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Delete)]
-        public virtual async Task<TestDataBag<List<TestCache>>> DeleteBagList([CacheKey] params List<string> keys)
+        public virtual async Task<TestPayload<List<TestCache>>> DeletePayloadList([CacheKey] params List<string> keys)
         {
             await Task.Yield();
-            var bags = new TestDataBag<List<TestCache>>();
-            bags.SetData(keys.Select(key => new TestCache() { Id = key }).ToList());
+            var bags = new TestPayload<List<TestCache>>();
+            bags.Payload = keys.Select(key => new TestCache() { Id = key }).ToList();
             return bags;
         }
         [CacheMethod(DataType = typeof(TestCache), Action = CacheActionType.Save)]
-        public virtual async Task<TestDataBag<List<TestCache>>> SaveBagList([CacheKey] params List<string> keys)
+        public virtual async Task<TestPayload<List<TestCache>>> SavePayloadList([CacheKey] params List<string> keys)
         {
             await Task.Yield();
-            var bags = new TestDataBag<List<TestCache>>();
-            bags.SetData(keys.Select(key => new TestCache() { Id = key, Name = "SaveBagList" }).ToList());
+            var bags = new TestPayload<List<TestCache>>();
+            bags.Payload = keys.Select(key => new TestCache() { Id = key, Name = "SavePayloadList" }).ToList();
             return bags;
         }
         #endregion
 
-        #region 数据包-Array、Dictionary逻辑，不用测试
+        #region 载荷数据对象-Array、Dictionary逻辑，不用测试
         //  整理逻辑和List重合，Array、Dictionary自身初始化等逻辑，和LoadArray、LoadDictionary等一致
         #endregion
 
@@ -262,31 +262,16 @@ namespace Snail.Test.Aspect.Components
     }
 
     #region 内部类型
-    public interface ITestDataBag<T> : IDataBag<T>
+    public interface ITestPayload<T> : IPayload<T>
     {
 
     }
-    public class TestDataBag<T> : ITestDataBag<T>
+    public class TestPayload<T> : ITestPayload<T>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        private T? _data;
-
-        /// <summary>
-        /// 获取数据
-        /// </summary>
-        /// <returns></returns>
-        T? IDataBag<T>.GetData() => _data;
-        /// <summary>
-        /// 设置数据
-        /// </summary>
-        /// <param name="data"></param>
-        public void SetData(T? data) { _data = data; }
+        public T? Payload { get => field; set => field = value; }
     }
 
-
-    public class TestDataBag2 : TestDataBag<List<TestCache>>
+    public class TestPayload2 : TestPayload<List<TestCache>>
     {
 
     }

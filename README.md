@@ -7,11 +7,11 @@
 
 # 一、项目介绍
 
-| 分类         | 项目                                                                      | 简介                    | 备注                                                                                |
-| ------------ | ------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
-| 系统扩展     | [Snail.Utilities](https://www.yuque.com/snail-devx/.net/dfm91h7ygn0s0xf5)    | 工具类库                | 对系统功能的二次扩展和助手类                                                        |
-| 抽象层       | [Snail.Abstractions](https://www.yuque.com/snail-devx/.net/div7ulgpr9v61mna) | 抽象层                  | Snail项目的功能的抽象层和所需实体，包含接口扩展方法等                               |
-|              | [Snail.Aspect](https://www.yuque.com/snail-devx/.net/azws2yt3bpqeknkg)       | 切面层                  | 面向切面编程逻辑，实现方法拦截，参数验证；并针对Cache、Lock、Http等提供代码自动生成 |
+| 分类         | 项目                                                                         | 简介                    | 备注                                                                                |
+| ------------ | ---------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| 系统扩展     | [Snail.Utilities](https://www.yuque.com/snail-devx/.net/dfm91h7ygn0s0xf5)    | 工具类库                | 定义基础接口、对象；对系统功能的二次扩展和助手类                                    |
+| 抽象层       | [Snail.Abstractions](https://www.yuque.com/snail-devx/.net/div7ulgpr9v61mna) | 抽象层                  | 功能抽象层，包含接口扩展方法等，着重业务抽象，仅数据实体抽象放到Utilities           |
+|              | [Snail.Aspect](https://www.yuque.com/snail-devx/.net/azws2yt3bpqeknkg)       | 切面层                  | 面向抽象层的切面编程，实现方法拦截，参数验证；并对Cache、Http等提供代码自动生成     |
 | 实现层       | [Snail](https://www.yuque.com/snail-devx/.net/yllxpbqqa4100bzk)              | 实现库                  | Snail.Abstractions的默认实现                                                        |
 |              | [Snail.Logger](https://www.yuque.com/snail-devx/.net/zcr5bl6nlxmp23r8)       | 日志库                  | Snail.Abstractions中Logging日志中的ILogProvider具体实现，默认Log4Net                |
 |              | [Snail.RabbitMQ](https://www.yuque.com/snail-devx/.net/rh7kadziropcmd5t)     | 针对RabbitMQ封装        | Snail.Abstractions中Message消息中的IMessageProvider的RabbitMQ实现                   |

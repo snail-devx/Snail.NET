@@ -135,19 +135,19 @@ internal static class SymbolExtensions
         return false;
     }
     /// <summary>
-    /// 是否是数据包类型：Snail.Abstractions.Common.Interfaces.IDataBag
+    /// 是否是IPayload类型
     /// </summary>
     /// <param name="type"></param>
-    /// <param name="genericArgType">泛型类型，如IDataBag{Int32}则为<see cref="Int32"/></param>
-    /// <param name="inherit">是否算继承类型：为true时<paramref name="type"/>及基类实现了IDataBag{Int32}也算IDataBag</param>
+    /// <param name="genericArgType">泛型类型，如IPayload{Int32}则为<see cref="Int32"/></param>
+    /// <param name="inherit">是否算继承类型：为true时<paramref name="type"/>及基类实现了IPayload{Int32}也算IPayload</param>
     /// <returns></returns>
-    public static bool IsDataBag(this ITypeSymbol type, out ITypeSymbol? genericArgType, bool inherit = true)
+    public static bool IsPayload(this ITypeSymbol type, out ITypeSymbol? genericArgType, bool inherit = true)
     {
         //  遍历自身+基类实现接口
         genericArgType = null;
         if (type is INamedTypeSymbol nrt && nrt.IsGenericType)
         {
-            if ($"{type}".StartsWith("Snail.Abstractions.Common.Interfaces.IDataBag<") == true)
+            if ($"{type}".StartsWith($"{TYPENAME_IPayload}<") == true)
             {
                 genericArgType = nrt.TypeArguments.First();
                 return true;
@@ -157,7 +157,7 @@ internal static class SymbolExtensions
         {
             foreach (INamedTypeSymbol iNode in type.AllInterfaces)
             {
-                if (IsDataBag(iNode, out genericArgType, inherit: false) == true)
+                if (IsPayload(iNode, out genericArgType, inherit: false) == true)
                 {
                     return true;
                 }
@@ -222,21 +222,21 @@ internal static class SymbolExtensions
         return false;
     }
     /// <summary>
-    /// 是否是【IIdentity】类型：Snail.Abstractions.Identity.Interfaces.IIdentity
+    /// 是否是【IIdentifiable】类型
     /// </summary>
     /// <param name="type"></param>
     /// <param name="inherit">是否算竭诚类型：为true时，则查找<paramref name="type"/>的所有实现接口</param>
     /// <returns></returns>
-    public static bool IsIIdentity(this ITypeSymbol type, bool inherit = true)
-        => IsInterface(type, "Snail.Abstractions.Identity.Interfaces.IIdentity", inherit);
+    public static bool IIdentifiable(this ITypeSymbol type, bool inherit = true)
+        => IsInterface(type, TYPENAME_IIdentifiable, inherit);
     /// <summary>
-    /// 是否是【IValidatable】类型：Snail.Abstractions.Common.Interfaces.IValidatable
+    /// 是否是【IValidatable】类型
     /// </summary>
     /// <param name="type"></param>
     /// <param name="inherit">是否算竭诚类型：为true时，则查找<paramref name="type"/>的所有实现接口</param>
     /// <returns></returns>
     public static bool IsIValidatable(this ITypeSymbol type, bool inherit = true)
-        => IsInterface(type, "Snail.Abstractions.Common.Interfaces.IValidatable", inherit);
+        => IsInterface(type, TYPENAME_IValidatable, inherit);
     #endregion
 
     #endregion

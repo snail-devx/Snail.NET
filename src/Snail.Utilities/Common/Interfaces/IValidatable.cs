@@ -1,4 +1,4 @@
-namespace Snail.Abstractions.Common.Interfaces;
+namespace Snail.Utilities.Common.Interfaces;
 
 /// <summary>
 /// 接口：标记实现类可进行验证操作

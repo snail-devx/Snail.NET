@@ -1,9 +1,9 @@
-﻿namespace Snail.Abstractions.Common.Interfaces;
-
+﻿namespace Snail.Utilities.Common.Interfaces;
 /// <summary>
-/// 接口约束：池对象
+/// 接口约束：可池化对象
+/// <para>1、约束对象闲置时间等</para>
 /// </summary>
-public interface IPoolObject : IDisposable
+public interface IPoolable : IDisposable
 {
     /// <summary>
     /// 闲置时间
@@ -19,7 +19,7 @@ public interface IPoolObject : IDisposable
     /// 使用对象
     /// </summary>
     /// <remarks>和<see cref="Used"/>配合使用，注意线程并发影响</remarks>
-    IPoolObject Using()
+    IPoolable Using()
     {
         IdleTime = default;
         return this;

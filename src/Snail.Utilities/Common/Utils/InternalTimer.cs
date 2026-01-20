@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+﻿using Snail.Utilities.Common.Extensions;
+using System.Diagnostics;
 
-namespace Snail.Common.Utils;
+namespace Snail.Utilities.Common.Utils;
 
 /// <summary>
 /// 内部的定时器；每个1s运行一次 
@@ -23,7 +24,7 @@ internal sealed class InternalTimer
     static InternalTimer()
     {
         //  启动定时器做自动扫描，实现对象回收
-        var timer = new System.Timers.Timer(FromSeconds(1))
+        var timer = new System.Timers.Timer(TimeSpan.FromSeconds(1))
         {
             AutoReset = true,
             Enabled = true,
@@ -36,7 +37,7 @@ internal sealed class InternalTimer
                 return;
             }
             //  遍历事件监听委托，做异常捕捉，避免影响其他事件监听者
-            foreach (Action action in events)
+            foreach (Action action in events.Cast<Action>())
             {
                 RunResult rt = Run(action);
                 if (rt.Exception != null)

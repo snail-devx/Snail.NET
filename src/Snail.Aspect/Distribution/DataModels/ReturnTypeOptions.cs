@@ -16,47 +16,47 @@ internal readonly struct ReturnTypeOptions
     #region 属性变量
     /// <summary>
     /// 实际的返回值数据类型，可用于缓存操作的数据类型
-    /// <para>1、<see cref="IsDataBag"/>为true时，则是指数据包泛型对象解析结果 </para>
+    /// <para>1、<see cref="IsPayload"/>为true时，则是指IPayload&lt;T&gt;的T类型 </para>
     /// <para>2、<see cref="IsList"/>为true时， List{T}的T类型 </para>
     /// <para>、、、 </para>
     /// </summary>
     public ITypeSymbol? DataTypeSymbol { get; }
 
     /// <summary>
-    /// 是否是数据包
+    /// 是否是IPayload对象
     /// </summary>
-    public bool IsDataBag { get; }
+    public bool IsPayload { get; }
 
     /// <summary>
     /// 是否是多模式：List、Dictionary、Array、、、
     /// <para>1、为false时，为单模式 </para>
-    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
+    /// <para>2、<see cref="IsPayload"/>为true时，则是指IPayload&lt;T&gt;的T类型  </para>
     /// </summary>
     public bool IsMulti { get; }
     /// <summary>
     /// 多模式类型：List{string}、string[]、、、
     /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
-    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
+    /// <para>2、<see cref="IsPayload"/>为true时，则是指IPayload&lt;T&gt;的T类型  </para>
     /// </summary>
     public ITypeSymbol? MultiTypeSymbol { get; }
 
     /// <summary>
     /// 是否是数组
     /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
-    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
+    /// <para>2、<see cref="IsPayload"/>为true时，则是指IPayload&lt;T&gt;的T类型  </para>
     /// </summary>
     public bool IsArray { get; }
     /// <summary>
     /// 是否是List对象
     /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
-    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
+    /// <para>2、<see cref="IsPayload"/>为true时，则是指IPayload&lt;T&gt;的T类型  </para>
     /// </summary>
     public bool IsList { get; }
 
     /// <summary>
     /// 是否是Dictionary
     /// <para>1、<see cref="IsMulti"/>为true时，生效 </para>
-    /// <para>2、如果<see cref="IsDataBag"/>为true，则是指数据包泛型对象 </para>
+    /// <para>2、<see cref="IsPayload"/>为true时，则是指IPayload&lt;T&gt;的T类型  </para>
     /// </summary>
     public bool IsDictionary { get; }
     /// <summary>
@@ -78,7 +78,7 @@ internal readonly struct ReturnTypeOptions
         //  默认值处理
         {
             DataTypeSymbol = null;
-            IsDataBag = false;
+            IsPayload = false;
             IsMulti = false;
             MultiTypeSymbol = null;
             IsArray = false;
@@ -102,13 +102,13 @@ internal readonly struct ReturnTypeOptions
                 }
             }
 
-            //  遍历分析自身+实现接口 分析：若为数据包，则解包分析
+            //  遍历分析自身+实现接口 分析
             DataTypeSymbol = context.Semantic.GetTypeInfo(options.ReturnType).Type;
             CheckReturnTypeByKind(DataTypeSymbol!);
-            //      数据包对象，则需要解包操作
-            if (DataTypeSymbol!.IsDataBag(out ITypeSymbol? realType, inherit: true) == true)
+            //      IPayload类型数据，则分析Payload类型作为实际数据类型
+            if (DataTypeSymbol!.IsPayload(out ITypeSymbol? realType, inherit: true) == true)
             {
-                IsDataBag = true;
+                IsPayload = true;
                 CheckReturnTypeByKind(realType!);
                 DataTypeSymbol = realType;
             }
@@ -153,11 +153,11 @@ internal readonly struct ReturnTypeOptions
 
     #region 公共方法
     /// <summary>
-    /// 获取数据包类型名称：返回IDataBag{具体类型}
+    /// 获取IPayload类型名称：返回IPayload{具体类型}
     /// </summary>
     /// <returns></returns>
-    public string? GetDataBagTypeName()
-        => IsDataBag ? $"IDataBag<{GetSymbolName(MultiTypeSymbol ?? DataTypeSymbol!)}>" : null;
+    public string? GetPayloadTypeName()
+        => IsPayload ? $"IPayload<{GetSymbolName(MultiTypeSymbol ?? DataTypeSymbol!)}>" : null;
     /// <summary>
     /// 获取多类型名称；如IList{具体类型}
     /// </summary>

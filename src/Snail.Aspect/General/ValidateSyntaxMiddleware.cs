@@ -47,7 +47,7 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
         "static Snail.Utilities.Collections.Utils.DictionaryHelper",
         "static Snail.Utilities.Collections.Utils.ListHelper",
         //  验证 切面编程相关命名空间
-        "Snail.Abstractions.Common.Interfaces",
+        "Snail.Utilities.Common.Interfaces",
         typeof(ValidateAspectAttribute).Namespace!,
         typeof(RequiredAttribute).Namespace!,
     ];

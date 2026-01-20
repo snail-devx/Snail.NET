@@ -1,16 +1,13 @@
-﻿using Snail.Abstractions.Common.DataModels;
-using Snail.Abstractions.Common.Interfaces;
-using Snail.Utilities.Web.Extensions;
+﻿using Snail.Utilities.Web.Extensions;
 using System.Net;
 
 namespace Snail.Web.Components;
-
 /// <summary>
 /// HTTP 代理类
 /// <para>1、代理<see cref="HttpClient"/>实现hc复用</para>
 /// <para>2、自动管理回收空闲hc</para>
 /// </summary>
-public sealed class HttpProxy : PoolObject<HttpClient>, IPoolObject
+public sealed class HttpProxy : PoolableObject<HttpClient>, IPoolable
 {
     #region 属性变量
     /// <summary>
@@ -37,20 +34,20 @@ public sealed class HttpProxy : PoolObject<HttpClient>, IPoolObject
     /// <summary>
     /// 构造方法
     /// </summary>
-    public HttpProxy(HttpClient hc) : base(hc)
+    private HttpProxy(HttpClient hc) : base(hc)
     { }
     #endregion
 
-    #region IPoolObject
+    #region IPoolable
     /// <summary>
     /// 是否处于闲置状态
     /// </summary>
-    bool IPoolObject.IsIdle => _usingCount == 0;
+    bool IPoolable.IsIdle => _usingCount == 0;
     /// <summary>
     /// 使用对象
     /// </summary>
     /// <returns></returns>
-    IPoolObject IPoolObject.Using()
+    IPoolable IPoolable.Using()
     {
         //  重写实现接口，但什么都不做，主要避免外部做改变， 是否闲置，由使用计数来做
         return this;
@@ -58,7 +55,7 @@ public sealed class HttpProxy : PoolObject<HttpClient>, IPoolObject
     /// <summary>
     /// 对象使用完了
     /// </summary>
-    void IPoolObject.Used()
+    void IPoolable.Used()
     {
         //  重写实现接口，但什么都不做，主要避免外部做改变， 是否闲置，由使用计数来做
     }
@@ -84,7 +81,7 @@ public sealed class HttpProxy : PoolObject<HttpClient>, IPoolObject
         }
         /** 构建hc对象：不用设置为using状态，默认都是空闲状态，确保同一服务器始终一个链接；使用超过2小时，ObjectPool会自动回收创建新链接
          *  1、构建hc对象自动缓存，下次访问时，会自动使用缓存的hc对象
-         *  2、构建的hc对象，不进行using，new PoolObject后，默认为空闲时间，从而实现闲置时间超过2小时后自动销毁回收
+         *  2、构建的hc对象，不进行using，new HttpProxy后，默认空闲时间为当前时间，从而实现闲置时间超过2小时后自动销毁回收
          *  3、复用hc规则：
          *      1、服务器地址相同时，复用同一个链接；服务器地址不同时，创建新的链接；
          *      2、命中复用hc后，判断hc的空间时间需 小于 <see cref="ObjectPool{T}.IdleInterval"/> 时才复用；避免刚好满足销毁条件时，又复用，从而复用了已销毁的对象
@@ -95,7 +92,7 @@ public sealed class HttpProxy : PoolObject<HttpClient>, IPoolObject
             addFunc: () =>
             {
                 // 构建HttpClient时，传入固定handler，不用每次创建，但需要强制指定disposeHandler=false（hc dispose时不销毁handle），否则handler无法复用
-                HttpClient hc = new(_defaultHttpClienHandler, disposeHandler: false)
+                HttpClient hc = new HttpClient(_defaultHttpClienHandler, disposeHandler: false)
                 {
                     BaseAddress = baseAddress,
                     Timeout = FromMinutes(10),/*10分钟超时时间*/

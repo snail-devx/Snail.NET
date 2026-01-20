@@ -1,5 +1,4 @@
-﻿using Snail.Abstractions.Common.DataModels;
-using Snail.Abstractions.Dependency.Interfaces;
+﻿using Snail.Abstractions.Dependency.Interfaces;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 
@@ -11,7 +10,7 @@ namespace Snail.Dependency.Components;
 /// <para>2、将<see cref="Type"/>用于实例构建的相关信息缓存起来，加快后续构建性能 </para>
 /// <para>3、代理器基于对象池，针对长时间不使用的<see cref="Type"/>类型，做自动清理 </para>
 /// </summary>
-public sealed class TypeProxy : PoolObject<Type>
+public sealed class TypeProxy : PoolableObject<Type>
 {
     #region 属性变量
     /// <summary>
@@ -24,7 +23,7 @@ public sealed class TypeProxy : PoolObject<Type>
     /// <para>1、超过5分钟不用自动清理掉 </para>
     /// <para>2、【全局单例】生命周期依赖注入，类型代理只会分析一次，以后就不会再用，始终占着没有意义 </para>
     /// </summary>
-    private static readonly ObjectPool<TypeProxy> _typePool = new ObjectPool<TypeProxy>(FromMinutes(1));
+    private static readonly ObjectPool<TypeProxy> _typePool = new ObjectPool<TypeProxy>(FromMinutes(5));
 
     /// <summary>
     /// 依赖注入时，执行的构造方法

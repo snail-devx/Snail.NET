@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Snail.Aspect.Common.Components;
 using Snail.Aspect.Common.DataModels;
@@ -14,6 +10,10 @@ using Snail.Aspect.Distribution.DataModels;
 using Snail.Aspect.Distribution.Enumerations;
 using Snail.Aspect.Distribution.Interfaces;
 using Snail.Aspect.Distribution.Utils;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static Snail.Aspect.Common.Utils.SyntaxMiddlewareHelper;
 using static Snail.Aspect.Distribution.Utils.DistributionHelper;
 
@@ -56,10 +56,6 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// 类型名：<see cref="ICacheAnalyzer"/>
     /// </summary>
     protected static readonly string TYPENAME_ICacheAnalyzer = typeof(ICacheAnalyzer).FullName!;
-    /// <summary>
-    /// 类型名：IIdentity
-    /// </summary>
-    protected const string TYPENAME_IIdentity = "Snail.Abstractions.Identity.Interfaces.IIdentity";
 
     /// <summary>
     /// 固定需要引入的命名空间集合
@@ -78,10 +74,9 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         "static Snail.Utilities.Common.Utils.StringHelper",
         "static Snail.Utilities.Collections.Utils.DictionaryHelper",
         "static Snail.Utilities.Collections.Utils.ListHelper",
-        //  数据包相关和缓存转换相关
-        "Snail.Abstractions.Common.DataModels",
-        "Snail.Abstractions.Common.Interfaces",
-        "Snail.Abstractions.Identity.Interfaces",
+        //  Payload相关和缓存转换相关
+        "Snail.Utilities.Common",
+        "Snail.Utilities.Common.Interfaces",
         //  依赖注入相关：将生成的class注册为Interface实现组件
         "Snail.Abstractions.Dependency.Attributes",//       typeof(InjectAttribute).Namespace,//                
         "Snail.Abstractions.Dependency.Enumerations",//     typeof(LifetimeType).Namespace,//                   
@@ -89,7 +84,6 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Abstractions.Distribution",//                typeof(ICacher).Namespace,//                        
         "Snail.Abstractions.Distribution.Attributes",//     typeof(CacherAttribute).Namespace,//                
         "Snail.Abstractions.Distribution.Extensions",//     typeof(CacherExtensions).Namespace,//       
-        "Snail.Abstractions.Identity.Extensions",        
         //  缓存 切面编程相关命名空间
         typeof(CacheAspectAttribute).Namespace!,
         typeof(CacheActionType).Namespace!,
@@ -460,12 +454,12 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             if (keyOptions.IsArray == true)
             {
                 builder.Append(context.LinePrefix).AppendLine($"{key} = cacheLoadData?.Count > 0")
-                       .Append(context.LinePrefix).Append('\t').AppendLine($"? {key}.Except(cacheLoadData.Select(cld => (cld as IIdentity).Id)).ToArray()")
+                       .Append(context.LinePrefix).Append('\t').AppendLine($"? {key}.Except(cacheLoadData.Select(cld => (cld as IIdentifiable).Id)).ToArray()")
                        .Append(context.LinePrefix).Append('\t').AppendLine($": {key};");
             }
             else if (keyOptions.IsList == true)
             {
-                builder.Append(context.LinePrefix).AppendLine($"cacheLoadData?.ForEach(cld => (cld as IIdentity).Id?.RemoveFrom({key}));");
+                builder.Append(context.LinePrefix).AppendLine($"cacheLoadData?.ForEach(cld => (cld as IIdentifiable).Id?.RemoveFrom({key}));");
             }
             else
             {
@@ -486,35 +480,35 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <param name="keyOptions"></param>
     private static void GenerateLoadCodeByMerge(StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, ReturnTypeOptions rtOptions, CacheMethodOptions cacheOptions, CacheKeyOptions keyOptions)
     {
-        string? bagDataType = rtOptions.GetDataBagTypeName(), multiDataType = rtOptions.GetMultiTypeName();
+        string? payloadType = rtOptions.GetPayloadTypeName(), multiDataType = rtOptions.GetMultiTypeName();
         cacheOptions.DeconstructType(out _, out _);
         string linePrefix = $"{context.LinePrefix}\t";
         //  合并数据：基于不同数据类型，做区分处理
-        string mergeVarName = rtOptions.IsDataBag ? context.GetVarName("bagData") : "cacheNextData";
+        string mergeVarName = rtOptions.IsPayload ? context.GetVarName("payloadData") : "cacheNextData";
         //      单项数据：不用解包，直接基于cacheLoadData取具体数据
         if (rtOptions.IsMulti == false)
         {
             builder.Append(linePrefix)
-                   .Append(rtOptions.IsDataBag ? "var " : string.Empty)
+                   .Append(rtOptions.IsPayload ? "var " : string.Empty)
                    .Append(mergeVarName).Append(" = ")
                    .AppendLine(keyOptions.IsMulti ? "cacheLoadData.FirstOrDefault();" : "cacheLoadData;");
         }
-        //      多项数据：数组：先对数据包，做解包操作
+        //      多项数据：数组：对于IPayload类型数据，基于Payload数据做合并
         else if (rtOptions.IsArray == true)
         {
-            _ = rtOptions.IsDataBag == true
-                ? builder.Append(linePrefix).AppendLine($"var {mergeVarName} = (({bagDataType})cacheNextData)?.GetData();")
+            _ = rtOptions.IsPayload == true
+                ? builder.Append(linePrefix).AppendLine($"var {mergeVarName} = (({payloadType})cacheNextData)?.Payload;")
                 : null;
             builder.Append(linePrefix).Append(mergeVarName).Append(" = ");
             _ = keyOptions.IsMulti == false
                 ? builder.AppendLine($"cacheLoadData.AsList().TryAddRange({mergeVarName}).ToArray();")
                 : builder.AppendLine($"cacheLoadData.TryAddRange({mergeVarName}).ToArray();");
         }
-        //      多项数据：列表、字典：先对数据包，做解包操作
+        //      多项数据：列表、字典：对于IPayload类型数据，基于Payload数据做合并
         else
         {
-            _ = rtOptions.IsDataBag == true
-                ? builder.Append(linePrefix).Append($"var {mergeVarName} = (({bagDataType})cacheNextData)?.GetData() ?? ")
+            _ = rtOptions.IsPayload == true
+                ? builder.Append(linePrefix).Append($"var {mergeVarName} = (({payloadType})cacheNextData)?.Payload ?? ")
                 : builder.Append(linePrefix).Append($"{mergeVarName} ??= ");
             builder.AppendLine($"new {multiDataType}();");
             if (rtOptions.IsList == true)
@@ -529,11 +523,11 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             else { }
         }
 
-        //  DataBag数据执行SetData
-        if (rtOptions.IsDataBag == true)
+        //  载荷数据执行Payload赋值
+        if (rtOptions.IsPayload == true)
         {
             builder.Append(linePrefix).AppendLine($"cacheNextData ??= new {options.ReturnType}();");
-            builder.Append(linePrefix).AppendLine($"(({bagDataType})cacheNextData).SetData({mergeVarName});");
+            builder.Append(linePrefix).AppendLine($"(({payloadType})cacheNextData).Payload = {mergeVarName};");
         }
     }
 
@@ -588,7 +582,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <summary>
     /// 基于【NextCode】的返回值【cacheNextData】生成保存缓存的代码
     /// <para>1、方法<see cref="GenerateSaveCode"/>和<see cref="GenerateLoadCode"/>复用 </para>
-    /// <para>2、代码逻辑：如果是DataBag类型数据，则解包cacheNextData数据得到cacheBagData；然后执行保存缓存逻辑 </para>
+    /// <para>2、代码逻辑：如果是Payload类型数据，则解包cacheNextData数据得到cachePayload；然后执行保存缓存逻辑 </para>
     /// <para>3、生成代码不包含NextCode执行赋值cacheNextData逻辑；不包含返回值；外部自己确定什么时候返回 </para>
     /// </summary>
     /// <param name="method"></param>
@@ -600,26 +594,26 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     private static void GenerateSaveCodeWithNextData(MethodDeclarationSyntax method, StringBuilder builder, SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, ReturnTypeOptions rtOptions)
     {
         /*  生成代码参考：
-            TestDataBag? cacheNextData = await base.SaveObject(key);
-            var cacheBagData = cacheNextData?.GetData();
-            if(IsNullOrEmpty(cacheBagData) == false)
+            TestPayload? cacheNextData = await base.SaveObject(key);
+            var cachePayload = cacheNextData?.Payload();
+            if(IsNullOrEmpty(cachePayload) == false)
             {
                 ThrowIfNull(_cacher, "_cacher为null，无法进行Cache操作");
-                await _cacher!.AddHash<TestCache>("12312", cacheBagData!);
+                await _cacher!.AddHash<TestCache>("12312", cachePayload!);
             }
          */
         AttributeArgumentSyntax? expire = GetExpireSeconds(method, context);
         //  参数准备
         cacheOptions.DeconstructType(out string cacheType, out string dataType);
-        //      若返回值为数据包，则需要转成实际保存对象：cacheBagData
+        //      若返回值为IPayload，则需要转成实际保存对象：cachePayload
         string? saveDataVar = null;
         {
-            if (rtOptions.IsDataBag == true)
+            if (rtOptions.IsPayload == true)
             {
-                //  这里需要处理一下，得到DataBag做强转，转换成 IDataBag<>
-                string? bagTypeName = rtOptions.GetDataBagTypeName();
-                builder.Append(context.LinePrefix).AppendLine($"var cacheBagData = (({bagTypeName})cacheNextData)?.GetData();");
-                saveDataVar = "cacheBagData";
+                //  这里需要处理一下，得到IPayload做强转，转换成 IPayload<>
+                string? bagTypeName = rtOptions.GetPayloadTypeName();
+                builder.Append(context.LinePrefix).AppendLine($"var cachePayload = (({bagTypeName})cacheNextData)?.Payload;");
+                saveDataVar = "cachePayload";
             }
             saveDataVar ??= "cacheNextData";
         }
@@ -635,7 +629,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
         {
             dataCacheKeyMapVar = context.GetVarName("cacheDataMap");
             builder.Append(context.LinePrefix).Append('\t')
-                   .AppendLine($"var {dataCacheKeyMapVar} = BuildCacheMap<{dataType}>({saveDataVar}, cld => (cld as IIdentity).Id, {VAR_DataKeyPrefix});");
+                   .AppendLine($"var {dataCacheKeyMapVar} = BuildCacheMap<{dataType}>({saveDataVar}, cld => (cld as IIdentifiable).Id, {VAR_DataKeyPrefix});");
         }
         //      基于缓存Type，生成保存代码
         string? runCode = null;
@@ -741,10 +735,10 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
     private static ReturnTypeOptions CheckCacheReturnDataType(SourceGenerateContext context, MethodGenerateOptions options, CacheMethodOptions cacheOptions, bool onlyClass = true)
     {
         ReturnTypeOptions rtOptions = new(context, options, onlyClass);
-        //  1、【缓存DataType】需实现【IIdentity】；否则无法分析缓存数据Id；这里在Save时，会有一个情况不用实现（returnType为字典时），但先不考虑，简化一下
-        if (cacheOptions.DataTypeSymbol.IsIIdentity() == false)
+        //  1、【缓存DataType】需实现【IIdentifiable】；否则无法分析缓存数据Id；这里在Save时，会有一个情况不用实现（returnType为字典时），但先不考虑，简化一下
+        if (cacheOptions.DataTypeSymbol.IIdentifiable() == false)
         {
-            string msg = $"{cacheOptions.DataTypeSymbol.Name}需要实现接口[{TYPENAME_IIdentity}]；否则无法分析缓存数据Id";
+            string msg = $"{cacheOptions.DataTypeSymbol.Name}需要实现接口[{TYPENAME_IIdentifiable}]；否则无法分析缓存数据Id";
             context.ReportError(msg, cacheOptions.DataType!);
             return rtOptions;
         }
@@ -764,7 +758,7 @@ internal class CacheSyntaxMiddleware : ITypeDeclarationMiddleware
             {
                 string dataType = $"{cacheOptions.DataTypeSymbol.Name}";
                 dataType = $"{dataType}/IList<{dataType}>/{dataType}[]/IDictionary<string,{dataType}>";
-                dataType = $"{dataType}/Snail.Abstractions.Common.Interfaces.IDataBag<T>(T为{dataType})";
+                dataType = $"{dataType}/{TYPENAME_IPayload}<T>(T为{dataType})";
                 string msg = $"返回值{options.ReturnType}分析出的缓存数据类型{rtOptions.DataTypeSymbol}不符合[CacheMethod.DataType]类型{cacheOptions.DataTypeSymbol.Name}要求：{dataType}";
                 context.ReportError(msg, options.ReturnType!);
             }

@@ -1,4 +1,6 @@
-﻿namespace Snail.Test.Common
+﻿using Snail.Utilities.Common;
+
+namespace Snail.Test.Common
 {
     /// <summary>
     /// 多线程测试

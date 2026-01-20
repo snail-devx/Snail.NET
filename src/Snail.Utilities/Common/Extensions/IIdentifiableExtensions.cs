@@ -1,18 +1,18 @@
-using Snail.Abstractions.Identity.Interfaces;
+using Snail.Utilities.Common.Interfaces;
 
-namespace Snail.Abstractions.Identity.Extensions;
+namespace Snail.Utilities.Common.Extensions;
 
 /// <summary>
-/// <see cref="IIdentity"/>扩展方法
+/// <see cref="IIdentifiable"/>扩展方法
 /// </summary>
-public static class IIdentityExtensions
+public static class IIdentifiableExtensions
 {
     #region 公共方法
-    extension<T>(IList<T> datas) where T : IIdentity
+    extension<T>(IList<T> datas) where T : IIdentifiable
     {
         /// <summary>
         /// 转为字典
-        /// <para>1、key为<see cref="IIdentity.Id"/>值，value为数据自身</para>
+        /// <para>1、key为<see cref="IIdentifiable.Id"/>值，value为数据自身</para>
         /// </summary>
         /// <returns></returns>
         public Dictionary<string, T> ToDictionary()
@@ -21,7 +21,7 @@ public static class IIdentityExtensions
             foreach (var data in datas)
             {
                 ThrowIfNull(data, "data为null，无法基于IIdentity取数据主键Id值");
-                string key = ThrowIfNullOrEmpty(((IIdentity)data).Id);
+                string key = ThrowIfNullOrEmpty(((IIdentifiable)data).Id);
                 map[key] = data;
             }
             return map;
@@ -29,7 +29,7 @@ public static class IIdentityExtensions
 
         /// <summary>
         /// 将<paramref name="datas"/>数据添加到字典中
-        /// <para>1、<see cref="IIdentity.Id"/>作为字典的Key值 </para>
+        /// <para>1、<see cref="IIdentifiable.Id"/>作为字典的Key值 </para>
         /// <para>2、若key值为null，则忽略添加；若<paramref name="map"/>为null，则忽略 </para>
         /// </summary>
         /// <param name="map"></param>
@@ -44,11 +44,11 @@ public static class IIdentityExtensions
         }
     }
 
-    extension<T>(T data) where T : IIdentity
+    extension<T>(T data) where T : IIdentifiable
     {
         /// <summary>
         /// 将<paramref name="data"/>添加到字典中
-        /// <para>1、<see cref="IIdentity.Id"/>作为字典的Key值 </para>
+        /// <para>1、<see cref="IIdentifiable.Id"/>作为字典的Key值 </para>
         /// <para>2、若key值为null，则忽略添加；若<paramref name="map"/>为null，则忽略 </para>
         /// </summary>
         /// <param name="map"></param>

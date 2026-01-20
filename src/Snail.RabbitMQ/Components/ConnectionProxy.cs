@@ -1,17 +1,16 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using Snail.Abstractions.Common.DataModels;
-using Snail.Abstractions.Common.Interfaces;
-using Snail.Common.Components;
+using Snail.Utilities.Common;
 using Snail.Utilities.Common.Extensions;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.RabbitMQ.Components;
 
 /// <summary>
 /// RabbitMQ链接代理类
 /// </summary>
-public sealed class ConnectionProxy : PoolObject<IConnection>, IPoolObject
+public sealed class ConnectionProxy : PoolableObject<IConnection>, IPoolable
 {
     #region 属性变量
     /// <summary>
@@ -70,12 +69,12 @@ public sealed class ConnectionProxy : PoolObject<IConnection>, IPoolObject
     }
     #endregion
 
-    #region IPoolObject
+    #region IPoolable
     /// <summary>
     /// 闲置时间
     /// <para>1、从什么时候开始处理闲置状态；超过配置的闲置时间则自动回收 </para>
     /// </summary>
-    DateTime IPoolObject.IdleTime
+    DateTime IPoolable.IdleTime
     {
         set => IdleTime = value;
         get

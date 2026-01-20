@@ -1,12 +1,13 @@
-﻿using Snail.Abstractions.Common.Interfaces;
-using Snail.Utilities.Common.Extensions;
+﻿using Snail.Utilities.Common.Extensions;
+using Snail.Utilities.Common.Interfaces;
 
-namespace Snail.Abstractions.Common.DataModels;
-
+namespace Snail.Utilities.Common;
 /// <summary>
-/// 池对象基类；对<see cref="IPoolObject"/>做基础实现，简化复用
+/// 可池化对象基类
+/// <para>1、对<see cref="IPoolable"/>做基础实现，简化复用</para>
+/// <para>2、配合<see cref="ObjectPool{T}"/>使用，实现对象复用和自动回收</para>
 /// </summary>
-public abstract class PoolObject : Disposable, IPoolObject
+public abstract class PoolableObject : Disposable, IPoolable
 {
     #region 属性变量
     /// <summary>
@@ -16,12 +17,12 @@ public abstract class PoolObject : Disposable, IPoolObject
     protected DateTime IdleTime = DateTime.UtcNow;
     #endregion
 
-    #region IPoolObject
+    #region IPoolable
     /// <summary>
     /// 闲置时间 
     /// <para>1、从什么时候开始闲置了；超过配置的闲置时间则自动回收 </para>
     /// </summary>
-    DateTime IPoolObject.IdleTime { set => IdleTime = value; get => IdleTime; }
+    DateTime IPoolable.IdleTime { set => IdleTime = value; get => IdleTime; }
     #endregion
 
     #region 继承方法
@@ -45,12 +46,13 @@ public abstract class PoolObject : Disposable, IPoolObject
     }
     #endregion
 }
-
 /// <summary>
-/// 池对象；包装<typeparamref name="T"/>以支持的对象池中使用
+/// 可池化对象基类
+/// <para>1、包装<typeparamref name="T"/>以支持的对象池中使用</para>
+/// <para>2、配合<see cref="ObjectPool{T}"/>使用，实现对象复用和自动回收</para>
 /// </summary>
 /// <typeparam name="T">要代理放入对象池中的数据类型</typeparam>
-public class PoolObject<T> : PoolObject, IPoolObject where T : notnull
+public class PoolableObject<T> : PoolableObject, IPoolable where T : notnull
 {
     #region 属性变量
     /// <summary>
@@ -63,7 +65,7 @@ public class PoolObject<T> : PoolObject, IPoolObject where T : notnull
     /// <summary>
     /// 默认无参构造方法
     /// </summary>
-    public PoolObject(T obj)
+    public PoolableObject(T obj)
     {
         Object = ThrowIfNull(obj);
     }

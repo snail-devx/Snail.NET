@@ -1,6 +1,7 @@
 ﻿using Snail.Abstractions.Logging;
 using Snail.Abstractions.Logging.Attributes;
 using Snail.Abstractions.Logging.Extensions;
+using Snail.Utilities.Common;
 
 namespace Snail.Test.Logging
 {

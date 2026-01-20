@@ -1,12 +1,11 @@
-﻿using Snail.Abstractions.Identity.Interfaces;
-using Snail.Abstractions.Logging.DataModels;
+﻿using Snail.Abstractions.Logging.DataModels;
 
 namespace Snail.Logging.DataModels;
 
 /// <summary>
 /// 唯一主键日志描述器，多了日志Id约束
 /// </summary>
-public class IdLogDescriptor : LogDescriptor, IIdentity
+public class IdLogDescriptor : LogDescriptor, IIdentifiable
 {
     #region INetLogDescriptor
     /// <summary>

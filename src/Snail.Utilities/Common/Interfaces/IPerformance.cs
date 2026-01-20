@@ -1,4 +1,4 @@
-﻿namespace Snail.Abstractions.Common.Interfaces;
+﻿namespace Snail.Utilities.Common.Interfaces;
 
 /// <summary>
 /// 接口约束：性能指标

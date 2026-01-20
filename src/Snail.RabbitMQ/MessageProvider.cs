@@ -2,7 +2,6 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Snail.Abstractions;
-using Snail.Abstractions.Common.Interfaces;
 using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting.Extensions;
@@ -11,6 +10,7 @@ using Snail.Message.Components;
 using Snail.RabbitMQ.Components;
 using Snail.RabbitMQ.Exceptions;
 using Snail.Utilities.Common.Extensions;
+using Snail.Utilities.Common.Interfaces;
 using static System.Environment;
 
 namespace Snail.RabbitMQ;
@@ -69,7 +69,7 @@ public class MessageProvider : IMessageProvider
         ThrowIfNull(options);
         ThrowIfNull(server);
         //  发送消息到交换机：声明交换机和消息路由；若交换机为空则为默认交换机
-        ChannelProxy? channel = null;
+        ChannelProxy? proxy = null;
         void onChannelError(string title, string reason)
         {
             title = $"发送[{type}]消息：{title}";
@@ -77,10 +77,10 @@ public class MessageProvider : IMessageProvider
         }
         try
         {
-            channel = await Manager.GetChannel(isSend: true, server);
-            channel.OnError += onChannelError;
+            proxy = await Manager.GetChannel(isSend: true, server);
+            proxy.OnError += onChannelError;
             //  定义交换机，初始化路由
-            string exchange = await DeclareExchange(channel.Object, type, options);
+            string exchange = await DeclareExchange(proxy.Object, type, options);
             string routing = GetRouting(options);
             //  发送消息
             //      组装消息body
@@ -100,14 +100,14 @@ public class MessageProvider : IMessageProvider
                     [KEY_CompressionType] = format ?? string.Empty,
                 };
             }
-            await channel.Object.BasicPublishAsync(exchange, routing, mandatory: false, props, body);
+            await proxy.Object.BasicPublishAsync(exchange, routing, mandatory: false, props, body);
         }
         finally
         {
             //  回收信道
-            if (channel != null)
+            if (proxy != null)
             {
-                (channel as IPoolObject).Used();
+                (proxy as IPoolable).Used();
             }
         }
         //  不报错则true；后期再考虑其他的
@@ -133,7 +133,7 @@ public class MessageProvider : IMessageProvider
         ThrowIfNull(options);
         ThrowIfNull(server);
         //  1、基于信道，构建交换机、队列
-        ChannelProxy? channel = null;
+        ChannelProxy? proxy = null;
         string queue;
         void onChannelError(string title, string reason)
         {
@@ -141,10 +141,10 @@ public class MessageProvider : IMessageProvider
         }
         try
         {
-            channel = await Manager.GetChannel(isSend: false, server);
-            channel.OnError += onChannelError;
-            await DeclareExchange(channel.Object, type, options);
-            queue = await DeclareQueue(channel.Object, type, options);
+            proxy = await Manager.GetChannel(isSend: false, server);
+            proxy.OnError += onChannelError;
+            await DeclareExchange(proxy.Object, type, options);
+            queue = await DeclareQueue(proxy.Object, type, options);
         }
         catch (Exception ex)
         {
@@ -152,7 +152,7 @@ public class MessageProvider : IMessageProvider
             throw;
         }
         //  2、构建消息接收处理器
-        ReceiverProxy<T> proxy = new ReceiverProxy<T>(options.Attempt, receiver);
+        Func<T, Task<bool>> receiveHandler = new ReceiverProxy<T>(options.Attempt, receiver).OnReceive;
         async Task onReceived(object sender, BasicDeliverEventArgs args)
         {
             bool isSuccess = false, dataConverted = false;
@@ -173,7 +173,7 @@ public class MessageProvider : IMessageProvider
                 //  执行消息接收：进行数据转换，做好异常拦截
                 T message = Serializer.Deserialize<T>(body);
                 dataConverted = true;
-                isSuccess = await proxy.OnReceive(message);
+                isSuccess = await receiveHandler(message);
             }
             catch (ForceAskException)
             {
@@ -204,22 +204,22 @@ public class MessageProvider : IMessageProvider
         {
             for (var i = 0; i < Math.Max(options.Concurrent, 1); i++)
             {
-                if (channel == null)
+                if (proxy == null)
                 {
-                    channel = await Manager.GetChannel(isSend: false, server);
-                    channel.OnError += onChannelError;
+                    proxy = await Manager.GetChannel(isSend: false, server);
+                    proxy.OnError += onChannelError;
                 }
-                AsyncEventingBasicConsumer consumer = new(channel.Object);
+                AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(proxy.Object);
                 consumer.ReceivedAsync += onReceived;
                 //  接收消息：每次接收1个；强制约束 consumerTag，避免自动重连时发生变化，影响关闭时销毁
-                await channel.Object.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
+                await proxy.Object.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
                 string consumerTag = Guid.NewGuid().ToString();
-                await channel.Object.BasicConsumeAsync(queue, autoAck: false, consumerTag: consumerTag, consumer: consumer);
+                await proxy.Object.BasicConsumeAsync(queue, autoAck: false, consumerTag: consumerTag, consumer: consumer);
                 //  接收应用程序关闭事件，停止继续接收消息
                 App.OnStop += async () =>
                 {
-                    await channel.Object.BasicCancelAsync(consumerTag);
-                    (channel as IPoolObject).Used();
+                    await proxy.Object.BasicCancelAsync(consumerTag);
+                    (proxy as IPoolable).Used();
                 };
             }
         }

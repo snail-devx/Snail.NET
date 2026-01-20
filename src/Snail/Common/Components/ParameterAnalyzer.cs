@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
 namespace Snail.Common.Components;
-
 /// <summary>
 /// 参数分析器
 /// <para>1、分析字符串中的动态参数，进行参数替换；从而生成实际字符串数据  </para>

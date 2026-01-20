@@ -15,7 +15,7 @@ public class MiddlewareProxy<Middleware> : IMiddlewareProxy<Middleware> where Mi
     /// <summary>
     /// 注册的【中间件】集合
     /// </summary>
-    private readonly List<Tuple<string?, Func<Middleware, Middleware>?>> _middlewares = new List<Tuple<string?, Func<Middleware, Middleware>?>>();
+    private readonly List<Tuple<string?, Func<Middleware, Middleware>?>> _middlewares = [];
     #endregion
 
     #region 构造方法

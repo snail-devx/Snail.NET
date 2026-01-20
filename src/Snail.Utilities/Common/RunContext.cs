@@ -3,7 +3,7 @@ using Snail.Utilities.Threading.Extensions;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Snail.Common.Components;
+namespace Snail.Utilities.Common;
 
 /// <summary>
 /// 运行时上下文；用于跨方法、类共享数据

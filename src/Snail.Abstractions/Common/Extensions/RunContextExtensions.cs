@@ -1,7 +1,7 @@
-﻿namespace Snail.Common.Extensions;
-
+﻿namespace Snail.Abstractions.Common.Extensions;
 /// <summary>
 /// <see cref="RunContext"/>扩展方法
+/// <para>1、扩展一些抽象层所需的属性和方法，如遥测相关信息</para>
 /// </summary>
 public static class RunContextExtensions
 {

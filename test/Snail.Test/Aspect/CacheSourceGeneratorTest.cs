@@ -1,6 +1,6 @@
-﻿using Snail.Abstractions.Common.Interfaces;
-using Snail.Test.Aspect.Components;
+﻿using Snail.Test.Aspect.Components;
 using Snail.Test.Aspect.DataModels;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Test.Aspect
 {
@@ -17,7 +17,7 @@ namespace Snail.Test.Aspect
         [Test]
         public async Task Test()
         {
-            IApplication app = new Application();
+            Application app = new Application();
             app.Run();
 
 
@@ -68,7 +68,7 @@ namespace Snail.Test.Aspect
             }
             //  字典
             {
-                IDictionary<string, TestCache>? map = await aspect.LoadDictAbstract("10");
+                Dictionary<string, TestCache>? map = await aspect.LoadDictAbstract("10");
                 Assert.That(map?.Any() != true);
                 map = await aspect.LoadDict("10");
                 Assert.That(map?.Count == 1);
@@ -115,43 +115,43 @@ namespace Snail.Test.Aspect
                 Assert.That(caches?.Count(item => item.Name == "SaveArray") == 2);
                 await aspect.DeleteArrayAbstract(["1", "2"]);
             }
-            //  数据包-单个对象 
+            //  IPayload-单个对象 
             {
                 {
-                    await aspect.DeleteDataBagAbstract("30");
-                    IDataBag<TestCache> bag = ((await aspect.LoadDataBagAbstract("30")) as IDataBag<TestCache>)!;
+                    await aspect.DeletePayloadAbstract("30");
+                    IPayload<TestCache> bag = ((await aspect.LoadPayloadAbstract("30")) as IPayload<TestCache>)!;
                     Assert.That(bag == null);
-                    bag = await aspect.LoadDataBag("30");
-                    Assert.That(bag?.GetData()?.Id == "30");
+                    bag = await aspect.LoadPayload("30");
+                    Assert.That(bag?.Payload?.Id == "30");
                     TestCache cache = await aspect.LoadAbstract("30");
                     Assert.That(cache?.Id == "30");
-                    bag = await aspect.SaveDataBag("30");
-                    Assert.That(bag?.GetData()?.Id == "30" && bag?.GetData()?.Name == "SaveDataBag");
-                    await aspect.DeleteDataBagAbstract("30");
+                    bag = await aspect.SavePayload("30");
+                    Assert.That(bag?.Payload?.Id == "30" && bag?.Payload?.Name == "SavePayload");
+                    await aspect.DeletePayloadAbstract("30");
                     cache = await aspect.LoadAbstract("30");
                     Assert.That(cache == null);
                 }
                 {
-                    var bag = await aspect.LoadDataBagAbstract("30");
+                    var bag = await aspect.LoadPayloadAbstract("30");
                     Assert.That(bag == null);
                 }
             }
-            //  数据包-list
+            //  IPayload-list
             {
                 {
-                    TestDataBag<List<TestCache>> bags = await aspect.LoadBagListAbstract("40", "41");
+                    TestPayload<List<TestCache>> bags = await aspect.LoadPayloadListAbstract("40", "41");
                     Assert.That(bags == null);
                 }
                 {
-                    IDataBag<ListChild2<TestCache>> bags = await aspect.LoadBagList("40", "41");
-                    Assert.That(bags?.GetData()?.Count == 2);
+                    TestPayload<ListChild2<TestCache>> bags = await aspect.LoadPayloadList("40", "41");
+                    Assert.That(bags?.Payload?.Count == 2);
                     TestCache[] caches = await aspect.LoadArrayAbstract(["40", "41"]);
                     Assert.That(caches?.Length == 2);
-                    await aspect.DeleteBagList("40", "41");
+                    await aspect.DeletePayloadList("40", "41");
 
                 }
                 {
-                    var bags = await aspect.LoadBagListAbstract("40", "41");
+                    var bags = await aspect.LoadPayloadListAbstract("40", "41");
                     Assert.That(bags == null);
                 }
             }
@@ -161,35 +161,21 @@ namespace Snail.Test.Aspect
 
 
         #region 内部类型
-        public class DataBagTest : IDataBag<TestCache>
+        public class PayloadTest : IPayload<TestCache>
         {
-            /// <summary>
-            /// 获取数据
-            /// </summary>
-            /// <returns></returns>
-            public TestCache GetData() => new TestCache() { Id = "1" };
-            /// <summary>
-            /// 设置数据
-            /// </summary>
-            /// <param name="data"></param>
-            public void SetData(TestCache? data)
+            public TestCache? Payload
             {
+                get => new TestCache() { Id = "1" };
+                set { }
             }
         }
 
-        public class DataBagsTest : IDataBag<IList<TestCache>>
+        public class PayloadsTest : IPayload<IList<TestCache>>
         {
-            /// <summary>
-            /// 获取数据
-            /// </summary>
-            /// <returns></returns>
-            public IList<TestCache> GetData() => [new TestCache() { Id = "1" }];
-            /// <summary>
-            /// 设置数据
-            /// </summary>
-            /// <param name="data"></param>
-            public void SetData(IList<TestCache>? data)
+            public IList<TestCache>? Payload
             {
+                get => [new TestCache() { Id = "1" }];
+                set { }
             }
         }
         #endregion

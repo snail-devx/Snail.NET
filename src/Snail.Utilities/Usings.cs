@@ -4,6 +4,7 @@ global using Snail.Utilities.Common;
 global using static Snail.Utilities.Collections.Utils.ListHelper;
 global using static Snail.Utilities.Common.Utils.ArrayHelper;
 global using static Snail.Utilities.Common.Utils.DelegateHelper;
+global using static Snail.Utilities.Common.Utils.ExceptionHelper;
 global using static Snail.Utilities.Common.Utils.ObjectHelper;
 global using static Snail.Utilities.Common.Utils.StringHelper;
 global using static Snail.Utilities.Common.Utils.ValueTypeHelper;

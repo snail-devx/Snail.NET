@@ -1,6 +1,6 @@
-﻿using Snail.Abstractions.Identity.Extensions;
-using Snail.Abstractions.Identity.Interfaces;
-using Snail.Utilities.Collections.Extensions;
+﻿using Snail.Utilities.Collections.Extensions;
+using Snail.Utilities.Common.Extensions;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Abstractions.Distribution.Extensions;
 
@@ -35,20 +35,20 @@ public static class CacherExtensions
     /// </summary>
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="cacher">缓存器</param>
-    /// <param name="data">缓存对象；需实现<see cref="IIdentity"/>，从取主键Id值作为缓存Key</param>
+    /// <param name="data">缓存对象；需实现<see cref="IIdentifiable"/>，从取主键Id值作为缓存Key</param>
     /// <param name="expireSeconds">过期时间（单位秒）；为null则默认2小时，&lt;=0则始终不过期</param>
     /// <returns>成功返回true；否则返回false</returns>
-    public static Task<bool> AddObject<T>(this ICacher cacher, T data, long? expireSeconds = null) where T : IIdentity
+    public static Task<bool> AddObject<T>(this ICacher cacher, T data, long? expireSeconds = null) where T : IIdentifiable
         => AddObject<T>(cacher, [data], expireSeconds);
     /// <summary>
     /// 添加对象缓存
     /// </summary>
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="cacher">缓存器</param>
-    /// <param name="datas">缓存对象；需实现<see cref="IIdentity"/>，从取主键Id值作为缓存Key</param>
+    /// <param name="datas">缓存对象；需实现<see cref="IIdentifiable"/>，从取主键Id值作为缓存Key</param>
     /// <param name="expireSeconds">过期时间（单位秒）；为null则默认2小时，&lt;=0则始终不过期</param>
     /// <returns>成功返回true；否则返回false</returns>
-    public static Task<bool> AddObject<T>(this ICacher cacher, IList<T> datas, long? expireSeconds = null) where T : IIdentity
+    public static Task<bool> AddObject<T>(this ICacher cacher, IList<T> datas, long? expireSeconds = null) where T : IIdentifiable
     {
         IDictionary<string, T> map = ThrowIfNullOrEmpty(datas).ToDictionary();
         return cacher.AddObject(map, expireSeconds);
@@ -93,10 +93,10 @@ public static class CacherExtensions
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="cacher">缓存器</param>
     /// <param name="hashKey">hash的key值；类似数据库的表名称</param>
-    /// <param name="data">缓存对象；需实现<see cref="IIdentity"/>，从取主键Id值作为缓存Key</param>
+    /// <param name="data">缓存对象；需实现<see cref="IIdentifiable"/>，从取主键Id值作为缓存Key</param>
     /// <param name="expireSeconds">整个hash的过期时间（单位秒）；为null则默认2小时，&lt;=0则始终不过期</param>
     /// <returns>成功返回true；否则返回false</returns>
-    public static Task<bool> AddHash<T>(this ICacher cacher, string hashKey, T data, long? expireSeconds = null) where T : IIdentity
+    public static Task<bool> AddHash<T>(this ICacher cacher, string hashKey, T data, long? expireSeconds = null) where T : IIdentifiable
         => AddHash<T>(cacher, hashKey, [data], expireSeconds);
     /// <summary>
     /// 添加hash缓存
@@ -104,10 +104,10 @@ public static class CacherExtensions
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="cacher">缓存器</param>
     /// <param name="hashKey">hash的key值；类似数据库的表名称</param>
-    /// <param name="datas">缓存对象；需实现<see cref="IIdentity"/>，从取主键Id值作为缓存Key</param>
+    /// <param name="datas">缓存对象；需实现<see cref="IIdentifiable"/>，从取主键Id值作为缓存Key</param>
     /// <param name="expireSeconds">整个hash的过期时间（单位秒）；为null则默认2小时，&lt;=0则始终不过期</param>
     /// <returns>成功返回true；否则返回false</returns>
-    public static Task<bool> AddHash<T>(this ICacher cacher, string hashKey, IList<T> datas, long? expireSeconds = null) where T : IIdentity
+    public static Task<bool> AddHash<T>(this ICacher cacher, string hashKey, IList<T> datas, long? expireSeconds = null) where T : IIdentifiable
     {
         ThrowIfNullOrEmpty(hashKey);
         var map = ThrowIfNullOrEmpty(datas).ToDictionary();

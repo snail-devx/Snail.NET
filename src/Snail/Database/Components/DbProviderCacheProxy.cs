@@ -2,7 +2,6 @@
 using Snail.Abstractions.Database.Enumerations;
 using Snail.Abstractions.Database.Interfaces;
 using Snail.Abstractions.Distribution;
-using Snail.Abstractions.Identity.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using static Snail.Database.Components.DbModelProxy;
 

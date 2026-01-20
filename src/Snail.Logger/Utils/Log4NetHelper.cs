@@ -1,10 +1,10 @@
 ﻿using log4net.Config;
-using Snail.Abstractions.Identity.Interfaces;
 using Snail.Abstractions.Logging.DataModels;
 using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting.Enumerations;
 using Snail.Utilities.Collections.Extensions;
 using Snail.Utilities.Common.Extensions;
+using Snail.Utilities.Common.Interfaces;
 using Snail.Utilities.Common.Utils;
 using Snail.Utilities.Xml.Utils;
 using System.Text;
@@ -25,7 +25,7 @@ internal static class Log4NetHelper
     /// <summary>
     /// 字符串：日志Id属性名
     /// </summary>
-    private const string STR_IdProperty = nameof(IIdentity.Id);
+    private const string STR_IdProperty = nameof(IIdentifiable.Id);
 
     /// <summary>
     /// 日志描述器类型
@@ -69,14 +69,14 @@ internal static class Log4NetHelper
     public static string BuildLogMessage(LogDescriptor descriptor, ScopeDescriptor? scope)
     {
         StringBuilder builder = new StringBuilder().AppendLine();
-        bool ignoreIdKey = descriptor is IIdentity;
+        bool ignoreIdKey = descriptor is IIdentifiable;
         //  固定组装信息
         {
             //  日志标题；日志id、作用域等信息
             builder.Append(PREFIX_EmptyTab).AppendLine(descriptor.Title);
             if (ignoreIdKey == true)
             {
-                builder.Append(PREFIX_EmptyTab).AppendLine($"日志Id：{((IIdentity)descriptor).Id}");
+                builder.Append(PREFIX_EmptyTab).AppendLine($"日志Id：{((IIdentifiable)descriptor).Id}");
             }
             if (scope != null)
             {

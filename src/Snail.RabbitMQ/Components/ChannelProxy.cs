@@ -1,14 +1,14 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Snail.Abstractions.Common.DataModels;
-using Snail.Abstractions.Common.Interfaces;
+using Snail.Utilities.Common;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.RabbitMQ.Components;
 
 /// <summary>
 /// RabbitMQ信道代理器
 /// </summary>
-public sealed class ChannelProxy : PoolObject<IChannel>, IPoolObject
+public sealed class ChannelProxy : PoolableObject<IChannel>, IPoolable
 {
     #region 属性变量
     /// <summary>

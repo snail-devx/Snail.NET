@@ -1,4 +1,5 @@
 using Snail.Abstractions.Common.Interfaces;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Test.Aspect.Components;
 

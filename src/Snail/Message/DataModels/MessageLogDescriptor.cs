@@ -1,6 +1,4 @@
-﻿using Snail.Abstractions.Common.Interfaces;
-using Snail.Abstractions.Identity.Interfaces;
-using Snail.Abstractions.Logging.DataModels;
+﻿using Snail.Abstractions.Logging.DataModels;
 
 namespace Snail.Message.DataModels;
 
@@ -11,7 +9,7 @@ namespace Snail.Message.DataModels;
 /// 构造方法
 /// </remarks>
 /// <param name="isForce"></param>
-public sealed class MessageSendLogDescriptor(bool isForce) : LogDescriptor(isForce), IIdentity
+public sealed class MessageSendLogDescriptor(bool isForce) : LogDescriptor(isForce), IIdentifiable
 {
     #region 属性变量
     /// <summary>

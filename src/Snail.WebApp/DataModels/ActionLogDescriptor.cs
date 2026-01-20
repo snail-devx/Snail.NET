@@ -1,5 +1,5 @@
-﻿using Snail.Abstractions.Common.Interfaces;
-using Snail.Abstractions.Logging.DataModels;
+﻿using Snail.Abstractions.Logging.DataModels;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.WebApp.DataModels;
 

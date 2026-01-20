@@ -1,8 +1,8 @@
-﻿using Snail.Abstractions.Identity.Interfaces;
+﻿using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Test.Aspect.DataModels
 {
-    public class TestCacheBase : IIdentity
+    public class TestCacheBase : IIdentifiable
     {
         /// <summary>
         /// 数据主键Id值

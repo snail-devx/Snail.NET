@@ -12,7 +12,7 @@ namespace Snail.Test.Concurrent
         public void LockTest()
         {
             //  List自身，在多线程操作时，add不一定能加到100个数据进去
-            List<string> l = new List<string>();
+            List<string> l = [];
             Parallel.For(0, 100, index => l.Add(index.ToString()));
 
             //  测试添加
