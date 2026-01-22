@@ -45,8 +45,11 @@ public class Application : IApplication
         //  2、内置依赖注入实例
         RootServices.Register<IApplication>(LifetimeType.Singleton, this);
         //  3、强制内置服务初始化
-        this.AddDIService();/*                  依赖注入服务：进行IoC相关功能实现*/
-        this.AddLogServices();/*                日志服务：检测必备组件完整性*/
+        this.AddBootstrapperService()/*         引导程序服务：进行程序运行前的自动配置等*/
+            .AddDIService()/*                   依赖注入服务：进行IoC相关功能实现*/
+            .AddLogService();/*                 日志服务：检测必备组件完整性*/
+
+
     }
     #endregion
 

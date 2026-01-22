@@ -49,7 +49,7 @@ public static class ApplicationExtensions
         /// <para>1、进行日志相关服务组件检测，如确保<see cref="DIKEY_FileLogger"/>组件存在</para>
         /// </summary>
         /// <returns></returns>
-        public IApplication AddLogServices()
+        public IApplication AddLogService()
         {
             //  服务注册完成后，确保【文件】日志组件存在，否则会影响某些组件功能
             app.OnRegistered += services =>
@@ -65,7 +65,7 @@ public static class ApplicationExtensions
         /// 将日志写入到本地文件中
         /// <para>1、使用<see cref="DIKEY_FileLogger"/>为Key的<see cref="ILogProvider"/>组件完成文件日志写入</para>
         /// <para>2、不会进行日志等级有效性验证，推荐用于一些核心组件的兜底，如网络日志写入报错时，使用本地日志做兜底</para>
-        /// <para>3、推荐使用前，使用<see cref="AddLogServices(IApplication)"/>添加日志服务</para>
+        /// <para>3、推荐使用前，使用<see cref="AddLogService(IApplication)"/>添加日志服务</para>
         /// </summary>
         /// <param name="log"></param>
         /// <returns></returns>
@@ -78,7 +78,7 @@ public static class ApplicationExtensions
         /// 将错误日志写入文本文件
         /// <para>1、使用<see cref="DIKEY_FileLogger"/>为Key的<see cref="ILogProvider"/>组件完成文件日志写入</para>
         /// <para>2、推荐用于一些核心组件的兜底，如网络日志写入报错时，使用本地日志做兜底</para>
-        /// <para>3、推荐使用前，使用<see cref="AddLogServices(IApplication)"/>添加日志服务</para>
+        /// <para>3、推荐使用前，使用<see cref="AddLogService(IApplication)"/>添加日志服务</para>
         /// </summary>
         /// <param name="title"></param>
         /// <param name="content"></param>

@@ -42,8 +42,12 @@ public class WebAppInitializer : IInitializer<WebApplication>
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
             });
             */
-            builder.AddNewtonsoftJson();
-
+            //  添加NewtonsoftJson支持，扩展支持自定义类型推断
+            {
+                JsonBootstrapper bootstrapper = (JsonBootstrapper?)(services.Resolve<IEnumerable<IBootstrapper>>()?.FirstOrDefault(item => item is JsonBootstrapper))
+                    ?? new JsonBootstrapper(application);
+                builder.AddNewtonsoftJson(options => bootstrapper.UseCustomJsonConverter(options.SerializerSettings));
+            }
         };
         //  监听OnBuild事件，完成web应用内置中间件集成
         application.OnBuilded += (app, services) =>
