@@ -115,7 +115,7 @@ internal class MongoBootstrapper : IBootstrapper
             /* doc.GetValue取到的值，进行toString，会转成具体的数值字符串，如11转成“11”*/
             Type? type = doc == null
                 ? null
-                : _inferrer.InferType(doc.Contains, doc.GetValue);
+                : _inferrer.InferType(ValueType, doc.Contains, doc.GetValue);
             return type == null ? default! : BsonSerializer.Deserialize(doc, type);
         }
         #endregion

@@ -150,7 +150,7 @@ public class JsonBootstrapper : IBootstrapper
             if (reader.TokenType == JsonToken.StartObject)
             {
                 JObject jObj = JObject.Load(reader);
-                Type? targetType = _inferrer.InferType(jObj.ContainsKey, jObj.GetValue);
+                Type? targetType = _inferrer.InferType(_type, jObj.ContainsKey, jObj.GetValue);
                 return targetType == null ? null : jObj.ToObject(targetType);
             }
             return null;

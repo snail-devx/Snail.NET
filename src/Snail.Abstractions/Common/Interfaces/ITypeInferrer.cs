@@ -8,15 +8,17 @@ public interface ITypeInferrer
 {
     /// <summary>
     /// 支持哪些类型推断其实现类
-    /// <para>如Ilist属性，反序列化时，需要推断实际使用List还是其他实现类承载数据</para>
+    /// <para>1、如Ilist属性，反序列化时，需要推断实际使用List还是其他实现类承载数据</para>
     /// </summary>
     Type[] SupportTypes { get; }
 
     /// <summary>
     /// 推断类型
+    /// <para>1、推断<paramref name="type"/>对应的接口、抽象类在反序列化时，映射为具体的实现类</para>
     /// </summary>
+    /// <param name="type">要推断具体实现类的类型，如<see cref="IList{T}"/>具体应该由哪个派生类来实现</param>
     /// <param name="keyFunc">判断是否包含传入的指定key；包含则判定为container，否则为filter</param>
     /// <param name="valueFunc">特定情况下，需要取指定Key的数据，做处理；内部会强制调用ToString转成字符串</param>
     /// <returns>推断失败则返回null</returns>
-    Type? InferType(Func<string, bool> keyFunc, Func<string, object?> valueFunc);
+    Type? InferType(Type type, Func<string, bool> keyFunc, Func<string, object?> valueFunc);
 }
