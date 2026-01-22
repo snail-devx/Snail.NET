@@ -19,7 +19,7 @@ namespace Snail.Aspect.General;
 /// <summary>
 /// [GeneralAspect]语法节点通用源码中间件
 /// <para>1、侦测打了<see cref="MethodAspectAttribute"/>标签的interface、class，为其生成实现class，并注册为组件 </para>
-/// <para>2、自动分析可重写实现的方法，拦截方法执行<see cref="IMethodRunHandle.OnRun"/>或者<see cref="IMethodRunHandle.OnRunAsync"/>方法 </para>
+/// <para>2、自动分析可重写实现的方法，拦截方法执行<see cref="IMethodInterceptor.InterceptAsync"/>或者<see cref="IMethodInterceptor.Intercept"/>方法 </para>
 /// </summary>
 internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
 {
@@ -33,9 +33,9 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     protected static readonly string TYPENAME_MethodAspectAttribute = typeof(MethodAspectAttribute).FullName!;
     /// <summary>
-    /// 类型名：<see cref="IMethodRunHandle"/>
+    /// 类型名：<see cref="IMethodInterceptor"/>
     /// </summary>
-    protected static readonly string TYPENAME_IMethodRunHandle = typeof(IMethodRunHandle).FullName!;
+    protected static readonly string TYPENAME_IMethodInterceptor = typeof(IMethodInterceptor).FullName!;
     /// <summary>
     /// 固定需要引入的命名空间集合
     /// </summary>
@@ -51,19 +51,19 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         "static Snail.Utilities.Common.Utils.ObjectHelper",
         //  切面编程相关命名空间
         typeof(MethodAspectAttribute).Namespace!,
-        typeof(IMethodRunHandle).Namespace!,
+        typeof(IMethodInterceptor).Namespace!,
         typeof(MethodRunHandleExtensions).Namespace!,
         typeof(MethodRunContext).Namespace!,
     ];
 
     /// <summary>
-    /// [CacheAspect]特性标签
+    /// [MethodAspect]特性标签
     /// </summary>
     protected readonly AttributeSyntax ANode;
     /// <summary>
-    /// 缓存分析器参数：<see cref="IMethodRunHandle"/>分析缓存相关Key
+    /// 方法拦截器DI参数：<see cref="IMethodInterceptor"/>分析缓存相关Key
     /// </summary>
-    protected readonly AttributeArgumentSyntax? RunHandleArg;
+    protected readonly AttributeArgumentSyntax? InterceptorArg;
     /// <summary>
     /// 是否需要【辅助】代码
     /// </summary>
@@ -78,7 +78,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     private MethodSyntaxMiddleware(AttributeSyntax aNode)
     {
         ANode = aNode;
-        aNode.HasArgument("RunHandle", out RunHandleArg);
+        aNode.HasArgument(nameof(MethodAspectAttribute.Interceptor), out InterceptorArg);
     }
     #endregion
 
@@ -111,14 +111,14 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
     {
         context.ReportErrorIf
         (
-            condition: RunHandleArg == null || $"{RunHandleArg.Expression}" == "null",
-            message: $"[MethodAspect]必须传入RunHandle值，且不能为null",
+            condition: InterceptorArg == null || $"{InterceptorArg.Expression}" == "null",
+            message: $"[MethodAspect]必须传入{nameof(MethodAspectAttribute.Interceptor)}值，且不能为null",
             syntax: ANode
         );
         //  不支持泛型类型标记[MethodAspect]；可能导致分析类型失败，先简化强制禁用
         context.DisableGenericAspect("MethodAspect");
-        //  自身不能实现 [IMethodRunHandle]；若[MethodAspect]指定的RunHandle也是当前类型自身，则会造成依赖注入构建实例时死循环
-        context.DisableImplementAspect("CacheAspect", TYPENAME_IMethodRunHandle);
+        //  自身不能实现 [IMethodInterceptor]；若[MethodAspect]指定的Interceptor也是当前类型自身，则会造成依赖注入构建实例时死循环
+        context.DisableImplementAspect("MethodAspect", TYPENAME_IMethodInterceptor);
     }
     /// <summary>
     /// 生成方法代码；仅包括方法内部代码
@@ -161,14 +161,14 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
         _needAssistantCode = true;
         //      初始化context
         builder.Append(context.LinePrefix)
-               .Append($"{nameof(MethodRunContext)} mrhContext = new(")
+               .Append($"{nameof(MethodRunContext)} mrhContext = new {nameof(MethodRunContext)}(")
                .Append($"\"{method.Identifier}\", ")
                .Append(context.GetMethodParameterMapName(method))
                .AppendLine(");");
         //      生成执行代码：需要区分是否有返回值；配合 IMethodRunHandle 扩展方法，简化代码逻辑；替换下面的旧代码
         builder.Append(context.LinePrefix)
                .Append(options.ReturnType == null ? string.Empty : $"return ")
-               .Append(options.IsAsync ? $"await _aspectRunHandle!.OnRunAsync" : $"_aspectRunHandle.OnRun")
+               .Append(options.IsAsync ? $"await _methodInterceptor!.InterceptAsync" : $"_methodInterceptor.Intercept")
                .Append(options.ReturnType == null ? string.Empty : $"<{options.ReturnType}>")
                .Append('(').Append(NAME_LocalMethod).AppendLine(", mrhContext);");
 
@@ -187,7 +187,7 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
 
         //  生成[MethodAspect]辅助代码;
         [Inject(Key = "111")]
-        private IMethodRunHandle? _aspectRunHandle { init; get; }
+        private IMethodInterceptor? _methodInterceptor { init; get; }
         */
         if (_needAssistantCode == true)
         {
@@ -195,8 +195,8 @@ internal class MethodSyntaxMiddleware : ITypeDeclarationMiddleware
             //  直接生成，在【PrepareGenerate】判断了RunHandleArg必须存在且有效
             StringBuilder builder = new();
             builder.Append(context.LinePrefix).AppendLine("//  生成[MethodAspect]辅助代码;");
-            GenerateInjectAssistantCode(builder, context, RunHandleArg, nameof(IMethodRunHandle), "_aspectRunHandle");
-            context.AddRequiredField("_aspectRunHandle", $"_aspectRunHandle为null，无法进行Aspect操作");
+            GenerateInjectAssistantCode(builder, context, InterceptorArg, nameof(IMethodInterceptor), "_methodInterceptor");
+            context.AddRequiredField("_methodInterceptor", $"_methodInterceptor为null，无法进行Aspect操作");
             return builder.ToString();
         }
         return null;

@@ -12,7 +12,7 @@ namespace Snail.Test.Aspect.Components
     [CacheAspect(Workspace = "Test", Code = "Default")]
     [HttpAspect(Workspace = "Test", Code = "BAIDU", Analyzer = Cons.Analyzer)]
     [LockAspect(Workspace = "Test", Code = "Default")]
-    [MethodAspect(RunHandle = "")]
+    [MethodAspect(Interceptor = "")]
     [ValidateAspect]
     abstract class ComplexAspectTest
     {

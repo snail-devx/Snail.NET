@@ -30,7 +30,7 @@ public class WebApplication : Application, IApplication
     public event Action<WebApplicationBuilder, IDIManager>? OnBuild;
     /// <summary>
     /// 事件：配置Web应用控制器
-    /// <para>1、触发时机：<see cref="OnBuild"/>事件后，构建控制器是 </para>
+    /// <para>1、触发时机：<see cref="OnBuild"/>事件后，构建控制器时 </para>
     /// <para>2、用途说明：对配置好的控制器增加功能，如自定义序列化和反序列化 </para>
     /// <para>3、参数说明：</para>
     /// <para>- <see cref="IMvcBuilder"/>mvc构建器实例</para>
@@ -42,7 +42,7 @@ public class WebApplication : Application, IApplication
     public event Action<IMvcBuilder, IDIManager>? OnController;
     /// <summary>
     /// 事件：应用构建完成后
-    /// <para>1、触发时机：<see cref="OnBuild"/> 之后</para>
+    /// <para>1、触发时机：<see cref="OnController"/> 之后</para>
     /// <para>2、用途说明：进行<see cref="Microsoft.AspNetCore.Builder.WebApplication"/>配置，如站点跨域，HTTP请求中间件 </para>
     /// <para>3、参数说明：</para>
     /// <para>- <see cref="Microsoft.AspNetCore.Builder.WebApplication"/> 应用程序实例</para>

@@ -1,7 +1,7 @@
 namespace Snail.Test.Aspect.Components
 {
 
-    [MethodAspect(RunHandle = "111")]
+    [MethodAspect(Interceptor = "111")]
     public abstract class AspectTest
     {
         public virtual async Task<string> String()

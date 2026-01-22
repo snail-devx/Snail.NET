@@ -5,7 +5,7 @@ namespace Snail.Aspect.General.Components;
 
 /// <summary>
 /// 方法执行时的上下文；实现方法执行拦截，切面注入逻辑
-/// <para>1、配合<see cref="IMethodRunHandle"/>使用 </para>
+/// <para>1、配合<see cref="IMethodInterceptor"/>使用 </para>
 /// <para>2、记录方法名称、参数等信息 </para>
 /// <para>3、存储、修改方法返回值数据 </para>
 /// </summary>
@@ -25,7 +25,7 @@ public sealed class MethodRunContext
     /// <summary>
     /// 执行方法的返回值；若方法为void或者Task，则无返回值
     /// </summary>
-    public object? ReturnValue { private set; get; }
+    public object? ReturnValue { set; get; }
     #endregion
 
     #region 构造方法
@@ -38,20 +38,6 @@ public sealed class MethodRunContext
     {
         Method = method;
         Parameters = parameters;
-    }
-    #endregion
-
-    #region 公共方法
-    /// <summary>
-    /// 设置方法返回值
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    public T? SetReturnValue<T>(T? data)
-    {
-        ReturnValue = data;
-        return data;
     }
     #endregion
 }

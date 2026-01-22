@@ -6,44 +6,38 @@ using System.Threading.Tasks;
 namespace Snail.Aspect.General.Extensions;
 
 /// <summary>
-/// <see cref="IMethodRunHandle"/>扩展方法
+/// <see cref="IMethodInterceptor"/>扩展方法
 /// </summary>
 public static class MethodRunHandleExtensions
 {
     #region 公共方法
     /// <summary>
-    /// 异步方法运行时；支持返回返回值
+    /// 拦截异步方法；支持返回返回值
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="handle"></param>
+    /// <param name="interceptor"></param>
     /// <param name="next"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static async Task<T?> OnRunAsync<T>(this IMethodRunHandle handle, Func<Task<T?>> next, MethodRunContext context)
+    public static async Task<T?> InterceptAsync<T>(this IMethodInterceptor interceptor, Func<Task<T?>> next, MethodRunContext context)
     {
-        await handle.OnRunAsync(async () =>
-        {
-            T? data = await next.Invoke();
-            context.SetReturnValue(data);
-        }, context);
+        async Task interceptTask() => context.ReturnValue = await next.Invoke();
+        await interceptor.InterceptAsync(interceptTask, context);
         return (T?)context.ReturnValue;
     }
 
     /// <summary>
-    /// 同步方法运行时；支持返回返回值
+    /// 拦截同步方法；支持返回返回值
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="handle"></param>
+    /// <param name="interceptor"></param>
     /// <param name="next"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static T? OnRun<T>(this IMethodRunHandle handle, Func<T?> next, MethodRunContext context)
+    public static T? Intercept<T>(this IMethodInterceptor interceptor, Func<T?> next, MethodRunContext context)
     {
-        handle.OnRun(() =>
-        {
-            T? data = next.Invoke();
-            context.SetReturnValue(data);
-        }, context);
+        void interceptAction() => context.ReturnValue = next.Invoke();
+        interceptor.Intercept(interceptAction, context);
         return (T?)context.ReturnValue;
     }
     #endregion

@@ -1,6 +1,6 @@
 namespace Snail.Test.Aspect.Components;
 
-[MethodAspect(RunHandle = "null")]
+[MethodAspect(Interceptor = "null")]
 public class FileNamespaceTest
 {
 
