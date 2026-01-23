@@ -1,4 +1,7 @@
 ﻿using Snail.Abstractions.Common.Interfaces;
+using Snail.Abstractions.Setting.Extensions;
+using Snail.Utilities.Collections.Extensions;
+using Snail.Utilities.Common.Extensions;
 using Snail.WebApp.Extensions;
 
 namespace Snail.WebApp.Components;
@@ -52,16 +55,16 @@ public class WebAppInitializer : IInitializer<WebApplication>
         //  监听OnBuild事件，完成web应用内置中间件集成
         application.OnBuilded += (app, services) =>
         {
-            //  启用 请求提交数据 重复读取功能：解决actionfilter取不到request.Body数据的问题
-            app.UseRereadRequestBody();
-            //  添加CORS支持
-            app.UseUrlCors();
-            //  使用Cookie适配器：解决外部传入cookie值包含“{”、“}”等关键字时，无法识别的问题
-            app.UseMiddleware<CookieMiddleware>();
-            //  为每个请求构建全新的运行时上下文，互不干扰
-            app.UseMiddleware<RunContextMiddleware>();
-            //  整理遥测信息数据
-            app.UseMiddleware<TelemetryMiddleware>();
+            //  配置端口监听：从环境变量 Urls 中获取；如 http://*:4000
+            application.GetEnv("Urls")
+                ?.Split(";", StringSplitOptions.RemoveEmptyEntries)
+                ?.ForEach(app.Urls.Add);
+            //  中间配置
+            app.UseRereadRequestBody()/*                            重复读取：解决actionfilter取不到request.Body数据的问题*/
+               .UseUrlCors()/*                                      添加CORS支持*/
+               .UseMiddleware<CookieMiddleware>()/*                 Cookie插件：解决cookie值包含“{”、“}”等关键字时，无法识别的问题*/
+               .UseMiddleware<RunContextMiddleware>()/*             运行时上下文：为每个请求构建全新的运行时上下文，互不干扰*/
+               .UseMiddleware<TelemetryMiddleware>();/*             遥测中间件：整理遥测信息数据*/
         };
     }
     #endregion
