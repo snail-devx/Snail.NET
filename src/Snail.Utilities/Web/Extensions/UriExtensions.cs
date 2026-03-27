@@ -38,13 +38,17 @@ public static class UriExtensions
     /// <param name="uri"></param>
     /// <param name="userInfo">out 参数，被移除的userInfi信息字符串</param>
     /// <returns>移除userInfo后新的Uri</returns>
-    public static Uri TryClearUserInfo(this Uri uri, out string userInfo)
+    public static Uri TryClearUserInfo(this Uri uri, out string? userInfo)
     {
-        userInfo = uri.UserInfo;
-        if (userInfo?.Length > 0)
+        if (string.IsNullOrEmpty(uri.UserInfo) == false)
         {
+            userInfo = uri.UserInfo;
             string newUrl = $"{uri.Scheme}://{uri.Authority}{uri.PathAndQuery}{uri.Fragment}";
             uri = new Uri(newUrl);
+        }
+        else
+        {
+            userInfo = null;
         }
         return uri;
     }

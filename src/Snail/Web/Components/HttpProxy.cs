@@ -73,7 +73,7 @@ public sealed class HttpProxy : PoolableObject<HttpClient>, IPoolable
         ThrowIfNull(baseAddress);
         ThrowIfNull(request);
         //  对uri进行校验，提取UserInfo信息做Authorization验证；后期考虑缓存，空间换时间
-        baseAddress = baseAddress.TryClearUserInfo(out string userInfo);
+        baseAddress = baseAddress.TryClearUserInfo(out string? userInfo);
         if (userInfo != null)
         {
             userInfo = userInfo.AsBase64Encode();
