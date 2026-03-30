@@ -26,6 +26,10 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     protected static readonly string TYPENAME_ValidateAspectAttribute = typeof(ValidateAspectAttribute).FullName!;
     /// <summary>
+    /// 类型名：<see cref="ValidateDisabledAttribute"/>
+    /// </summary>
+    protected static readonly string TYPENAME_ValidateDisabledAttribute = typeof(ValidateDisabledAttribute).FullName!;
+    /// <summary>
     /// 类型名：<see cref="RequiredAttribute"/>
     /// </summary>
     protected const string TYPENAME_RequiredAttribute = "Snail.Aspect.General.Attributes.RequiredAttribute";
@@ -108,6 +112,11 @@ internal class ValidateSyntaxMiddleware : ITypeDeclarationMiddleware
     /// <returns>代码字符串</returns>
     string? ITypeDeclarationMiddleware.GenerateMethodCode(MethodDeclarationSyntax method, SourceGenerateContext context, MethodGenerateOptions options, MethodCodeDelegate? next)
     {
+        //  若配置了忽略验证，则直接执行下一步
+        if (method.AttributeLists.GetAttribute(context.Semantic, TYPENAME_ValidateDisabledAttribute) != null)
+        {
+            return next?.Invoke(method, context, options);
+        }
         //  判断是否有验证参数，有则生成
         StringBuilder builder = new();
         foreach (ParameterSyntax parameter in method.ParameterList.Parameters)

@@ -20,7 +20,7 @@ public static class UriExtensions
         user = null;
         pwd = null;
         //  对特殊字符做一下转义
-        if (uri.UserInfo?.Length > 0)
+        if (string.IsNullOrEmpty(uri.UserInfo) == false)
         {
             var arr = uri.UserInfo.Split(':');
             if (arr.Length == 2)

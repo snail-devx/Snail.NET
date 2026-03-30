@@ -29,9 +29,9 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// </summary>
     private static readonly IList<Func<TypeDeclarationSyntax, SemanticModel, ITypeDeclarationMiddleware?>> _middlewareConfigs;
     /// <summary>
-    /// 类型名：<see cref="AspectIgnoreAttribute"/>
+    /// 类型名：<see cref="AspectDisabledAttribute"/>
     /// </summary>
-    protected static readonly string TYPENAME_AspectIgnoreAttribute = typeof(AspectIgnoreAttribute).FullName!;
+    protected static readonly string TYPENAME_AspectDisabledAttribute = typeof(AspectDisabledAttribute).FullName!;
     /// <summary>
     /// 固定需要引入的命名空间几何
     /// </summary>
@@ -124,8 +124,8 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
             transform: (ctx, _) =>
             {
                 TypeDeclarationSyntax tds = (ctx.Node as TypeDeclarationSyntax)!;
-                //  如果标记为AspectIgnoreAttribute，则忽略掉
-                AttributeSyntax? attr = tds.AttributeLists.GetAttribute(ctx.SemanticModel, TYPENAME_AspectIgnoreAttribute);
+                //  如果标记为AspectDisabledAttribute，则忽略掉
+                AttributeSyntax? attr = tds.AttributeLists.GetAttribute(ctx.SemanticModel, TYPENAME_AspectDisabledAttribute);
                 if (attr != null)
                 {
                     return null;
@@ -328,8 +328,8 @@ internal class ClassInterfaceSyntaxProxy : ISyntaxProxy
     /// <returns>是成功生成代码，返回true；否则返回false</returns>
     private bool GenerateMethod(StringBuilder builder, MethodDeclarationSyntax mNode, SourceGenerateContext context)
     {
-        //      显式指定了Ignore，则忽略
-        if (mNode.AttributeLists.GetAttribute(context.Semantic, TYPENAME_AspectIgnoreAttribute) != null)
+        //  显式指定了禁止，则忽略
+        if (mNode.AttributeLists.GetAttribute(context.Semantic, TYPENAME_AspectDisabledAttribute) != null)
         {
             return false;
         }

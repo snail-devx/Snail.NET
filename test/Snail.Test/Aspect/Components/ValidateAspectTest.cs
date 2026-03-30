@@ -1,4 +1,3 @@
-using Snail.Abstractions.Common.Interfaces;
 using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Test.Aspect.Components;
@@ -12,7 +11,7 @@ public class ValidateAspectTest
     public virtual void TestAny([Required] int[] v)
     {
     }
-
+    [ValidateDisabled]
     public virtual void TestValidatable(Validatable tv, [Required] Validatable tv1)
     {
     }
