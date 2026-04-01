@@ -70,6 +70,7 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
     }
     /// <summary>
     /// 保存数据：存在覆盖，不存在插入
+    /// <para>注意事项：数据库实现时是先删除后插入</para>
     /// </summary>
     /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
     /// <param name="models">要保存的数据实体对象集合</param>

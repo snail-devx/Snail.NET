@@ -47,6 +47,7 @@ public class MongoProvider : DbProvider, IDbProvider
     }
     /// <summary>
     /// 保存数据：存在覆盖，不存在插入
+    /// <para>注意事项：数据库实现时是先删除后插入</para>
     /// </summary>
     /// <typeparam name="DbModel">数据库实体；需被<see cref="DbTableAttribute"/>特性标记</typeparam>
     /// <param name="models">要保存的数据实体对象集合</param>
@@ -56,6 +57,18 @@ public class MongoProvider : DbProvider, IDbProvider
         ThrowIfNullOrEmpty(models);
         //  将实体直接反序列化成Document，少了几次DbModel<->BsonDocument的转换，对性能友好
         IMongoCollection<BsonDocument> collection = CreateBsonCollection<DbModel>(false);
+        //  进行先删除后增加逻辑；和Sql系列保持一致，旧代码遍历单个替换，性能太差
+        DbModelField pkField = GetProxy<DbModel>().PKField;
+        List<object> ids = models
+            .Select(value => pkField.Property.GetValue(value)!)
+            .ToList();
+        var result = await collection.DeleteManyAsync(new BsonDocument("_id", new BsonDocument("$in", BsonArray.Create(ids))));
+        IEnumerable<BsonDocument> documents = models.Select(BuildDocument);
+        await collection.InsertManyAsync(documents);
+        //  不报错标记为成功
+        return true;
+
+        /* 旧代码备份，循环单个替换，性能不高、、、
         List<BsonDocument> inserts = [];
         foreach (var model in models)
         {
@@ -76,6 +89,7 @@ public class MongoProvider : DbProvider, IDbProvider
         }
         //  不报错标记为成功
         return true;
+         */
     }
     /// <summary>
     /// 基于主键id值加载数据，此接口仅支持单主键
