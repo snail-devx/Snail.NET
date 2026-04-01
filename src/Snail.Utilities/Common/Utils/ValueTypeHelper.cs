@@ -91,7 +91,7 @@ public static class ValueTypeHelper
         }
     }
     /// <summary>
-    /// 【布尔】值不为true时抛出异常
+    /// 【布尔】值不为false时抛出异常
     /// </summary>
     /// <param name="value">要判断的数据</param>
     /// <param name="message">异常消息，根据需要自己传递</param>
