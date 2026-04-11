@@ -196,15 +196,6 @@ public sealed class DIManager : Disposable, IDIManager
 
         return this;
     }
-
-    /// <summary>
-    /// 基于依赖注入构建泛型实例
-    /// </summary>
-    /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
-    /// <param name="from">源类型：基于此查找注册信息</param>
-    /// <returns>构建完成的实例对象</returns>
-    object? IDIManager.Resolve(string? key, Type from)
-        => Resolve(key, from, parameters: null);
     /// <summary>
     /// 依赖注入构建实例
     /// </summary>
@@ -212,9 +203,16 @@ public sealed class DIManager : Disposable, IDIManager
     /// <param name="from">源类型：基于此查找注册信息</param>
     /// <param name="parameters">实现类型的构造方法执行时注入的参数信息</param>
     /// <returns>构建完成的实例对象</returns>
-    /// <remarks>此方法内部使用，暂不对外</remarks>
-    object? IDIManager.Resolve(string? key, Type from, IParameter[] parameters)
-         => Resolve(key, from, parameters);
+    object? IDIManager.Resolve(string? key, Type from, IParameter[]? parameters)
+    {
+        /** 一般不用关注，使用<see cref = "IDIManager" /> 接口即可，仅在需要针对构造方法传入参数时，使用此；暂时作为public对外提供 */
+        EnsureEnable();
+        ThrowIfNull(from);
+        DIDescriptor? descriptor = FindResolveDescriptor(key, from);
+        return descriptor != null
+            ? BuildInstance(this, descriptor, parameters)
+            : null;
+    }
     #endregion
 
     #region 继承方法
@@ -303,24 +301,6 @@ public sealed class DIManager : Disposable, IDIManager
         });
     }
 
-    /// <summary>
-    /// 依赖注入构建实例
-    /// </summary>
-    /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
-    /// <param name="from">源类型：基于此查找注册信息</param>
-    /// <returns>构建完成的实例对象</returns>
-    /// <param name="parameters">执行实现类型的构造方法执行时注入的参数信息；一般不用关注</param>
-    /// <returns>构建完成的实例对象</returns>
-    private object? Resolve(in string? key, in Type from, in IParameter[]? parameters)
-    {
-        /** 一般不用关注，使用<see cref = "IDIManager" /> 接口即可，仅在需要针对构造方法传入参数时，使用此；暂时作为public对外提供 */
-        EnsureEnable();
-        ThrowIfNull(from);
-        DIDescriptor? descriptor = FindResolveDescriptor(key, from);
-        return descriptor != null
-            ? BuildInstance(this, descriptor, parameters)
-            : null;
-    }
     /// <summary>
     /// 查找构建实例的依赖注入信息描述其
     /// </summary>
@@ -486,17 +466,23 @@ public sealed class DIManager : Disposable, IDIManager
         if (instance == null)
         {
             //  基于To类型反射构建；基于代理器，缓存构建相关信息，加快后续构建速度
-            if (descriptor.ToFunc == null)
+            try
             {
-                TypeProxy proxy = TypeProxy.GetProxy(descriptor.To!);
-                instance = proxy.BuildInstance(manager, parameters);
+                if (descriptor.ToFunc == null)
+                {
+                    TypeProxy proxy = TypeProxy.GetProxy(descriptor.To!);
+                    instance = proxy.BuildInstance(manager, parameters);
+                }
+                //  基于委托构建实例，直接执行即可     
+                else
+                {
+                    instance = descriptor.ToFunc.Invoke(manager);
+                }
             }
-            //  基于委托构建实例，直接执行即可     
-            else
+            finally
             {
-                instance = descriptor.ToFunc.Invoke(manager);
+                storager.SaveInstace(instance);
             }
-            storager.SaveInstace(instance);
         }
         return instance;
     }

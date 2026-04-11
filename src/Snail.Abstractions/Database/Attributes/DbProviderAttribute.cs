@@ -82,6 +82,11 @@ public sealed class DbProviderAttribute : Attribute, IInject, IParameter<IDbServ
 
     #region IInject
     /// <summary>
+    /// 是否是必须的
+    /// <para>为true时，若依赖注入构建值为空会报错</para>
+    /// </summary>
+    public bool Required { init; get; }
+    /// <summary>
     /// 依赖注入Key值，用于DI动态构建实例
     /// <para>1、用于区分同一个源（From）多个实现（to）的情况 </para>
     /// <para>2、默认值为null </para>

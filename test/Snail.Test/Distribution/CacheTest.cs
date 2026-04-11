@@ -334,21 +334,21 @@ namespace Snail.Test.Distribution
 
             await cacher.AddObject<CacheTestModel>(obj1.Id, obj1, 5);
             Assert.That(null != await cacher.GetObject<CacheTestModel>(obj1.Id));
-            Thread.Sleep(TimeSpan.FromSeconds(7));
+            await Task.Delay(TimeSpan.FromSeconds(7));
             Assert.That(null == await cacher.GetObject<CacheTestModel>(obj1.Id));
             Assert.That(false == await cacher.HasObject<CacheTestModel>(obj1.Id));
 
             string hashKey = "Snail_HashKey";
             await cacher.AddHash<CacheTestModel>(hashKey, obj1.Id, obj1, 4);
             Assert.That(null != await cacher.GetHash<CacheTestModel>(hashKey, obj1.Id));
-            Thread.Sleep(TimeSpan.FromSeconds(6));
+            await Task.Delay(TimeSpan.FromSeconds(6));
             Assert.That(null == await cacher.GetHash<CacheTestModel>(hashKey, obj1.Id));
             Assert.That(false == await cacher.HasHash<CacheTestModel>(hashKey, obj1.Id));
 
             string setKey = "Snail_SortedSet_Expire";
             await cacher.AddSortedSet<CacheTestModel>(setKey, obj1, 100, 3);
             Assert.That(null != (await cacher.GetSortedSet<CacheTestModel>(setKey, 0, 0))?.FirstOrDefault());
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(5));
             Assert.That(false == await cacher.HasSortedSet<CacheTestModel>(setKey));
             Assert.That(0 == await cacher.GetSortedSetLen<CacheTestModel>(setKey));
         }

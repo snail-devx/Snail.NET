@@ -9,6 +9,7 @@ namespace Snail.Abstractions.Dependency.Attributes;
 /// <para>3、在其他方法时：DI构建完实例后，执行此方法进行个性化初始化配置；前提是此方法为【实例方法】</para>
 /// <para>4、在方法参数上：DI执行构造方法、注入方法前，基于DI构建此参数值（无此特性的参数，走参数类型默认值）</para>
 /// </summary>
+/// <remarks>在private标记的属性、字段、方法上慎用，若类允许继承，由子类注入实现类时，无法执行注入逻辑</remarks>
 [AttributeUsage(
     AttributeTargets.Constructor | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Parameter,
     AllowMultiple = false,
@@ -17,6 +18,12 @@ namespace Snail.Abstractions.Dependency.Attributes;
 public class InjectAttribute : Attribute, IInject
 {
     #region 属性变量
+    /// <summary>
+    /// 是否是必须的
+    /// <para>为true时，若依赖注入构建值为空会报错</para>
+    /// </summary>
+    public bool Required { init; get; }
+
     /// <summary>
     /// 依赖注入Key值，用于DI动态构建实例
     /// <para>1、用于区分同一个源（From）多个实现（to）的情况 </para>

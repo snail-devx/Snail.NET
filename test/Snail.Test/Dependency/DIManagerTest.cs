@@ -3,6 +3,7 @@ using Snail.Dependency;
 using Snail.Test.Dependency.Components;
 using Snail.Test.Dependency.DataModels;
 using Snail.Test.Dependency.Interfaces;
+using Snail.Utilities.Common.Interfaces;
 
 namespace Snail.Test.Dependency
 {
@@ -287,6 +288,48 @@ namespace Snail.Test.Dependency
 
         }
 
+        /// <summary>
+        /// 测试 Required注入
+        /// </summary>
+        [Test]
+        public void TestRequiredInject()
+        {
+            IDIManager manager = DIManager.Empty;
+            manager.Register<TestRequiredInject>();
+            try
+            {
+                manager.Resolve<TestRequiredInject>();
+            }
+            catch (Exception ex)
+            {
+                Assert.That(ex.Message.Contains("构建TestRequiredInject.App属性值失败：Resolve返回null。key:null;from:Snail.Abstractions.IApplication (Parameter 'value')"));
+            }
+
+            IApplication app = new Application();
+            app.RootServices.Register<TestRequiredInject>();
+            try
+            {
+                app.RootServices.Resolve<TestRequiredInject>();
+            }
+            catch (Exception ex)
+            {
+                Assert.That(ex.Message.Contains("构建TestRequiredInject.Identifiable属性值失败：Resolve返回null"));
+            }
+            app.RootServices.Register<IIdentifiable>(instance: new IdentifiableInject());
+            app.RootServices.Resolve<TestRequiredInject>();
+        }
+
+        /// <summary>
+        /// 测试私有注入
+        /// </summary>
+        [Test]
+        public void TestPrivateInject()
+        {
+            IDIManager manager = DIManager.Empty;
+            manager.Register<TestPrivateInject>().Register<TestPrivateInject, TestPrivateInjectChild>(key: "Child");
+            TestPrivateInject? self = manager.Resolve<TestPrivateInject>();
+            TestPrivateInject? child = manager.Resolve<TestPrivateInject>(key: "Child");
+        }
 
         #region 私有类型
         private class StringParameter : IParameter

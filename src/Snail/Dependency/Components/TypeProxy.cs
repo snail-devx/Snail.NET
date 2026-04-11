@@ -126,24 +126,29 @@ public sealed class TypeProxy : PoolableObject<Type>
             object? instance = null;
             //  构造方法注入，创建实例；外部传入的parameters参数传递过来作为构造方法的补充参数
             {
-                object?[]? paramValues = BuildMethodParamVlaues(manager, Constructor, parameters);
+                object?[]? paramValues = BuildMethodParamValues(manager, Constructor, parameters);
                 instance = Constructor.Invoke(paramValues);
             }
             //  注入初始化字段、属性
             Fields?.ForEach(field =>
             {
-                object? value = BuildValueByAttribute(manager, field.FieldType, field);
+                object? value = BuildValueByAttribute($"{field.DeclaringType!.Name}.{field.Name}字段", manager, field.FieldType, field);
                 field.SetValue(instance, value);
             });
             Properties?.ForEach(property =>
             {
-                object? value = BuildValueByAttribute(manager, property.PropertyType, property);
+                object? value = BuildValueByAttribute($"{property.DeclaringType!.Name}.{property.Name}属性", manager, property.PropertyType, property);
+                //  判断属性是否标记了 required ，如 public required string Str{init;get;}如无法反射赋值，则强制报错
+                //if (property.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null)
+                //{
+
+                //}
                 property.SetValue(instance, value);
             });
             //  执行初始化方法：这里不能将外部传入的parameters参数传递进去（parameters仅用于构造方法）
             Methods?.ForEach(method =>
             {
-                object?[]? paramValues = BuildMethodParamVlaues(manager, method, extParams: null);
+                object?[]? paramValues = BuildMethodParamValues(manager, method, extParams: null);
                 method.Invoke(instance, paramValues);
             });
 
@@ -239,7 +244,7 @@ public sealed class TypeProxy : PoolableObject<Type>
     /// <param name="method">方法对象</param>
     /// <param name="extParams">执行方法时，外部已经传入的参数信息；不用再动态构建了</param>
     /// <returns></returns>
-    private static object?[]? BuildMethodParamVlaues(in IDIManager manager, in MethodBase method, in IParameter[]? extParams)
+    private static object?[]? BuildMethodParamValues(in IDIManager manager, in MethodBase method, in IParameter[]? extParams)
     {
         ParameterInfo[] pis = method.GetParameters();
         object?[]? paramValues = pis.Any() ? new object[pis.Length] : null;
@@ -257,7 +262,7 @@ public sealed class TypeProxy : PoolableObject<Type>
             object? value = pi.HasDefaultValue ? pi.DefaultValue : null;
             value = parameter != null
                 ? (parameter.GetParameter(manager) ?? value)
-                : BuildValueByAttribute(manager, pi.ParameterType, pi, defaultValue: value);
+                : BuildValueByAttribute($"{method.DeclaringType!.Name}.{method.Name}参数{pi.Name}", manager, pi.ParameterType, pi, defaultValue: value);
             paramValues![index] = value;
         }
         return paramValues;
@@ -265,12 +270,13 @@ public sealed class TypeProxy : PoolableObject<Type>
     /// <summary>
     /// 基于依赖注入的特性标签构建值
     /// </summary>
+    /// <param name="title">属性/字段/参数的Name值</param>
     /// <param name="manager">依赖注入管理器</param>
     /// <param name="from">构建值的源类型</param>
     /// <param name="provider">自定义属性提供程序，如<see cref="FieldInfo" />、<see cref="PropertyInfo"/>、<see cref="ParameterInfo"/></param>
     /// <param name="defaultValue">默认值</param>
     /// <returns>构建出来的值；若如依赖注入标签，则构建默认值（如int为0）</returns>
-    private static object? BuildValueByAttribute(in IDIManager manager, in Type from, in ICustomAttributeProvider provider, in object? defaultValue = null)
+    private static object? BuildValueByAttribute(string title, in IDIManager manager, in Type from, in ICustomAttributeProvider provider, in object? defaultValue = null)
     {
         //  构建类型值时；按照值类型和引用类型做一下区分，后续看情况值类型也走依赖注入
         object? value;
@@ -280,9 +286,14 @@ public sealed class TypeProxy : PoolableObject<Type>
         }
         else
         {
+            //  为了兼容微软逻辑，这里不管是否标记了Inject，都resolve一下
             IList<IParameter> parameters = provider.GetParameterAttribute(out IInject? inject);
             string? key = inject?.GetKey(manager);
             value = manager.Resolve(key, from, parameters.ToArray()) ?? defaultValue;
+            //  标记了Required时，则验证非null
+            return inject?.Required == true
+                ? ThrowIfNull(value, $"构建{title}值失败：Resolve返回null。key:{key ?? STR_Null};from:{from.FullName}")
+                : value;
         }
         return value;
     }

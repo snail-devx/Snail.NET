@@ -53,15 +53,7 @@ public interface IDIManager : IDisposable
     /// </summary>
     /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
     /// <param name="from">源类型：基于此查找注册信息</param>
-    /// <returns>构建完成的实例对象</returns>
-    object? Resolve(string? key, Type from);
-    /// <summary>
-    /// 依赖注入构建实例
-    /// </summary>
-    /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
-    /// <param name="from">源类型：基于此查找注册信息</param>
     /// <param name="parameters">实现类型的构造方法执行时注入的参数信息</param>
     /// <returns>构建完成的实例对象</returns>
-    /// <remarks>此方法内部使用，暂不对外</remarks>
-    internal object? Resolve(string? key, Type from, IParameter[] parameters);
+    object? Resolve(string? key, Type from, IParameter[]? parameters = null);
 }
