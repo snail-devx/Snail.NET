@@ -2,9 +2,9 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Snail.Abstractions;
+using Snail.Abstractions.Dependency;
 using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Logging.Extensions;
-using Snail.Abstractions.Setting.Extensions;
 using Snail.Abstractions.Web.Interfaces;
 using Snail.Message.Components;
 using Snail.RabbitMQ.Components;
@@ -28,30 +28,31 @@ public class MessageProvider : IMessageProvider
     /// Key值：压缩类型
     /// </summary>
     protected const string KEY_CompressionType = "compression.type";
+
     /// <summary>
     /// 应用程序实例
     /// </summary>
-    protected readonly IApplication App;
+    [Inject(Required = true)]
+    protected IApplication App { init; get; } = null!;
     /// <summary>
     /// RabbitMQ管理器
     /// </summary>
-    protected readonly RabbitManager Manager;
+    [Inject(Required = true)]
+    protected RabbitManager Manager { init; get; } = null!;
     /// <summary>
     /// 消息序列化器
     /// </summary>
-    protected readonly IMessageSerializer Serializer;
+    protected IMessageSerializer Serializer { private init; get; }
     #endregion
 
     #region 构造方法
     /// <summary>
     /// 构造方法
     /// </summary>
-    public MessageProvider(IApplication app)
+    public MessageProvider(IDIManager di)
     {
-        App = ThrowIfNull(app);
-        Manager = app.ResolveRequired<RabbitManager>();
         //  消息序列化器：若为空则使用默认的
-        Serializer = app.Resolve<IMessageSerializer>() ?? new MessageSerializer();
+        Serializer = di.Resolve<IMessageSerializer>() ?? new MessageSerializer();
     }
     #endregion
 

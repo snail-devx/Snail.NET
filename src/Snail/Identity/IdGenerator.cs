@@ -25,14 +25,13 @@ public sealed class IdGenerator : IIdGenerator
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app">应用程序实例</param>
+    /// <param name="di"></param>
     /// <param name="server">用于生成主键Id的服务器地址，和<see cref="IIdProvider"/>配合</param>
     /// <param name="provider">主键Id提供程序，负责进行id生成具体实现；为null则采用默认的</param>
-    public IdGenerator(IApplication app, IServerOptions? server, IIdProvider? provider = null)
+    public IdGenerator([Inject(Required = true)] IDIManager di, IServerOptions? server, IIdProvider? provider = null)
     {
-        ThrowIfNull(app);
         _server = server;
-        _provider = provider ?? app.ResolveRequired<IIdProvider>();
+        _provider = provider ?? di.ResolveRequired<IIdProvider>();
     }
     #endregion
 

@@ -23,16 +23,16 @@ public sealed class MessageManager : IMessageManager
 
     #region 构造方法
     /// <summary>
-    /// 默认无参构造方法
     /// </summary>
-    public MessageManager(IApplication app)
+    public MessageManager([Inject(Required = true)] IDIManager di, IInitializer<IMessageManager>? initializer)
     {
-        ThrowIfNull(app);
-        //  中间件代理
-        _sendMiddlewares = app.ResolveRequired<IMiddlewareProxy<SendDelegate>>();
-        _receiveMiddlewares = app.ResolveRequired<IMiddlewareProxy<ReceiveDelegate>>();
-        //  执行初始化器逻辑
-        app.Resolve<IInitializer<IMessageManager>>()?.Initialize(this);
+        /** 这里不能把 _sendMiddlewares、_receiveMiddlewares 放到属性中使用【inject】属性
+         *      1、因为initializer.Initialize方法会重新调用 MessageManager.Use方法
+         *      2、若在属性中Inject，则可能在  MessageManager.Use 方法中调用 _sendMiddlewares、_receiveMiddlewares 时报错空引用
+         */
+        _sendMiddlewares = di.ResolveRequired<IMiddlewareProxy<SendDelegate>>();
+        _receiveMiddlewares = di.ResolveRequired<IMiddlewareProxy<ReceiveDelegate>>();
+        initializer?.Initialize(this);
     }
     #endregion
 

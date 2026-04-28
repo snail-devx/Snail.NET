@@ -1,5 +1,4 @@
-﻿using Snail.Abstractions;
-using Snail.Abstractions.Database.DataModels;
+﻿using Snail.Abstractions.Database.DataModels;
 using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Dependency.Enumerations;
 using Snail.Database.Components;
@@ -23,12 +22,9 @@ public class MongoProvider : DbProvider, IDbProvider
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app">应用程序实例</param>
     /// <param name="server">数据库服务器配置选项</param>
-    public MongoProvider(IApplication app, IDbServerOptions server)
-        : base(app, server)
-    {
-    }
+    public MongoProvider(IDbServerOptions server) : base(server)
+    { }
     #endregion
 
     #region IDbProvider

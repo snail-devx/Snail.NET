@@ -75,6 +75,29 @@ public static class ApplicationExtensions
             return provider.Log(log, scope: null, server: null);
         }
         /// <summary>
+        /// 将跟踪日志写入文本文件
+        /// <para>1、使用<see cref="DIKEY_FileLogger"/>为Key的<see cref="ILogProvider"/>组件完成文件日志写入</para>
+        /// <para>2、推荐用于一些核心组件的兜底，如网络日志写入报错时，使用本地日志做兜底</para>
+        /// <para>3、推荐使用前，使用<see cref="AddLogService(IApplication)"/>添加日志服务</para>
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public bool LogTraceFile(string title, string? content)
+        {
+            LogDescriptor log = new()
+            {
+                Level = LogLevel.Trace,
+                Title = title,
+                LogTag = string.Empty,
+                Content = content,
+                AssemblyName = typeof(ApplicationExtensions).Assembly.FullName,
+                ClassName = typeof(ApplicationExtensions).FullName,
+                MethodName = nameof(LogErrorFile),
+            };
+            return app.LogFile(log);
+        }
+        /// <summary>
         /// 将错误日志写入文本文件
         /// <para>1、使用<see cref="DIKEY_FileLogger"/>为Key的<see cref="ILogProvider"/>组件完成文件日志写入</para>
         /// <para>2、推荐用于一些核心组件的兜底，如网络日志写入报错时，使用本地日志做兜底</para>
@@ -90,7 +113,7 @@ public static class ApplicationExtensions
             {
                 Level = LogLevel.Error,
                 Title = title,
-                LogTag = "",
+                LogTag = string.Empty,
                 Content = content,
                 AssemblyName = typeof(ApplicationExtensions).Assembly.FullName,
                 ClassName = typeof(ApplicationExtensions).FullName,

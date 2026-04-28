@@ -1,5 +1,4 @@
 ﻿using MySql.Data.MySqlClient;
-using Snail.Abstractions;
 using Snail.Abstractions.Database.Enumerations;
 using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Dependency.Enumerations;
@@ -18,12 +17,9 @@ public class MySqlProvider : SqlProvider, IDbProvider
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app"></param>
     /// <param name="server"></param>
-    public MySqlProvider(IApplication app, IDbServerOptions server)
-        : base(app, server)
-    {
-    }
+    public MySqlProvider(IDbServerOptions server) : base(server)
+    { }
     #endregion
 
     #region 重写父类

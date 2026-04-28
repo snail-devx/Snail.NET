@@ -59,7 +59,6 @@ public interface IApplication
     /// <para>2、用途说明：实现程序关闭前的资源销毁等处理，若内部为异步任务，则返回Task，否则返回null</para>
     /// </summary>
     event Func<Task?>? OnStop;
-
     /// <summary>
     /// 应用根目录；默认exe所在目录，从<see cref="AppContext.BaseDirectory"/>取值
     /// </summary>
@@ -71,15 +70,13 @@ public interface IApplication
     internal protected ISettingManager Setting { get; }
     /// <summary>
     /// 依赖注入根服务
+    /// <para>1、作为应用全局服务实例存在</para>
     /// </summary>
-    /// <remarks>暂时不对外开放，仅针对内部使用</remarks>
-    internal protected IDIManager RootServices { get; }
+    IDIManager Services { get; }
     /// <summary>
-    /// 当前作用域的依赖注入服务
-    /// <para>1、实现作用域之间实例隔离；如一个ASP.NET Core的HTTP请求，就是一个全新的作用域</para>
-    /// <para>2、若为null，则从app根服务构建新的服务实例</para>
+    /// 取消令牌：用于判断应用程序是否已停止
     /// </summary>
-    IDIManager ScopeServices { get; }
+    CancellationToken CancellationToken { get; }
 
     /// <summary>
     /// 运行应用程序

@@ -12,5 +12,6 @@ public interface IBootstrapper
     /// 执行引导
     /// <para>1、执行时机：在<see cref="IApplication.OnRegistered"/>事件中执行此方法</para>
     /// </summary>
-    void Bootstrap();
+    /// <param name="app"></param>
+    void Bootstrap(IApplication app);
 }

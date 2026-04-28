@@ -19,10 +19,9 @@ namespace Snail.Test.Database.Components
         /// <summary>
         /// 构造方法
         /// </summary>
-        /// <param name="app"></param>
         /// <param name="server"></param>
-        public MySqlCustomProvider(IApplication app, IDbServerOptions server)
-            : base(app, server)
+        public MySqlCustomProvider(IDbServerOptions server)
+            : base(server)
         {
         }
     }
@@ -35,10 +34,9 @@ namespace Snail.Test.Database.Components
         /// <summary>
         /// 构造方法
         /// </summary>
-        /// <param name="app"></param>
         /// <param name="server"></param>
-        public PostgresCustomProvider(IApplication app, IDbServerOptions server)
-            : base(app, server)
+        public PostgresCustomProvider(IDbServerOptions server)
+            : base(server)
         {
         }
     }
@@ -52,10 +50,9 @@ namespace Snail.Test.Database.Components
         /// <summary>
         /// 构造方法
         /// </summary>
-        /// <param name="app"></param>
         /// <param name="server"></param>
-        public MongoCustomProvider(IApplication app, IDbServerOptions server)
-            : base(app, server)
+        public MongoCustomProvider(IDbServerOptions server)
+            : base(server)
         {
         }
     }
@@ -69,10 +66,9 @@ namespace Snail.Test.Database.Components
         /// <summary>
         /// 构造方法
         /// </summary>
-        /// <param name="app"></param>
         /// <param name="server"></param>
-        public ElasticCustomProvider(IApplication app, IDbServerOptions server)
-            : base(app, server)
+        public ElasticCustomProvider(IDbServerOptions server)
+            : base(server)
         {
         }
     }

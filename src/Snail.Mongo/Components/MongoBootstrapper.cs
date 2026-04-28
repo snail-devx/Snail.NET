@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Serializers;
 using Snail.Abstractions;
 using Snail.Abstractions.Common.Interfaces;
+using Snail.Abstractions.Dependency;
 using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Dependency.Extensions;
 
@@ -23,11 +24,9 @@ internal class MongoBootstrapper : IBootstrapper
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app"></param>
-    public MongoBootstrapper(IApplication app)
+    public MongoBootstrapper([Inject(Required = true)] IDIManager di)
     {
-        ThrowIfNull(app);
-        _inferrers = app.ResolveInRoot<IEnumerable<ITypeInferrer>>()?.ToArray();
+        _inferrers = di.Resolve<IEnumerable<ITypeInferrer>>()?.ToArray();
     }
     #endregion
 
@@ -36,7 +35,8 @@ internal class MongoBootstrapper : IBootstrapper
     /// 执行引导
     /// <para>1、执行时机：在<see cref="IApplication.OnRegistered"/>事件后执行此方法</para>
     /// </summary>
-    void IBootstrapper.Bootstrap()
+    /// <param name="app"></param>
+    void IBootstrapper.Bootstrap(IApplication app)
     {
         if (IsNullOrEmpty(_inferrers) == true)
         {

@@ -73,38 +73,21 @@ public static class ApplicationExtensions
         }
 
         /// <summary>
-        /// 使用【依赖注入服务】构建泛型实例
-        /// <para>1、通过<see cref="IApplication.ScopeServices"/>进行泛型实例构建</para>
-        /// </summary>
-        /// <typeparam name="T">依赖注入源类型</typeparam>
-        /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
-        /// <returns></returns>
-        public T? Resolve<T>(string? key = null) => app.ScopeServices.Resolve<T>(key);
-        /// <summary>
-        /// 使用【依赖注入服务】构建有效泛型实例，返回null报错
-        /// <para>1、通过<see cref="IApplication.ScopeServices"/>进行泛型实例构建</para>
-        /// </summary>
-        /// <typeparam name="T">依赖注入源类型</typeparam>
-        /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
-        /// <returns></returns>
-        public T ResolveRequired<T>(string? key = null) => app.ScopeServices.ResolveRequired<T>(key);
-
-        /// <summary>
         /// 使用【依赖注入根服务】构建泛型实例
-        /// <para>1、通过<see cref="IApplication.RootServices"/>进行泛型实例构建</para>
+        /// <para>1、通过<see cref="IApplication.Services"/>进行泛型实例构建</para>
         /// </summary>
         /// <typeparam name="T">依赖注入源类型</typeparam>
         /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
         /// <returns></returns>
-        public T? ResolveInRoot<T>(string? key = null) => app.RootServices.Resolve<T>(key);
+        public T? Resolve<T>(string? key = null) => app.Services.Resolve<T>(key);
         /// <summary>
         /// 使用【依赖注入根服务】构建有效泛型实例，返回null报错
-        /// <para>1、通过<see cref="IApplication.RootServices"/>进行泛型实例构建</para>
+        /// <para>1、通过<see cref="IApplication.Services"/>进行泛型实例构建</para>
         /// </summary>
         /// <typeparam name="T">依赖注入源类型</typeparam>
         /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
         /// <returns></returns>
-        public T ResolveRequiredInRoot<T>(string? key = null) => app.RootServices.ResolveRequired<T>(key);
+        public T ResolveRequired<T>(string? key = null) => app.Services.ResolveRequired<T>(key);
         #endregion
     }
 }

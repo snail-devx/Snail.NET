@@ -34,7 +34,7 @@ namespace Snail.Test.Identity
         /// <param name="targetType"></param>
         private void TestIdProvider(IIdProvider? provider, string title, Type targetType)
         {
-            IIdGenerator generator = new IdGenerator(App, null, provider);
+            IIdGenerator generator = new IdGenerator(App.Services, null, provider);
 
             Assert.That(provider != null && provider.GetType() == targetType, $"{title}是{targetType.FullName}");
             string id = provider!.NewId();

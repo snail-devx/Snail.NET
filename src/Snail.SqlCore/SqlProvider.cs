@@ -1,5 +1,4 @@
-﻿using Snail.Abstractions;
-using Snail.Abstractions.Database.DataModels;
+﻿using Snail.Abstractions.Database.DataModels;
 using Snail.Database.Components;
 using Snail.SqlCore.Components;
 using Snail.SqlCore.Enumerations;
@@ -22,12 +21,9 @@ public abstract class SqlProvider : DbProvider, IDbProvider, ISqlProvider
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app">应用程序实例</param>
     /// <param name="server">数据库服务器配置选项</param>
-    public SqlProvider(IApplication app, IDbServerOptions server)
-        : base(app, server)
-    {
-    }
+    public SqlProvider(IDbServerOptions server) : base(server)
+    { }
     #endregion
 
     #region ISqlProvider：abstract，交给具体子类重写

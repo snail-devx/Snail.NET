@@ -80,19 +80,19 @@ public class WebApplication : Application, IApplication
         base.StartBuild();
         //  2、初始化构建器：强制替换内置ioc服务；触发OnBuild、OnController事件
         WebApplicationBuilder builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(_args);
-        builder.Host.UseServiceProviderFactory(new ServiceProviderFactory(RootServices));
+        builder.Host.UseServiceProviderFactory(new ServiceProviderFactory(Services));
         builder.Host.ConfigureHostOptions(options => options.ShutdownTimeout = TimeSpan.FromSeconds(30));
         //      触发 OnBuild 事件
-        OnBuild?.Invoke(builder, RootServices);
+        OnBuild?.Invoke(builder, Services);
         OnBuild = null;
         //      添加控制器支持：AddControllers，支持Controller自定义，mvcbuilder干预；
         IMvcBuilder mvc = builder.Services.AddControllers().AddControllersAsServices();
-        OnController?.Invoke(mvc, RootServices);
+        OnController?.Invoke(mvc, Services);
         OnController = null;
         //  3、构建应用：内部会固化IServiceCollection注册服务，并转换成ServiceProvider对外提供
         Microsoft.AspNetCore.Builder.WebApplication app = builder.Build();
         //builder.Services.AddHostedService()
-        OnBuilded?.Invoke(app, RootServices);
+        OnBuilded?.Invoke(app, Services);
         OnBuilded = null;
         //      监听【OnRun】事件：启动WebApp；添加控制器映射，启动站点接收请求
         OnRun += (_) =>

@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
-using Snail.Abstractions;
 using Snail.Abstractions.Database.DataModels;
 using Snail.Abstractions.Dependency.Attributes;
 using Snail.Abstractions.Dependency.Enumerations;
-using Snail.Abstractions.Dependency.Extensions;
 using Snail.Abstractions.Logging;
 using Snail.Database.Components;
 using Snail.Elastic.Components;
@@ -26,20 +24,17 @@ public class ElasticProvider : DbProvider, IDbProvider
     /// <summary>
     /// 日志记录器
     /// </summary>
-    protected readonly ILogger Logger;
+    [Inject(Required = true)]
+    protected ILogger Logger { init; get; } = null!;
     #endregion
 
     #region 构造方法
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app">应用程序实例</param>
     /// <param name="server">数据库服务器配置选项</param>
-    public ElasticProvider(IApplication app, IDbServerOptions server)
-        : base(app, server)
-    {
-        Logger = app.ResolveRequired<ILogger>();
-    }
+    public ElasticProvider(IDbServerOptions server) : base(server)
+    { }
     #endregion
 
     #region IDbModelProvider

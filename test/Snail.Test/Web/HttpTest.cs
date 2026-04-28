@@ -35,7 +35,7 @@ namespace Snail.Test.Web
             Assert.That(http.GetServer(workspace: "Test", code: "BAIDU") != null, "BAIDU服务器地址不能为空");
             IServerOptions server = new ServerOptions(workspace: "Test", code: "BAIDU");
             //      http请求
-            IHttpRequestor requestor = new HttpRequestor(App, server, provider: null);
+            IHttpRequestor requestor = new HttpRequestor(App.Services, server, provider: null);
             HttpResult hr = await requestor.Get("/s?wd=xx");
             //      中间件：直接使用的 MiddlewareProxy<> 实现，不用测试
 

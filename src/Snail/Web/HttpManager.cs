@@ -27,12 +27,17 @@ public sealed class HttpManager : ServerManager, IHttpManager
     /// 构造方法
     /// </summary>
     /// <param name="app"></param>
-    public HttpManager(IApplication app)
+    /// <param name="di"></param>
+    /// <param name="initializer"></param>
+    public HttpManager(IApplication app, IDIManager di, IInitializer<IHttpManager>? initializer)
         : base(app, rsCode: "server")
     {
-        ThrowIfNull(app);
-        _proxy = app.ResolveRequired<IMiddlewareProxy<HttpDelegate>>();
-        app.Resolve<IInitializer<IHttpManager>>()?.Initialize(this);
+        /** 这里不能把 _proxy 放到属性中使用【inject】属性
+         *      1、因为initializer.Initialize方法会重新调用 HttpManager.Use方法
+         *      2、若在属性中Inject，则可能在  HttpManager.Use 方法中调用 _proxy 时报错空引用
+         */
+        _proxy = di.ResolveRequired<IMiddlewareProxy<HttpDelegate>>();
+        initializer?.Initialize(this);
     }
     #endregion
 

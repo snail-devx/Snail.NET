@@ -44,19 +44,19 @@ public sealed class Logger : ILogger
     /// 构造方法
     /// </summary>
     /// <param name="app">应用程序实例</param>
+    /// <param name="di"></param>
     /// <param name="server">日志服务器配置选项；为null提供程序自身做默认值处理，或者报错
     /// <para>1、记录器为网络日志时，日志要记录到哪个服务器下，如哪个数据库服务器 </para>
     /// <para>2、记录器为本地日志时，采用哪个工作组下的配置，如log4net配置；此时仅<see cref="IServerOptions.Workspace"/>生效 </para>
     /// </param>
     /// <param name="provider">日志记录提供程序，为null则表示系统系统默认；除非想做定制，否则忽略即可</param>
     [Inject]
-    public Logger(IApplication app, IServerOptions? server = null, ILogProvider? provider = null)
+    public Logger([Inject(Required = true)] IApplication app, [Inject(Required = true)] IDIManager di, IServerOptions? server = null, ILogProvider? provider = null)
     {
-        ThrowIfNull(app);
         _level = app.LogLevel;
         _server = server;
-        _provider = provider ?? app.ResolveRequired<ILogProvider>();
-        _idGenerator = app.ResolveRequired<IIdGenerator>();
+        _provider = provider ?? di.ResolveRequired<ILogProvider>();
+        _idGenerator = di.ResolveRequired<IIdGenerator>();
     }
     /// <summary>
     /// 基于父级logger创建子级作用域logger

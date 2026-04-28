@@ -1,7 +1,6 @@
 ﻿using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Setting;
 using Snail.Abstractions.Setting.Delegates;
-using Snail.Abstractions.Web.Extensions;
 using Snail.Aspect.Common.Attributes;
 using Snail.Dependency;
 using Snail.Setting;
@@ -23,13 +22,14 @@ public class Application : IApplication
 {
     #region 属性变量
     /// <summary>
-    /// 依赖注入根服务
-    /// </summary>
-    protected IDIManager RootServices { get; private init; }
-    /// <summary>
     /// 应用程序配置管理器
     /// </summary>
     protected ISettingManager Setting { get; private init; }
+
+    /// <summary>
+    /// 取消令牌源
+    /// </summary>
+    protected CancellationTokenSource CancellationSource { private init; get; }
     #endregion
 
     #region 构造方法
@@ -38,18 +38,19 @@ public class Application : IApplication
     /// </summary>
     public Application()
     {
+        CancellationSource = new CancellationTokenSource();
+        CancellationToken = CancellationSource.Token;
         RunContext.New();
         //  1、内置配置、实例 初始化
         Setting = SettingFactory.Create();
-        RootServices = (DIManager.Current = DIManager.Empty);
+        Services = (DIManager.Current = DIManager.Empty);
         //  2、内置依赖注入实例
-        RootServices.Register<IApplication>(LifetimeType.Singleton, this);
+        Services.Register<IApplication>(LifetimeType.Singleton, this);
         //  3、强制内置服务初始化
-        this.AddBootstrapperService()/*         引导程序服务：进行程序运行前的自动配置等*/
-            .AddDIService()/*                   依赖注入服务：进行IoC相关功能实现*/
-            .AddLogService();/*                 日志服务：检测必备组件完整性*/
-
-
+        this.AddDIService()/*                   依赖注入服务：进行IoC相关功能实现*/
+            .AddLogService()/*                  日志服务：检测必备组件完整性*/
+            .AddBootstrapperService()/*         引导程序服务：进行程序运行前的自动配置等*/
+            .AddCronTaskerService();/*          定时任务服务：进行定时任务处理*/
     }
     #endregion
 
@@ -110,14 +111,14 @@ public class Application : IApplication
     ISettingManager IApplication.Setting => Setting;
     /// <summary>
     /// 依赖注入根服务
+    /// <para>1、作为应用全局服务实例存在</para>
     /// </summary>
-    IDIManager IApplication.RootServices => RootServices;
+    public IDIManager Services { private init; get; }
     /// <summary>
-    /// 当前作用域的依赖注入服务
-    /// <para>1、实现作用域之间实例隔离</para>
-    /// <para>2、如一个ASP.NET Core的HTTP请求，就是一个全新的作用域</para>
+    /// 取消令牌：用于判断应用程序是否已停止
     /// </summary>
-    IDIManager IApplication.ScopeServices => DIManager.TrySetCurrent(RootServices.New);
+    /// <remarks>全局共享一个Token，不使用<see cref="CancellationTokenSource.Token"/>此属性get会始终创建新的</remarks>
+    public CancellationToken CancellationToken { private init; get; }
 
     /// <summary>
     /// 运行应用程序
@@ -127,26 +128,31 @@ public class Application : IApplication
         //  1、启用应用程序构建
         StartBuild();
         //  2、启动应用
-        OnRun?.Invoke(RootServices);
+        OnRun?.Invoke(Services);
         OnRun = null;
     }
     /// <summary>
     /// 停止应用程序
     /// </summary>
     /// <returns>异步任务；若内部存在异步处理，则返回Task，方便外部等待优雅退出</returns>
-    public Task? Stop()
+    public async Task Stop()
     {
-        if (OnStop == null)
-        {
-            return null;
-        }
+        //  应用程序 取消
+        await CancellationSource.CancelAsync();
         //  触发停止事件
-        List<Task> tasks = [];
-        foreach (Func<Task?> stop in OnStop.GetInvocationList().Cast<Func<Task?>>())
+        if (OnStop != null)
         {
-            stop.Invoke()?.AddTo(tasks);
+            List<Task> tasks = [];
+            foreach (Func<Task?> stop in OnStop.GetInvocationList().Cast<Func<Task?>>())
+            {
+                stop.Invoke()?.AddTo(tasks);
+            }
+            Task? task = tasks.Count > 1 ? Task.WhenAll(tasks) : tasks.FirstOrDefault();
+            if (task != null)
+            {
+                await task;
+            }
         }
-        return tasks.Count > 1 ? Task.WhenAll(tasks) : tasks.FirstOrDefault();
     }
     #endregion
 
@@ -182,9 +188,9 @@ public class Application : IApplication
         //  2、应用配置构建
         ((IApplication)this).Setting.Run();
         //  3、服务注册
-        OnRegister?.Invoke(RootServices);
+        OnRegister?.Invoke(Services);
         OnRegister = null;
-        OnRegistered?.Invoke(RootServices);
+        OnRegistered?.Invoke(Services);
         OnRegistered = null;
     }
     /// <summary>
@@ -235,7 +241,7 @@ public class Application : IApplication
                 if (attrs.Any() == true)
                 {
                     ReadOnlySpan<Attribute> attrSpan = new([.. attrs]);
-                    callback.Invoke(RootServices, type, attrSpan);
+                    callback.Invoke(Services, type, attrSpan);
                 }
             }
         }

@@ -13,19 +13,15 @@ public class MessageInitializer : IInitializer<IMessageManager>
 {
     #region 属性变量
     /// <summary>
-    /// 应用程序实例
+    /// 上下文插件
     /// </summary>
-    protected readonly IApplication App;
-    #endregion
-
-    #region 构造方法
+    [Inject(Required = true, Key = MIDDLEWARE_RunContext)]
+    protected IMessageMiddleware RunContextMiddleware { init; get; } = null!;
     /// <summary>
-    /// 构造方法
+    /// 遥测追踪插件
     /// </summary>
-    public MessageInitializer(IApplication app)
-    {
-        App = ThrowIfNull(app);
-    }
+    [Inject(Required = true, Key = MIDDLEWARE_Telemetry)]
+    protected IMessageMiddleware TelemetryMiddleware { init; get; } = null!;
     #endregion
 
     #region IInitializer<IMessageManager>
@@ -36,8 +32,8 @@ public class MessageInitializer : IInitializer<IMessageManager>
     void IInitializer<IMessageManager>.Initialize(IMessageManager manager)
     {
         //  配置日志和运行上下文中间件
-        manager.Use(MIDDLEWARE_RunContext, App.ResolveRequired<IMessageMiddleware>(key: MIDDLEWARE_RunContext))
-               .Use(MIDDLEWARE_Telemetry, App.ResolveRequired<IMessageMiddleware>(key: MIDDLEWARE_Telemetry));
+        manager.Use(MIDDLEWARE_RunContext, RunContextMiddleware)
+               .Use(MIDDLEWARE_Telemetry, TelemetryMiddleware);
     }
     #endregion
 }

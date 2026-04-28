@@ -13,19 +13,15 @@ public class HttpInitializer : IInitializer<IHttpManager>
 {
     #region 属性变量
     /// <summary>
-    /// 应用程序
+    /// 上下文插件
     /// </summary>
-    protected readonly IApplication App;
-    #endregion
-
-    #region 构造方法
+    [Inject(Required = true, Key = MIDDLEWARE_RunContext)]
+    protected IHttpMiddleware RunContextMiddleware { init; get; } = null!;
     /// <summary>
-    /// 构造方法
+    /// 遥测追踪插件
     /// </summary>
-    public HttpInitializer(IApplication app)
-    {
-        App = ThrowIfNull(app);
-    }
+    [Inject(Required = true, Key = MIDDLEWARE_Telemetry)]
+    protected IHttpMiddleware TelemetryMiddleware { init; get; } = null!;
     #endregion
 
     #region  IInitializer<IHttpManager>
@@ -36,8 +32,8 @@ public class HttpInitializer : IInitializer<IHttpManager>
     /// <exception cref="NotImplementedException"></exception>
     void IInitializer<IHttpManager>.Initialize(IHttpManager manager)
     {
-        manager.Use(MIDDLEWARE_RunContext, App.ResolveRequired<IHttpMiddleware>(key: MIDDLEWARE_RunContext))
-               .Use(MIDDLEWARE_Telemetry, App.ResolveRequired<IHttpMiddleware>(key: MIDDLEWARE_Telemetry));
+        manager.Use(MIDDLEWARE_RunContext, RunContextMiddleware)
+               .Use(MIDDLEWARE_Telemetry, TelemetryMiddleware);
     }
     #endregion
 }

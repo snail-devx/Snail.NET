@@ -1,5 +1,4 @@
 ﻿using Npgsql;
-using Snail.Abstractions;
 using Snail.Abstractions.Database.DataModels;
 using Snail.Abstractions.Database.Enumerations;
 using Snail.Abstractions.Dependency.Attributes;
@@ -25,12 +24,9 @@ public class PostgresProvider : SqlProvider, IDbProvider
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app"></param>
     /// <param name="server"></param>
-    public PostgresProvider(IApplication app, IDbServerOptions server)
-        : base(app, server)
-    {
-    }
+    public PostgresProvider(IDbServerOptions server) : base(server)
+    { }
     #endregion
 
     #region 重写父类

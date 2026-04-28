@@ -38,18 +38,18 @@ public abstract class ActionBaseFilter : IAsyncActionFilter
     /// <summary>
     /// 当前应用实例
     /// </summary>
-    [Inject]
-    public required IApplication App { init; get; }
+    [Inject(Required = true)]
+    protected IApplication App { init; get; } = null!;
     /// <summary>
     /// 错误编码管理器
     /// </summary>
-    [Inject]
-    public required IErrorCodeManager ErrorManager { init; get; }
+    [Inject(Required = true)]
+    protected IErrorCodeManager ErrorManager { init; get; } = null!;
     /// <summary>
     /// 日志记录器
     /// </summary>
-    [Logger]
-    public required ILogger Logger { init; get; }
+    [Logger(Required = true)]
+    protected ILogger Logger { init; get; } = null!;
 
     /// <summary>
     /// JSON序列化配置字典
@@ -65,9 +65,6 @@ public abstract class ActionBaseFilter : IAsyncActionFilter
             { JsonResolverType.LowerCase, new LowercaseContractResolver()},
         }
     );
-    #endregion
-
-    #region 构造方法
     #endregion
 
     #region IAsyncActionFilter

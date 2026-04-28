@@ -39,14 +39,14 @@ public sealed class Messenger : IMessenger
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app">应用程序实例</param>
+    /// <param name="di"></param>
     /// <param name="server">消息服务器配置选项</param>
     /// <param name="provider">消息提供程序，为nulll则采用默认的</param>
-    public Messenger(IApplication app, IServerOptions server, IMessageProvider? provider = null)
+    public Messenger([Inject(Required = true)] IDIManager di, IServerOptions server, IMessageProvider? provider = null)
     {
-        _manager = app.ResolveRequired<IMessageManager>();
+        _manager = di.ResolveRequired<IMessageManager>();
         _server = ThrowIfNull(server);
-        _provider = provider = provider ??= app.ResolveRequired<IMessageProvider>();
+        _provider = provider = provider ??= di.ResolveRequired<IMessageProvider>();
         //  这里将消息发送器做一下构建，不用每次发送时都构建（但若单纯只是接收消息，这里构建就有点浪费，后期再优化）
         _sender = _manager.Build((SendDelegate)_provider.Send);
     }

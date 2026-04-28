@@ -21,11 +21,9 @@ public class JsonBootstrapper : IBootstrapper
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app"></param>
-    public JsonBootstrapper(IApplication app)
+    public JsonBootstrapper([Inject(Required = true)] IDIManager di)
     {
-        ThrowIfNull(app);
-        _inferrers = app.ResolveInRoot<IEnumerable<ITypeInferrer>>()?.ToArray();
+        _inferrers = di.Resolve<IEnumerable<ITypeInferrer>>()?.ToArray();
     }
     #endregion
 
@@ -71,7 +69,8 @@ public class JsonBootstrapper : IBootstrapper
     /// <summary>
     /// 执行引导
     /// </summary>
-    void IBootstrapper.Bootstrap()
+    /// <param name="app"></param>
+    void IBootstrapper.Bootstrap(IApplication app)
     {
         //  由推断器时，才操作JsonConvert.DefaultSettings；否则忽略
         if (IsNullOrEmpty(_inferrers) == false)

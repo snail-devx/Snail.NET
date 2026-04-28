@@ -23,18 +23,16 @@ public sealed class HttpRequestor : IHttpRequestor
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app">应用程序实例</param>
+    /// <param name="di"></param>
     /// <param name="server">服务器配置选项；非null，请求发往哪台服务器</param>
     /// <param name="provider">HTTP提供程序；为null则使用默认的</param>
-    /// <remarks>作为【依赖注入】的注入入口</remarks>
-    [Inject]
-    public HttpRequestor(IApplication app, IServerOptions server, IHttpProvider? provider = null)
+    public HttpRequestor(IDIManager di, IServerOptions server, IHttpProvider? provider = null)
     {
-        ThrowIfNull(app);
+        ThrowIfNull(di);
         ThrowIfNull(server);
         //  预热依赖对象
-        IHttpManager manager = app.ResolveRequired<IHttpManager>();
-        provider ??= app.ResolveRequired<IHttpProvider>();
+        IHttpManager manager = di.ResolveRequired<IHttpManager>();
+        provider ??= di.ResolveRequired<IHttpProvider>();
         //  构建中间件，构建http发送委托
         HttpDelegate middleware = manager.Build(provider.Send, onionMode: true);
         _sender = request => middleware.Invoke(request, server);

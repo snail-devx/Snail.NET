@@ -30,7 +30,7 @@ namespace Snail.Test.Dependency
             IApplication app = new Application();
             app.Run();
 
-            IDIManager di = app.ScopeServices;
+            IDIManager di = app.Services;
             //  from TestComponent
             //      Component   标记
             Assert.That(di.IsRegistered("TypeOfTransient", typeof(TestComponent)), "应该已注册了才对。key:TypeOfTransient    from:TestComponent");
@@ -306,17 +306,17 @@ namespace Snail.Test.Dependency
             }
 
             IApplication app = new Application();
-            app.RootServices.Register<TestRequiredInject>();
+            app.Services.Register<TestRequiredInject>();
             try
             {
-                app.RootServices.Resolve<TestRequiredInject>();
+                app.Services.Resolve<TestRequiredInject>();
             }
             catch (Exception ex)
             {
                 Assert.That(ex.Message.Contains("构建TestRequiredInject.Identifiable属性值失败：Resolve返回null"));
             }
-            app.RootServices.Register<IIdentifiable>(instance: new IdentifiableInject());
-            app.RootServices.Resolve<TestRequiredInject>();
+            app.Services.Register<IIdentifiable>(instance: new IdentifiableInject());
+            app.Services.Resolve<TestRequiredInject>();
         }
 
         /// <summary>

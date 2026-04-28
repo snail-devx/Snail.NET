@@ -13,7 +13,9 @@ public abstract class DbProvider
     /// <summary>
     /// 数据库管理器
     /// </summary>
-    protected readonly IDbManager DbManager;
+    [Inject(Required = true)]
+    protected IDbManager DbManager { init; get; } = null!;
+
     /// <summary>
     /// 服务器配置选项
     /// </summary>
@@ -24,12 +26,9 @@ public abstract class DbProvider
     /// <summary>
     /// 构造方法
     /// </summary>
-    /// <param name="app"></param>
     /// <param name="server"></param>
-    public DbProvider(IApplication app, IDbServerOptions server)
+    public DbProvider(IDbServerOptions server)
     {
-        ThrowIfNull(app);
-        DbManager = app.ResolveRequired<IDbManager>();
         DbServer = ThrowIfNull(server);
     }
     #endregion

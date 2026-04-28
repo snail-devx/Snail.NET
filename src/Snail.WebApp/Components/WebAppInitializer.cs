@@ -48,7 +48,7 @@ public class WebAppInitializer : IInitializer<WebApplication>
             //  添加NewtonsoftJson支持，扩展支持自定义类型推断
             {
                 JsonBootstrapper bootstrapper = (JsonBootstrapper?)(services.Resolve<IEnumerable<IBootstrapper>>()?.FirstOrDefault(item => item is JsonBootstrapper))
-                    ?? new JsonBootstrapper(application);
+                    ?? new JsonBootstrapper(services);
                 builder.AddNewtonsoftJson(options => bootstrapper.UseCustomJsonConverter(options.SerializerSettings));
             }
         };

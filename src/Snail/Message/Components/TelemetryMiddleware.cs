@@ -25,24 +25,13 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <summary>
     /// 日志记录器
     /// </summary>
-    protected readonly ILogger Logger;
+    [Inject(Required = true)]
+    protected ILogger Logger { init; get; } = null!;
     /// <summary>
     /// 主键Id生成器
     /// </summary>
-    protected IIdGenerator IdGenerator { private init; get; }
-    #endregion
-
-    #region 构造方法
-    /// <summary>
-    /// 构造方法
-    /// </summary>
-    /// <param name="app"></param>
-    public TelemetryMiddleware(IApplication app)
-    {
-        ThrowIfNull(app);
-        Logger = app.ResolveRequired<ILogger>();
-        IdGenerator = app.ResolveRequired<IIdGenerator>();
-    }
+    [Inject(Required = true)]
+    protected IIdGenerator IdGenerator { init; get; } = null!;
     #endregion
 
     #region IMessageMiddleware
