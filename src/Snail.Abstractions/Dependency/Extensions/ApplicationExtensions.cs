@@ -78,16 +78,20 @@ public static class ApplicationExtensions
         /// </summary>
         /// <typeparam name="T">依赖注入源类型</typeparam>
         /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
+        /// <param name="parameters">实现类型的构造方法执行时注入的参数信息</param>
         /// <returns></returns>
-        public T? Resolve<T>(string? key = null) => app.Services.Resolve<T>(key);
+        public T? Resolve<T>(string? key = null, IParameter[]? parameters = null)
+            => app.Services.Resolve<T>(key, parameters);
         /// <summary>
         /// 使用【依赖注入根服务】构建有效泛型实例，返回null报错
         /// <para>1、通过<see cref="IApplication.Services"/>进行泛型实例构建</para>
         /// </summary>
         /// <typeparam name="T">依赖注入源类型</typeparam>
         /// <param name="key">依赖注入Key值，用于DI动态构建实例</param>
+        /// <param name="parameters">实现类型的构造方法执行时注入的参数信息</param>
         /// <returns></returns>
-        public T ResolveRequired<T>(string? key = null) => app.Services.ResolveRequired<T>(key);
+        public T ResolveRequired<T>(string? key = null, IParameter[]? parameters = null)
+            => app.Services.ResolveRequired<T>(key, parameters);
         #endregion
     }
 }
