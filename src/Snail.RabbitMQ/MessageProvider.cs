@@ -108,6 +108,7 @@ public class MessageProvider : IMessageProvider
             //  回收信道
             if (proxy != null)
             {
+                proxy.OnError -= onChannelError;
                 (proxy as IPoolable).Used();
             }
         }
