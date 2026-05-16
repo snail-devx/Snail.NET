@@ -47,9 +47,10 @@ public class TelemetryMiddleware : IHttpMiddleware
         attr ??= new HttpLogAttribute();
         request.Headers.TrySet(attr.Send, KEY_RecordData, STR_True);
         //  初始化遥测追踪数据，记录日志
+        string parentSpanId = IdGenerator.NewId("HttpLog");
+        Initialize(request, RunContext.Current, parentSpanId, attr);
+        if (attr.Disabled == false)
         {
-            string parentSpanId = IdGenerator.NewId("HttpLog");
-            Initialize(request, RunContext.Current, parentSpanId);
             Logger.Log(new SendLogDescriptor(true)
             {
                 Title = $"HTTP请求开始：{GetRequestUrl(request)}",
@@ -68,7 +69,7 @@ public class TelemetryMiddleware : IHttpMiddleware
             });
         }
         //  发送请求，记录请求耗时、响应结果、拦截错误日志
-        Stopwatch? sw = attr.Performance == true ? Stopwatch.StartNew() : null;
+        Stopwatch? sw = attr.Disabled == false && attr.Performance == true ? Stopwatch.StartNew() : null;
         Exception? tmpEx = null;
         HttpResponseMessage? response = null;
         try
@@ -85,7 +86,7 @@ public class TelemetryMiddleware : IHttpMiddleware
         {
             sw?.Stop();
             //  报错时先强制记录；未报错时，不记录请求结果和性能日志时，不记录；错误时，记录成错误日志；否则跟踪日志；
-            if (tmpEx != null || attr.Response || attr.Performance)
+            if (attr.Disabled == false && (tmpEx != null || attr.Response || attr.Performance))
             {
                 Logger.Log(new ResponseLogDescriptor()
                 {
@@ -115,12 +116,14 @@ public class TelemetryMiddleware : IHttpMiddleware
     /// <param name="request">HTTP请求消息</param>
     /// <param name="context">当前运行时上下文</param>
     /// <param name="parentSpanId">父级追踪动作Id</param>
-    protected virtual void Initialize(in HttpRequestMessage request, in RunContext context, in string parentSpanId)
+    /// <param name="attr">日志记录特性标签</param>
+    protected virtual void Initialize(in HttpRequestMessage request, in RunContext context, in string parentSpanId, in HttpLogAttribute attr)
     {
         //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
         request.Headers.Add(CONTEXT_TraceId, context.TraceId);
         request.Headers.Add(CONTEXT_ParentSpanId, parentSpanId);
         //  后期支持w3c的 TraceContext 标准逻辑
+        //  后期记录attr特性标签进行一些处理，如标准的禁用日志逻辑、、、
     }
     #endregion
 

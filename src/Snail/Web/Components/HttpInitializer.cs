@@ -29,7 +29,6 @@ public class HttpInitializer : IInitializer<IHttpManager>
     /// 初始化处理
     /// </summary>
     /// <param name="manager"></param>
-    /// <exception cref="NotImplementedException"></exception>
     void IInitializer<IHttpManager>.Initialize(IHttpManager manager)
     {
         manager.Use(MIDDLEWARE_RunContext, RunContextMiddleware)

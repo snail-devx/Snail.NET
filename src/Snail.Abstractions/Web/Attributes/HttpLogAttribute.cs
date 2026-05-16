@@ -9,6 +9,12 @@
 public sealed class HttpLogAttribute : Attribute
 {
     /// <summary>
+    /// 使用禁用日志
+    /// <para>为true时，内部不进行日志记录，即使报错也不记录</para>
+    /// </summary>
+    public bool Disabled { init; get; }
+
+    /// <summary>
     /// 是否记录发送数据
     /// </summary>
     public bool Send { init; get; } = true;
