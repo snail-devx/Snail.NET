@@ -38,17 +38,22 @@ public class TelemetryMiddleware : IHttpMiddleware
     /// </summary>
     /// <param name="request">http请求</param>
     /// <param name="server">请求服务器</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <param name="next">下一个操作</param>
     /// <returns></returns>
-    async Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, HttpDelegate next)
+    async Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, IHttpOptions? options, HttpDelegate next)
     {
         //  初始化，记录发送日志：查询日志记录标签，null走默认值
-        DiagnosticsHelper.GetEntryMethod(typeof(TelemetryMiddleware), out HttpLogAttribute? attr);
-        attr ??= new HttpLogAttribute();
+        HttpLogAttribute? attr = options?.Resolve<HttpLogAttribute>();
+        if (attr == null)
+        {
+            DiagnosticsHelper.GetEntryMethod(typeof(TelemetryMiddleware), out attr);
+            attr ??= new HttpLogAttribute();
+        }
         request.Headers.TrySet(attr.Send, KEY_RecordData, STR_True);
         //  初始化遥测追踪数据，记录日志
         string parentSpanId = IdGenerator.NewId("HttpLog");
-        Initialize(request, RunContext.Current, parentSpanId, attr);
+        Initialize(request, RunContext.Current, options, parentSpanId, attr);
         if (attr.Disabled == false)
         {
             Logger.Log(new SendLogDescriptor(true)
@@ -74,7 +79,7 @@ public class TelemetryMiddleware : IHttpMiddleware
         HttpResponseMessage? response = null;
         try
         {
-            response = await next(request, server!);
+            response = await next(request, server!, options);
             return response;
         }
         catch (Exception ex)
@@ -115,9 +120,10 @@ public class TelemetryMiddleware : IHttpMiddleware
     /// </summary>
     /// <param name="request">HTTP请求消息</param>
     /// <param name="context">当前运行时上下文</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <param name="parentSpanId">父级追踪动作Id</param>
     /// <param name="attr">日志记录特性标签</param>
-    protected virtual void Initialize(in HttpRequestMessage request, in RunContext context, in string parentSpanId, in HttpLogAttribute attr)
+    protected virtual void Initialize(in HttpRequestMessage request, RunContext context, IHttpOptions? options, in string parentSpanId, in HttpLogAttribute attr)
     {
         //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
         request.Headers.Add(CONTEXT_TraceId, context.TraceId);

@@ -1,4 +1,5 @@
-﻿using Snail.Utilities.Web.Extensions;
+﻿using Snail.Abstractions.Web.Interfaces;
+using Snail.Utilities.Web.Extensions;
 using System.Net;
 
 namespace Snail.Web.Components;
@@ -65,10 +66,11 @@ public sealed class HttpProxy : PoolableObject<HttpClient>, IPoolable
     /// <summary>
     /// 发送HTTP请求
     /// </summary>
-    /// <param name="baseAddress"></param>
-    /// <param name="request"></param>
+    /// <param name="baseAddress">请求服务器地址</param>
+    /// <param name="request">请求对象</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
-    public static Task<HttpResponseMessage> Send(Uri baseAddress, in HttpRequestMessage request)
+    public static Task<HttpResponseMessage> Send(Uri baseAddress, in HttpRequestMessage request, in IHttpOptions? options = null)
     {
         ThrowIfNull(baseAddress);
         ThrowIfNull(request);

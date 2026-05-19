@@ -1,7 +1,7 @@
 ﻿namespace Snail.Abstractions.Web.Interfaces;
 
 /// <summary>
-/// HTTP请求提供程序；负责进行实际HTTP请求发送
+/// 接口约束：HTTP请求提供程序；负责进行实际HTTP请求发送
 /// </summary>
 public interface IHttpProvider
 {
@@ -10,6 +10,7 @@ public interface IHttpProvider
     /// </summary>
     /// <param name="request">请求对象</param>
     /// <param name="server">服务器配置选项</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
-    Task<HttpResponseMessage> Send(HttpRequestMessage request, IServerOptions server);
+    Task<HttpResponseMessage> Send(HttpRequestMessage request, IServerOptions server, IHttpOptions? options = null);
 }

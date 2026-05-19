@@ -35,14 +35,15 @@ public sealed class HttpProvider : IHttpProvider
     /// </summary>
     /// <param name="request">请求对象</param>
     /// <param name="server">服务器配置选项</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
-    Task<HttpResponseMessage> IHttpProvider.Send(HttpRequestMessage request, IServerOptions server)
+    Task<HttpResponseMessage> IHttpProvider.Send(HttpRequestMessage request, IServerOptions server, IHttpOptions? options)
     {
         ThrowIfNull(request);
         ServerDescriptor? descriptor = _manager.GetServer(server);
         ThrowIfNull(descriptor, $"取到的服务器信息为null:${server}");
         Uri baseAddress = new(descriptor!.Server);
-        return HttpProxy.Send(baseAddress, request);
+        return HttpProxy.Send(baseAddress, request, options);
     }
     #endregion
 }

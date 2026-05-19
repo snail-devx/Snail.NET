@@ -31,8 +31,8 @@ public static class HttpManagerExtensions
             ThrowIfNull(middleware);
             manager.Use(name, next =>
             {
-                HttpDelegate @delegate = (HttpRequestMessage request, IServerOptions server) =>
-                    middleware.Send(request, server, next);
+                HttpDelegate @delegate = (HttpRequestMessage request, IServerOptions server, IHttpOptions? options) =>
+                    middleware.Send(request, server, options, next);
                 return @delegate;
             });
             return manager;
@@ -56,10 +56,10 @@ public static class HttpManagerExtensions
             ThrowIfNull(middleware);
             manager.Use(name, next =>
             {
-                HttpDelegate @delegate = (HttpRequestMessage request, IServerOptions server) =>
+                HttpDelegate @delegate = (HttpRequestMessage request, IServerOptions server, IHttpOptions? options) =>
                 {
                     middleware.Invoke(request, server);
-                    return next.Invoke(request, server);
+                    return next.Invoke(request, server, options);
                 };
                 return @delegate;
             });

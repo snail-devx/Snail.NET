@@ -53,7 +53,7 @@ public class RunContextMiddleware : IMessageMiddleware
     /// </summary>
     /// <param name="message">要发送的消息数据</param>
     /// <param name="context">当前运行时上下文</param>
-    protected virtual void InitializeSend(in MessageDescriptor message, in RunContext context)
+    protected virtual void InitializeSend(MessageDescriptor message, RunContext context)
     {
         //  目前不做任何操作，后期考虑把上下文上的共享信息写入message中，传递到下一个请求中进行共享
     }
@@ -62,7 +62,7 @@ public class RunContextMiddleware : IMessageMiddleware
     /// </summary>
     /// <param name="message">接收到的消息数据</param>
     /// <param name="context">全新的运行时上下文</param>
-    protected virtual void InitializeReceive(in MessageDescriptor message, in RunContext context)
+    protected virtual void InitializeReceive(MessageDescriptor message, RunContext context)
     {
         //  目前不做任何操作，后期考虑从message中获取共享数据写入运行时上下文
     }

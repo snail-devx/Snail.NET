@@ -163,7 +163,7 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// <param name="message">要发送的消息数据</param>
     /// <param name="context">当前运行时上下文</param>
     /// <param name="parentSpanId">当前父级操作Id</param>
-    protected virtual void InitializeSend(in MessageDescriptor message, in RunContext context, in string parentSpanId)
+    protected virtual void InitializeSend(MessageDescriptor message, RunContext context, string parentSpanId)
     {
         message.Context ??= new Dictionary<string, string>();
         //  在这里构建标准化的追踪参数；先写入 X-Trace-Id header中
@@ -176,7 +176,7 @@ public class TelemetryMiddleware : IMessageMiddleware
     /// </summary>
     /// <param name="message">接收到的消息数据</param>
     /// <param name="context">全新的运行时上下文</param>
-    protected virtual void InitializeReceive(in MessageDescriptor message, in RunContext context)
+    protected virtual void InitializeReceive(MessageDescriptor message, RunContext context)
     {
         //  分析消息中的 标准化参数，构建 trace-id和parent-span-id
         if (message.Context?.Count > 0)

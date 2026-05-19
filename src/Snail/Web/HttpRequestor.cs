@@ -16,7 +16,7 @@ public sealed class HttpRequestor : IHttpRequestor
     /// <summary>
     /// 实际的http请求发送器
     /// </summary>
-    private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _sender;
+    private readonly Func<HttpRequestMessage, IHttpOptions?, Task<HttpResponseMessage>> _sender;
     #endregion
 
     #region 构造方法
@@ -35,7 +35,7 @@ public sealed class HttpRequestor : IHttpRequestor
         provider ??= di.ResolveRequired<IHttpProvider>();
         //  构建中间件，构建http发送委托
         HttpDelegate middleware = manager.Build(provider.Send, onionMode: true);
-        _sender = request => middleware.Invoke(request, server);
+        _sender = (request, options) => middleware.Invoke(request, server, options);
     }
     #endregion
 
@@ -44,8 +44,9 @@ public sealed class HttpRequestor : IHttpRequestor
     /// 发送请求；异步可等待
     /// </summary>
     /// <param name="request">请求对象</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns>返回结果</returns>
-    async Task<HttpResult> IHttpRequestor.Send(HttpRequestMessage request)
+    async Task<HttpResult> IHttpRequestor.Send(HttpRequestMessage request, IHttpOptions? options)
     {
         ThrowIfNull(request);
         ThrowIfNull(request.Method);
@@ -60,7 +61,7 @@ public sealed class HttpRequestor : IHttpRequestor
         {
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("UTF-8"));
         }
-        HttpResponseMessage response = await _sender.Invoke(request);
+        HttpResponseMessage response = await _sender.Invoke(request, options);
         //  构建请求结果：后期考虑做一下异常拦截，把异常信息具象化，如是否请求成功，请求状态码，异常信息都解析出来
         return new HttpResult(response);
     }

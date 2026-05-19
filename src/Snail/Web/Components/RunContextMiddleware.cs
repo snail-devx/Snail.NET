@@ -15,12 +15,13 @@ public class RunContextMiddleware : IHttpMiddleware
     /// </summary>
     /// <param name="request">http请求</param>
     /// <param name="server">请求服务器</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <param name="next">下一个操作</param>
     /// <returns></returns>
-    Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, HttpDelegate next)
+    Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, IHttpOptions? options, HttpDelegate next)
     {
-        Initialize(request, RunContext.Current);
-        return next(request, server);
+        Initialize(request, RunContext.Current, options);
+        return next(request, server, options);
     }
     #endregion
 
@@ -30,7 +31,8 @@ public class RunContextMiddleware : IHttpMiddleware
     /// </summary>
     /// <param name="request">HTTP请求消息</param>
     /// <param name="context">当前运行时上下文</param>
-    protected virtual void Initialize(in HttpRequestMessage request, in RunContext context)
+    /// <param name="options">请求发送配置选项</param>
+    protected virtual void Initialize(HttpRequestMessage request, RunContext context, IHttpOptions? options)
     {
         //  目前不做任何操作，后期考虑把上下文上的共享信息写入cookie中，传递到下一个请求中进行共享
     }

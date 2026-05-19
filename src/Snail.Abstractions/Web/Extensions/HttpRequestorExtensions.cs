@@ -1,4 +1,5 @@
 ﻿using Snail.Abstractions.Web.DataModels;
+using Snail.Abstractions.Web.Interfaces;
 using Snail.Utilities.Common.Extensions;
 using System.Net.Http.Headers;
 
@@ -17,10 +18,11 @@ public static class HttpRequestorExtensions
     /// </summary>
     /// <param name="requestor">HTTP请求器</param>
     /// <param name="url">请求url地址</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
     /// <remarks>暂时不支持delete请求提交数据</remarks>
-    public static Task<HttpResult> Get(this IHttpRequestor requestor, string url)
-        => requestor.Send(new HttpRequestMessage(HttpMethod.Get, url));
+    public static Task<HttpResult> Get(this IHttpRequestor requestor, string url, IHttpOptions? options = null)
+        => requestor.Send(new HttpRequestMessage(HttpMethod.Get, url), options);
 
     /// <summary>
     /// 发送Post请求
@@ -29,9 +31,10 @@ public static class HttpRequestorExtensions
     /// <param name="requestor">HTTP请求器</param>
     /// <param name="url">请求url地址</param>
     /// <param name="data">提交数据</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
-    public static Task<HttpResult> Post<T>(this IHttpRequestor requestor, string url, T? data = default)
-        => requestor.Send(BuildRequestByData(HttpMethod.Post, url, data));
+    public static Task<HttpResult> Post<T>(this IHttpRequestor requestor, string url, T? data = default, IHttpOptions? options = null)
+        => requestor.Send(BuildRequestByData(HttpMethod.Post, url, data), options);
 
     /// <summary>
     /// 发送Put请求
@@ -40,19 +43,21 @@ public static class HttpRequestorExtensions
     /// <param name="requestor">HTTP请求器</param>
     /// <param name="url">请求url地址</param>
     /// <param name="data">提交数据</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
-    public static Task<HttpResult> Put<T>(this IHttpRequestor requestor, string url, T? data = default)
-        => requestor.Send(BuildRequestByData(HttpMethod.Put, url, data));
+    public static Task<HttpResult> Put<T>(this IHttpRequestor requestor, string url, T? data = default, IHttpOptions? options = null)
+        => requestor.Send(BuildRequestByData(HttpMethod.Put, url, data), options);
 
     /// <summary>
     /// 发送Delete请求
     /// </summary>
     /// <param name="requestor">HTTP请求器</param>
     /// <param name="url">请求url地址</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
     /// <remarks>暂时不支持delete请求提交数据</remarks>
-    public static Task<HttpResult> Delete(this IHttpRequestor requestor, string url)
-        => requestor.Send(new HttpRequestMessage(HttpMethod.Delete, url));
+    public static Task<HttpResult> Delete(this IHttpRequestor requestor, string url, IHttpOptions? options = null)
+        => requestor.Send(new HttpRequestMessage(HttpMethod.Delete, url), options);
     #endregion
 
     #endregion

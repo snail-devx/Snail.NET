@@ -13,6 +13,7 @@ public interface IHttpMiddleware
     /// <param name="request">http请求</param>
     /// <param name="server">请求服务器</param>
     /// <param name="next">下一个操作</param>
+    /// <param name="options">请求发送配置选项</param>
     /// <returns></returns>
-    Task<HttpResponseMessage> Send(HttpRequestMessage request, IServerOptions server, HttpDelegate next);
+    Task<HttpResponseMessage> Send(HttpRequestMessage request, IServerOptions server, IHttpOptions? options, HttpDelegate next);
 }
