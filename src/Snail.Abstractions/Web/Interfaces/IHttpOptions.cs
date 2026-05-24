@@ -11,6 +11,7 @@ public interface IHttpOptions
     /// 解析配置选项
     /// </summary>
     /// <typeparam name="T">配置选项类型</typeparam>
+    /// <param name="request">http请求对象</param>
     /// <returns>解析出来的配置选项，不存在则返回null</returns>
-    T? Resolve<T>();
+    object? Resolve<T>(HttpRequestMessage request);
 }

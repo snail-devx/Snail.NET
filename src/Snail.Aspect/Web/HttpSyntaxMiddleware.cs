@@ -54,6 +54,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
         "Snail.Abstractions.Dependency.Enumerations",       //  typeof(LifetimeType).Namespace,//                   
         //  HTTP请求实现时所需接口
         "Snail.Abstractions.Web",//                           typeof(IHttpRequestor).Namespace,//  
+        "Snail.Abstractions.Web.Interfaces",//                typeof(IHttpOptions).Namespace
         "Snail.Abstractions.Web.Attributes",//              typeof(HttpRequestorAttribute).Namespace,//  
         "Snail.Abstractions.Web.DataModels",//              typeof(HttpResult).Namespace,// 
         "Snail.Abstractions.Web.Extensions",//              typeof(HttpRequestorExtensions).Namespace,// 
@@ -73,6 +74,12 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     /// </summary>
     protected readonly AttributeArgumentSyntax? AnalyzerArg;
     /// <summary>
+    /// HTTP请求配置选项参数：
+    /// <para>DI注入Key值</para>
+    /// <para>用于取 Snail.Abstractions.Web.Interfaces.IHttpOptions 实例 </para>
+    /// </summary>
+    protected readonly AttributeArgumentSyntax? OptionsArg;
+    /// <summary>
     /// 是否需要【辅助】代码
     /// </summary>
     private bool _needAssistantCode = false;
@@ -86,6 +93,7 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
     {
         ANode = aNode;
         aNode.HasAnalyzer(out AnalyzerArg);
+        aNode.HasArgument("Options", out OptionsArg);
     }
     #endregion
 
@@ -216,11 +224,24 @@ internal class HttpSyntaxMiddleware : ITypeDeclarationMiddleware
             StringBuilder builder = new();
             builder.Append(context.LinePrefix).AppendLine("//  生成[HttpAspect]辅助代码;");
             //  生成 IHttpRequestor 注入代码；加入必填验证
-            string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
-            builder.Append(context.LinePrefix).AppendLine($"[HttpRequestor, {serverInjectCode}]")
-                   .Append(context.LinePrefix).AppendLine("private IHttpRequestor? _requestor { init; get; }");
-            context.AddRequiredField("_requestor", "_requestor为null，无法进行Http请求");
-            //  生成 IHttpAnalyzer 注入代码，加入必填字段验证
+            {
+                string serverInjectCode = BuildServerInjectCodeByAttribute(ANode, context);
+                string? optionsInjectCode = null;
+                if (OptionsArg != null)
+                {
+                    optionsInjectCode = $", Parameter<IHttpOptions>(Key = {OptionsArg.Expression}, Required=true)";
+                }
+                builder.Append(context.LinePrefix)
+                       .Append($"[HttpRequestor, {serverInjectCode}");
+                if (string.IsNullOrEmpty(optionsInjectCode) == false)
+                {
+                    builder.Append(optionsInjectCode);
+                }
+                builder.AppendLine("]");
+                builder.Append(context.LinePrefix).AppendLine("private IHttpRequestor? _requestor { init; get; }");
+                context.AddRequiredField("_requestor", "_requestor为null，无法进行Http请求");
+            }
+            //  生成 IHttpAnalyzer 注入代码，
             if (GenerateInjectAssistantCode(builder, context, AnalyzerArg, nameof(IHttpAnalyzer), "_httpAnalyzer") == true)
             {
                 context.AddRequiredField("_httpAnalyzer", "_httpAnalyzer为null，无法进行Http请求分析");

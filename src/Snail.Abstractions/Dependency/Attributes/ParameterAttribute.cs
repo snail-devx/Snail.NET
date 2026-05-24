@@ -16,6 +16,11 @@ public class ParameterAttribute<T> : Attribute, IParameter
     /// <typeparamref name="T"/>的依赖注入Key值，用于DI动态构建实例
     /// </summary>
     public string? Key { init; get; }
+    /// <summary>
+    /// 是否是必须的参数
+    /// <para>为true时，若依赖注入构建值为空会报错</para>
+    /// </summary>
+    public bool Required { init; get; }
     #endregion
 
     #region IParameter
@@ -35,6 +40,11 @@ public class ParameterAttribute<T> : Attribute, IParameter
     /// 获取参数值；由外部自己构建
     /// </summary>
     /// <returns></returns>
-    public object? GetParameter(in IDIManager manager) => manager.Resolve(key: Key, typeof(T));
+    public object? GetParameter(in IDIManager manager)
+    {
+        return Required == true
+               ? manager.ResolveRequired(key: Key, typeof(T))
+               : manager.Resolve(key: Key, typeof(T));
+    }
     #endregion
 }

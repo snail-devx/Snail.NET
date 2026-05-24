@@ -132,7 +132,6 @@ namespace Snail.Test.Aspect.Interfaces
         public Task<IList<string>> TestDeleteCache4([CacheKey] IList<string> x);
         #endregion
 
-
         /// <summary>
         /// 测试Get方法
         /// </summary>

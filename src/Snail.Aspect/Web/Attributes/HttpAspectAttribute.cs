@@ -42,4 +42,10 @@ public sealed class HttpAspectAttribute : Attribute
     /// </summary>
     /// <remarks>不传入则采用默认的分析器</remarks>
     public string? Analyzer { init; get; }
+
+    /// <summary>
+    /// HTTP请求配置选项的DI注入Key值
+    /// <para>用于取 Snail.Abstractions.Web.Interfaces.IHttpOptions 实例 </para>
+    /// </summary>
+    public string? Options { init; get; }
 }

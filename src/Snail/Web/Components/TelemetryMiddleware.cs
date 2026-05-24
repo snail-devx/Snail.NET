@@ -44,7 +44,7 @@ public class TelemetryMiddleware : IHttpMiddleware
     async Task<HttpResponseMessage> IHttpMiddleware.Send(HttpRequestMessage request, IServerOptions server, IHttpOptions? options, HttpDelegate next)
     {
         //  初始化，记录发送日志：查询日志记录标签，null走默认值
-        HttpLogAttribute? attr = options?.Resolve<HttpLogAttribute>();
+        HttpLogAttribute? attr = options?.Resolve<HttpLogAttribute>(request) as HttpLogAttribute;
         if (attr == null)
         {
             DiagnosticsHelper.GetEntryMethod(typeof(TelemetryMiddleware), out attr);

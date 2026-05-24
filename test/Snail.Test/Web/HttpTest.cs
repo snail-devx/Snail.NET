@@ -51,9 +51,6 @@ namespace Snail.Test.Web
             {
                 await requestor.Get("/s?wd=" + index);
             });
-
-            //  测试 自定义选项
-            hr = await requestor.Get("/s?wd=xx", new HttpOptions());
         }
         /// <summary>
         /// 测试回收逻辑
@@ -95,9 +92,9 @@ namespace Snail.Test.Web
 
         private class HttpOptions : IHttpOptions
         {
-            T? IHttpOptions.Resolve<T>() where T : default
+            object? IHttpOptions.Resolve<T>(HttpRequestMessage request)
             {
-                return default;
+                return null;
             }
         }
         #endregion
