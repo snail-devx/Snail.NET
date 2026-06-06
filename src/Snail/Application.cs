@@ -115,6 +115,13 @@ public class Application : IApplication
     /// </summary>
     public IDIManager Services { private init; get; }
     /// <summary>
+    /// 依赖注入作用域服务
+    /// <para>1、作为当前任务的作用域服务存在</para>
+    /// <para>2、如一个api请求是一个独立作用域</para>
+    /// </summary>
+    /// <remarks>不要在后台服务（如定时服务）中使用，避免Services销毁导致程序出错</remarks>
+    IDIManager IApplication.ScopeServices => DIManager.Current;
+    /// <summary>
     /// 取消令牌：用于判断应用程序是否已停止
     /// </summary>
     /// <remarks>全局共享一个Token，不使用<see cref="CancellationTokenSource.Token"/>此属性get会始终创建新的</remarks>

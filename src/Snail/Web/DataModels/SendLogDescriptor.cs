@@ -1,4 +1,4 @@
-﻿using Snail.Logging.DataModels;
+﻿using Snail.Abstractions.Logging.DataModels;
 
 namespace Snail.Web.DataModels;
 

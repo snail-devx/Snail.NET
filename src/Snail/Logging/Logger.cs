@@ -5,7 +5,6 @@ using Snail.Abstractions.Logging.Enumerations;
 using Snail.Abstractions.Logging.Extensions;
 using Snail.Abstractions.Logging.Interfaces;
 using Snail.Abstractions.Web.Interfaces;
-using Snail.Logging.DataModels;
 
 namespace Snail.Logging;
 
