@@ -1,4 +1,4 @@
-﻿namespace Snail.Abstractions.Common;
+﻿namespace Snail.Abstractions.Validation;
 
 /// <summary>
 ///接口约束： 验证器

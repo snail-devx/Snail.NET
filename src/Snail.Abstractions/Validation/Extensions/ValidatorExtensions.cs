@@ -1,4 +1,4 @@
-﻿namespace Snail.Abstractions.Common.Extensions;
+﻿namespace Snail.Abstractions.Validation.Extensions;
 
 /// <summary>
 /// <see cref="IValidator"/>扩展方法

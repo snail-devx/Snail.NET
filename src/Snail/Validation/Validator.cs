@@ -1,6 +1,6 @@
-﻿using Snail.Abstractions.Common;
+﻿using Snail.Abstractions.Validation;
 
-namespace Snail.Common;
+namespace Snail.Validation;
 
 /// <summary>
 /// 验证器默认实现
