@@ -1,22 +1,24 @@
-﻿namespace Snail.Abstractions.Web.Interfaces;
 
+using Snail.Abstractions.Web.Interfaces;
+
+namespace Snail.Abstractions.Web.DataModels;
 /// <summary>
-/// 接口约束：HTTP请求相关配置选项
-/// <para>1、配合<see cref="IHttpRequestor.Send"/>使用，进行最细力度的请求发送控制</para>
-/// <para>2、基于配置，用于干预中间件运行逻辑</para>
+/// HTTP请求配置选项
+/// <para>做默认实现</para>
 /// </summary>
-public interface IHttpOptions
+public class HttpOptions : IHttpOptions
 {
+    #region IHttpOptions
     /// <summary>
     /// 操作在何时视为已完成
     /// <para>1、流式响应时，赋值为：<see cref="HttpCompletionOption.ResponseHeadersRead"/></para>
     /// <para>2、其他情况忽略即可</para>
     /// </summary>
-    HttpCompletionOption? CompletionOption { get; }
+    public HttpCompletionOption? CompletionOption { init; get; }
     /// <summary>
     /// 取消令牌：用于判断HTTP请求是否停止了
     /// </summary>
-    CancellationToken? Cancellation { get; }
+    public CancellationToken? Cancellation { init; get; }
 
     /// <summary>
     /// 解析配置选项
@@ -25,5 +27,9 @@ public interface IHttpOptions
     /// <typeparam name="T">配置选项类型</typeparam>
     /// <param name="request">http请求对象</param>
     /// <returns>解析出来的配置选项，不存在则返回null</returns>
-    object? Resolve<T>(HttpRequestMessage request);
+    object? IHttpOptions.Resolve<T>(HttpRequestMessage request)
+    {
+        return null;
+    }
+    #endregion
 }

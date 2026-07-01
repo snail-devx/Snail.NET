@@ -12,6 +12,7 @@ public interface IHttpRequestor
     /// 发送请求；异步可等待
     /// </summary>
     /// <param name="request">请求对象</param>
+    /// <param name="options">http请求配置选项</param>
     /// <returns>返回结果</returns>
-    Task<HttpResult> Send(HttpRequestMessage request);
+    Task<HttpResult> Send(HttpRequestMessage request, IHttpOptions? options = null);
 }

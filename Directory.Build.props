@@ -6,7 +6,7 @@
 	<!-- 项目默认属性 -->
 	<PropertyGroup>
 		<!-- 定义可全局使用变量 -->
-		<Version>1.10.37</Version>
+		<Version>1.10.38</Version>
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -44,11 +44,9 @@
 			IDE0305;
 		</NoWarn>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<None Include="../../README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
-	
 	<!-- 项目构建时，针对Nuget包做处理：复制到统一目录下 -->
 	<!--	项目构建前，先将之前的nuget包删除掉-->
 	<Target Name="CleanupBeforeBuild" BeforeTargets="BeforeBuild">

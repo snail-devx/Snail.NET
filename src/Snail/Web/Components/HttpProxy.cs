@@ -1,6 +1,6 @@
-﻿using Snail.Abstractions.Web.Interfaces;
+﻿using System.Net;
+using Snail.Abstractions.Web.Interfaces;
 using Snail.Utilities.Web.Extensions;
-using System.Net;
 
 namespace Snail.Web.Components;
 /// <summary>
@@ -124,7 +124,12 @@ public sealed class HttpProxy : PoolableObject<HttpClient>, IPoolable
 #pragma warning restore SYSLIB0014
             }
             //  发送请求
-            return proxy.Object.SendAsync(request);
+            return proxy.Object.SendAsync
+            (
+                request,
+                completionOption: options?.CompletionOption ?? HttpCompletionOption.ResponseContentRead,
+                cancellationToken: options?.Cancellation ?? CancellationToken.None
+            );
         }
         finally
         {

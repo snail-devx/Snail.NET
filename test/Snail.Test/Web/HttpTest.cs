@@ -92,6 +92,9 @@ namespace Snail.Test.Web
 
         private class HttpOptions : IHttpOptions
         {
+            CancellationToken? IHttpOptions.Cancellation => null;
+            HttpCompletionOption? IHttpOptions.CompletionOption => null;
+
             object? IHttpOptions.Resolve<T>(HttpRequestMessage request)
             {
                 return null;
